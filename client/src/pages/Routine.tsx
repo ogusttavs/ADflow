@@ -150,7 +150,8 @@ function HabitsTracker() {
   });
 
   const isCompleted = (habitId: number) => (logs ?? []).some(l => l.habitId === habitId && l.date === today && l.completed);
-  const doneCount = todayHabits.filter(h => isCompleted(h.id)).length;
+  const myHabits = todayHabits.filter(h => !(h as { isShared?: boolean }).isShared);
+  const doneCount = myHabits.filter(h => isCompleted(h.id)).length;
 
   return (
     <Card className="bg-card border-border">
@@ -192,21 +193,27 @@ function HabitsTracker() {
         ) : (
           <>
             <div className="flex items-center gap-2 mb-3">
-              <Progress value={todayHabits.length > 0 ? (doneCount / todayHabits.length) * 100 : 0} className="h-1.5 flex-1" />
-              <span className="text-xs text-muted-foreground">{doneCount}/{todayHabits.length}</span>
+              <Progress value={myHabits.length > 0 ? (doneCount / myHabits.length) * 100 : 0} className="h-1.5 flex-1" />
+              <span className="text-xs text-muted-foreground">{doneCount}/{myHabits.length}</span>
             </div>
             {todayHabits.map(habit => {
+              const shared = (habit as { isShared?: boolean; ownerName?: string }).isShared;
+              const ownerName = (habit as { ownerName?: string }).ownerName;
               const done = isCompleted(habit.id);
               return (
-                <div key={habit.id} className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors cursor-pointer hover:bg-muted/30 ${done ? "opacity-60" : ""}`}
-                  onClick={() => toggleMut.mutate({ habitId: habit.id, date: today }, { onSuccess: () => { utils.productivity.getHabitLogs.invalidate(); } })}>
+                <div key={`${shared ? "s" : ""}${habit.id}`}
+                  className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${shared ? "opacity-75 cursor-default" : "cursor-pointer hover:bg-muted/30"} ${done ? "opacity-60" : ""}`}
+                  onClick={() => !shared && toggleMut.mutate({ habitId: habit.id, date: today }, { onSuccess: () => { utils.productivity.getHabitLogs.invalidate(); } })}>
                   <span className="text-lg">{habit.icon}</span>
                   {done ? <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" /> : <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />}
                   <span className={`text-sm flex-1 ${done ? "line-through text-muted-foreground" : ""}`}>{habit.name}</span>
-                  <Button variant="ghost" size="icon" className="w-6 h-6 opacity-0 group-hover:opacity-100" onClick={e => {
-                    e.stopPropagation();
-                    deleteMut.mutate({ id: habit.id }, { onSuccess: () => { utils.productivity.listHabits.invalidate(); toast.success("Hábito removido"); } });
-                  }}><Trash2 className="w-3 h-3" /></Button>
+                  {shared
+                    ? <Badge variant="outline" className="text-[10px] text-violet-500 border-violet-400/40">👫 {ownerName}</Badge>
+                    : <Button variant="ghost" size="icon" className="w-6 h-6 opacity-0 group-hover:opacity-100" onClick={e => {
+                        e.stopPropagation();
+                        deleteMut.mutate({ id: habit.id }, { onSuccess: () => { utils.productivity.listHabits.invalidate(); toast.success("Hábito removido"); } });
+                      }}><Trash2 className="w-3 h-3" /></Button>
+                  }
                 </div>
               );
             })}
@@ -298,11 +305,14 @@ function TasksList() {
         ) : (
           <div className="space-y-1">
             {(tasks ?? []).map(task => {
+              const shared = (task as { isShared?: boolean }).isShared;
+              const ownerName = (task as { ownerName?: string }).ownerName;
               const CatIcon = CATEGORY_ICONS[task.category] || ListTodo;
               const isOverdue = task.status === "PENDING" && task.dueDate && task.dueDate < new Date().toISOString().slice(0, 10);
               return (
-                <div key={task.id} className={`flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/30 transition-colors ${isOverdue ? "border border-red-500/30" : ""}`}>
-                  <button onClick={() => updateMut.mutate({ id: task.id, status: task.status === "DONE" ? "PENDING" : "DONE" }, { onSuccess: () => utils.productivity.listTasks.invalidate() })}>
+                <div key={`${shared ? "s" : ""}${task.id}`} className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${isOverdue ? "border border-red-500/30" : ""} ${shared ? "" : "hover:bg-muted/30"}`}>
+                  <button disabled={!!shared}
+                    onClick={() => !shared && updateMut.mutate({ id: task.id, status: task.status === "DONE" ? "PENDING" : "DONE" }, { onSuccess: () => utils.productivity.listTasks.invalidate() })}>
                     {task.status === "DONE" ? <CheckCircle2 className="w-5 h-5 text-green-400" /> : <Circle className="w-5 h-5 text-muted-foreground" />}
                   </button>
                   <CatIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
@@ -312,10 +322,15 @@ function TasksList() {
                       {task.dueDate && <span className={`text-[10px] ${isOverdue ? "text-red-400" : "text-muted-foreground"}`}>{task.dueDate}{task.dueTime ? ` ${task.dueTime}` : ""}</span>}
                     </div>
                   </div>
-                  <Badge className={`text-[10px] ${PRIORITY_COLORS[task.priority]}`}>{task.priority}</Badge>
-                  <Button variant="ghost" size="icon" className="w-6 h-6" onClick={() => deleteMut.mutate({ id: task.id }, { onSuccess: () => { utils.productivity.listTasks.invalidate(); } })}>
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+                  {shared
+                    ? <Badge variant="outline" className="text-[10px] text-violet-500 border-violet-400/40">👫 {ownerName}</Badge>
+                    : <Badge className={`text-[10px] ${PRIORITY_COLORS[task.priority]}`}>{task.priority}</Badge>
+                  }
+                  {!shared && (
+                    <Button variant="ghost" size="icon" className="w-6 h-6" onClick={() => deleteMut.mutate({ id: task.id }, { onSuccess: () => { utils.productivity.listTasks.invalidate(); } })}>
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
                 </div>
               );
             })}

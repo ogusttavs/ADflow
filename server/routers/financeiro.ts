@@ -167,13 +167,15 @@ export const financeiroRouter = router({
     }),
 
   summary3months: protectedProcedure
-    .input(z.object({ personType: z.enum(["cpf", "cnpj"]) }))
+    .input(z.object({ personType: z.enum(["cpf", "cnpj"]), viewAsUserId: z.number().optional() }))
     .query(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) return [];
+      if (input.viewAsUserId) await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType);
+      const targetUserId = input.viewAsUserId ?? ctx.user.id;
       const all = await db.select().from(financeiroTransactions)
         .where(and(
-          eq(financeiroTransactions.userId, ctx.user.id),
+          eq(financeiroTransactions.userId, targetUserId),
           eq(financeiroTransactions.personType, input.personType),
         ));
 

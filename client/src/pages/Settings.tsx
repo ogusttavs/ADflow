@@ -8,9 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings as SettingsIcon, Bell, Shield, Palette, Save, MoonStar, Sun } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Settings as SettingsIcon, Bell, Shield, Palette, Save, MoonStar, Sun, Users, Plus, Trash2, Check, X, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { trpc } from "@/lib/trpc";
 
 const THEME_OPTIONS: Array<{
   id: Theme;
@@ -104,6 +107,9 @@ export default function Settings() {
             </TabsTrigger>
             <TabsTrigger value="appearance" className="flex items-center gap-2">
               <Palette className="w-4 h-4" />Aparência
+            </TabsTrigger>
+            <TabsTrigger value="family" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />Família & Equipe
             </TabsTrigger>
           </TabsList>
 
@@ -300,8 +306,309 @@ export default function Settings() {
               </CardContent>
             </Card>
           </TabsContent>
+          {/* Family & Team */}
+          <TabsContent value="family">
+            <FamilyTab />
+          </TabsContent>
         </Tabs>
       </div>
     </AppLayout>
+  );
+}
+
+// ─── Family Tab ──────────────────────────────────────────────────────────────
+function FamilyTab() {
+  const utils = trpc.useUtils();
+  const { data: me } = trpc.auth.me.useQuery();
+  const { data: links } = trpc.family.listLinks.useQuery();
+  const sendInviteMut = trpc.family.sendInvite.useMutation();
+  const acceptMut = trpc.family.acceptInvite.useMutation();
+  const rejectMut = trpc.family.rejectInvite.useMutation();
+  const removeMut = trpc.family.removeLink.useMutation();
+  const updateMut = trpc.family.updateLink.useMutation();
+
+  const myIdNum = me?.id ?? null;
+  const mySentLinks = (links ?? []).filter(l => l.ownerId === myIdNum);
+  const myReceivedLinks = (links ?? []).filter(l => l.linkedUserId === myIdNum);
+
+  // ── Invite dialog state ──────────────────────────────────────────────────
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteType, setInviteType] = useState<"spouse" | "employee">("spouse");
+  const [inviteShareCpf, setInviteShareCpf] = useState(true);
+  const [inviteShareCnpj, setInviteShareCnpj] = useState(false);
+  const [invitePermission, setInvitePermission] = useState<"view" | "edit">("view");
+  const [inviteShareProductivity, setInviteShareProductivity] = useState(false);
+
+  // ── Edit dialog state ───────────────────────────────────────────────────
+  const [editOpen, setEditOpen] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [editShareCpf, setEditShareCpf] = useState(true);
+  const [editShareCnpj, setEditShareCnpj] = useState(false);
+  const [editPermission, setEditPermission] = useState<"view" | "edit">("view");
+  const [editShareProductivity, setEditShareProductivity] = useState(false);
+
+  const refresh = () => utils.family.listLinks.invalidate();
+
+  function openEdit(link: typeof mySentLinks[number]) {
+    const types = link.sharePersonTypes as string[];
+    setEditId(link.id);
+    setEditShareCpf(types.includes("cpf"));
+    setEditShareCnpj(types.includes("cnpj"));
+    setEditPermission(link.permission as "view" | "edit");
+    setEditShareProductivity(link.shareProductivity);
+    setEditOpen(true);
+  }
+
+  function handleSendInvite() {
+    const sharePersonTypes: Array<"cpf" | "cnpj"> = [];
+    if (inviteShareCpf) sharePersonTypes.push("cpf");
+    if (inviteShareCnpj) sharePersonTypes.push("cnpj");
+    if (sharePersonTypes.length === 0) { toast.error("Selecione ao menos CPF ou CNPJ"); return; }
+
+    sendInviteMut.mutate({
+      email: inviteEmail,
+      type: inviteType,
+      sharePersonTypes,
+      permission: invitePermission,
+      shareProductivity: inviteType === "spouse" ? inviteShareProductivity : false,
+    }, {
+      onSuccess: () => { toast.success("Convite enviado!"); setInviteOpen(false); setInviteEmail(""); refresh(); },
+      onError: (e) => toast.error(e.message),
+    });
+  }
+
+  function handleSaveEdit() {
+    if (!editId) return;
+    const sharePersonTypes: Array<"cpf" | "cnpj"> = [];
+    if (editShareCpf) sharePersonTypes.push("cpf");
+    if (editShareCnpj) sharePersonTypes.push("cnpj");
+    if (sharePersonTypes.length === 0) { toast.error("Selecione ao menos CPF ou CNPJ"); return; }
+
+    updateMut.mutate({
+      id: editId,
+      sharePersonTypes,
+      permission: editPermission,
+      shareProductivity: editShareProductivity,
+    }, {
+      onSuccess: () => { toast.success("Conexão atualizada!"); setEditOpen(false); refresh(); },
+      onError: (e) => toast.error(e.message),
+    });
+  }
+
+  const statusBadge = (s: string) => {
+    if (s === "pending") return <Badge variant="outline" className="text-yellow-500 border-yellow-500/40 text-[10px]">Pendente</Badge>;
+    if (s === "accepted") return <Badge variant="outline" className="text-green-500 border-green-500/40 text-[10px]">Aceito</Badge>;
+    return <Badge variant="outline" className="text-red-400 border-red-400/40 text-[10px]">Recusado</Badge>;
+  };
+
+  const typeBadge = (t: string) => (
+    <Badge variant="secondary" className="text-[10px]">{t === "spouse" ? "👫 Cônjuge" : "💼 Funcionário"}</Badge>
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* ── Enviados ─────────────────────────────────────────────────────── */}
+      <Card className="bg-card border-border">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Conexões Enviadas
+            </CardTitle>
+            <Button size="sm" className="gap-1.5 text-xs h-8" onClick={() => setInviteOpen(true)}>
+              <Plus className="w-3.5 h-3.5" />Convidar
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {mySentLinks.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Nenhuma conexão enviada ainda.</p>
+          ) : (
+            mySentLinks.map(link => (
+              <div key={link.id} className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border bg-muted/20">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-medium truncate">{link.linked?.name || link.invitedEmail}</p>
+                    {typeBadge(link.type)}
+                    {statusBadge(link.status)}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {link.linked?.email} · {link.permission === "edit" ? "Pode editar" : "Somente leitura"}
+                    {(link.sharePersonTypes as string[]).includes("cpf") && " · CPF"}
+                    {(link.sharePersonTypes as string[]).includes("cnpj") && " · CNPJ"}
+                    {link.shareProductivity && " · Rotina"}
+                  </p>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  {link.status === "accepted" && (
+                    <Button variant="ghost" size="icon" className="w-7 h-7" onClick={() => openEdit(link)}>
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon" className="w-7 h-7 text-destructive hover:text-destructive"
+                    onClick={() => removeMut.mutate({ id: link.id }, { onSuccess: () => { toast.success("Conexão removida"); refresh(); } })}>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ── Recebidos ────────────────────────────────────────────────────── */}
+      <Card className="bg-card border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Convites Recebidos
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {myReceivedLinks.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Nenhum convite recebido.</p>
+          ) : (
+            myReceivedLinks.map(link => (
+              <div key={link.id} className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border bg-muted/20">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-medium truncate">{link.owner?.name || "Desconhecido"}</p>
+                    {typeBadge(link.type)}
+                    {statusBadge(link.status)}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {link.owner?.email}
+                    {(link.sharePersonTypes as string[]).includes("cpf") && " · CPF"}
+                    {(link.sharePersonTypes as string[]).includes("cnpj") && " · CNPJ"}
+                    {link.shareProductivity && " · Rotina"}
+                  </p>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  {link.status === "pending" ? (
+                    <>
+                      <Button variant="ghost" size="icon" className="w-7 h-7 text-green-500 hover:text-green-500"
+                        onClick={() => acceptMut.mutate({ id: link.id }, { onSuccess: () => { toast.success("Convite aceito!"); refresh(); } })}>
+                        <Check className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="w-7 h-7 text-destructive hover:text-destructive"
+                        onClick={() => rejectMut.mutate({ id: link.id }, { onSuccess: () => { toast.success("Convite recusado."); refresh(); } })}>
+                        <X className="w-3.5 h-3.5" />
+                      </Button>
+                    </>
+                  ) : (
+                    <Button variant="ghost" size="icon" className="w-7 h-7 text-destructive hover:text-destructive"
+                      onClick={() => removeMut.mutate({ id: link.id }, { onSuccess: () => { toast.success("Você saiu da conexão."); refresh(); } })}>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ── Send Invite Dialog ────────────────────────────────────────────── */}
+      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Convidar Pessoa</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>E-mail do usuário</Label>
+              <Input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
+                placeholder="email@exemplo.com" />
+              <p className="text-xs text-muted-foreground">A pessoa precisa já ter uma conta no sistema.</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Tipo de vínculo</Label>
+              <Select value={inviteType} onValueChange={v => setInviteType(v as "spouse" | "employee")}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="spouse">👫 Cônjuge</SelectItem>
+                  <SelectItem value="employee">💼 Funcionário</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Compartilhar finanças de</Label>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Switch checked={inviteShareCpf} onCheckedChange={setInviteShareCpf} />
+                  <span className="text-sm">CPF (Pessoa Física)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Switch checked={inviteShareCnpj} onCheckedChange={setInviteShareCnpj} />
+                  <span className="text-sm">CNPJ (Empresa)</span>
+                </label>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Permissão</Label>
+              <Select value={invitePermission} onValueChange={v => setInvitePermission(v as "view" | "edit")}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="view">Somente leitura</SelectItem>
+                  <SelectItem value="edit">Pode editar (criar/excluir)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {inviteType === "spouse" && (
+              <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                <div>
+                  <p className="text-sm font-medium">Compartilhar rotina</p>
+                  <p className="text-xs text-muted-foreground">Hábitos e tarefas visíveis na tela de Rotina</p>
+                </div>
+                <Switch checked={inviteShareProductivity} onCheckedChange={setInviteShareProductivity} />
+              </div>
+            )}
+            <Button className="w-full" disabled={!inviteEmail || sendInviteMut.isPending}
+              onClick={handleSendInvite}>
+              {sendInviteMut.isPending ? "Enviando..." : "Enviar Convite"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Edit Link Dialog ──────────────────────────────────────────────── */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Editar Conexão</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Compartilhar finanças de</Label>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Switch checked={editShareCpf} onCheckedChange={setEditShareCpf} />
+                  <span className="text-sm">CPF (Pessoa Física)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Switch checked={editShareCnpj} onCheckedChange={setEditShareCnpj} />
+                  <span className="text-sm">CNPJ (Empresa)</span>
+                </label>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Permissão</Label>
+              <Select value={editPermission} onValueChange={v => setEditPermission(v as "view" | "edit")}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="view">Somente leitura</SelectItem>
+                  <SelectItem value="edit">Pode editar (criar/excluir)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+              <div>
+                <p className="text-sm font-medium">Compartilhar rotina</p>
+                <p className="text-xs text-muted-foreground">Hábitos e tarefas visíveis na tela de Rotina</p>
+              </div>
+              <Switch checked={editShareProductivity} onCheckedChange={setEditShareProductivity} />
+            </div>
+            <Button className="w-full" disabled={updateMut.isPending} onClick={handleSaveEdit}>
+              {updateMut.isPending ? "Salvando..." : "Salvar Alterações"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

@@ -36,8 +36,8 @@ function monthLabel(ym: string) {
 }
 
 // ─── 3-Month Overview Sheet ───────────────────────────────────────────────────
-function ThreeMonthsSheet({ personType }: { personType: PersonType }) {
-  const { data: months } = trpc.financeiro.summary3months.useQuery({ personType });
+function ThreeMonthsSheet({ personType, viewAsUserId }: { personType: PersonType; viewAsUserId?: number }) {
+  const { data: months } = trpc.financeiro.summary3months.useQuery({ personType, viewAsUserId });
 
   return (
     <Sheet>
@@ -223,7 +223,7 @@ function ComprovantesTab({ personType }: { personType: PersonType }) {
 }
 
 // ─── Recurring Tab ────────────────────────────────────────────────────────────
-function RecorrenteTab({ personType }: { personType: PersonType }) {
+function RecorrenteTab({ personType, canEdit = true }: { personType: PersonType; canEdit?: boolean }) {
   const [showNew, setShowNew] = useState(false);
   const [form, setForm] = useState({
     type: "income" as "income" | "expense",
@@ -293,7 +293,8 @@ function RecorrenteTab({ personType }: { personType: PersonType }) {
         </div>
       )}
 
-      <div className="flex justify-end">
+      {canEdit && (
+        <div className="flex justify-end">
         <Dialog open={showNew} onOpenChange={setShowNew}>
           <DialogTrigger asChild>
             <Button className="gap-2"><Plus className="w-4 h-4" />Nova Recorrência</Button>
@@ -365,6 +366,7 @@ function RecorrenteTab({ personType }: { personType: PersonType }) {
           </DialogContent>
         </Dialog>
       </div>
+      )}
 
       <Card>
         <CardContent className="p-0">
@@ -396,14 +398,14 @@ function RecorrenteTab({ personType }: { personType: PersonType }) {
                   <span className={`text-sm font-bold tabular-nums ${item.type === "income" ? "text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300"}`}>
                     {formatBRL(item.amount)}
                   </span>
-                  {!item.isEnded && (
+                  {canEdit && !item.isEnded && (
                     <Switch checked={item.active}
                       onCheckedChange={v => updateMut.mutate({ id: item.id, active: v })} />
                   )}
-                  <Button variant="ghost" size="icon" className="w-7 h-7 opacity-50 hover:opacity-100"
+                  {canEdit && <Button variant="ghost" size="icon" className="w-7 h-7 opacity-50 hover:opacity-100"
                     onClick={() => deleteMut.mutate({ id: item.id })}>
                     <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
+                  </Button>}
                 </div>
               ))}
             </div>
@@ -445,7 +447,7 @@ function NewCategoryDialog({ personType, type, onCreated }: { personType: Person
 }
 
 // ─── Transactions Tab ─────────────────────────────────────────────────────────
-function LancamentosTab({ personType }: { personType: PersonType }) {
+function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personType: PersonType; viewAsUserId?: number; canEdit?: boolean }) {
   const today = new Date();
   const [selectedMonth, setSelectedMonth] = useState(today.toISOString().slice(0, 7));
   const [showNew, setShowNew] = useState(false);
@@ -459,8 +461,8 @@ function LancamentosTab({ personType }: { personType: PersonType }) {
     receiptFileId: "" as string,
   });
 
-  const { data: transactions, refetch } = trpc.financeiro.list.useQuery({ personType });
-  const { data: summary } = trpc.financeiro.summary.useQuery({ personType, month: selectedMonth });
+  const { data: transactions, refetch } = trpc.financeiro.list.useQuery({ personType, viewAsUserId });
+  const { data: summary } = trpc.financeiro.summary.useQuery({ personType, month: selectedMonth, viewAsUserId });
   const { data: receipts } = trpc.files.list.useQuery({ entityType: "financeiro_receipt", personType });
   const { data: categoriesData, refetch: refetchCats } = trpc.financeiro.listCategories.useQuery({ personType });
 
@@ -525,9 +527,9 @@ function LancamentosTab({ personType }: { personType: PersonType }) {
           </SelectContent>
         </Select>
 
-        <ThreeMonthsSheet personType={personType} />
+        <ThreeMonthsSheet personType={personType} viewAsUserId={viewAsUserId} />
 
-        <Dialog open={showNew} onOpenChange={setShowNew}>
+        {canEdit && <Dialog open={showNew} onOpenChange={setShowNew}>
           <DialogTrigger asChild>
             <Button className="gap-2 ml-auto w-full sm:w-auto"><Plus className="h-4 w-4" />Novo Lançamento</Button>
           </DialogTrigger>
@@ -608,7 +610,7 @@ function LancamentosTab({ personType }: { personType: PersonType }) {
               </Button>
             </div>
           </DialogContent>
-        </Dialog>
+        </Dialog>}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -719,10 +721,10 @@ function LancamentosTab({ personType }: { personType: PersonType }) {
                   <span className={`text-sm font-bold tabular-nums flex-shrink-0 ${t.type === "income" ? "text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300"}`}>
                     {t.type === "expense" ? "-" : "+"}{formatBRL(t.amount)}
                   </span>
-                  <Button variant="ghost" size="icon" className="w-7 h-7 flex-shrink-0 opacity-50 hover:opacity-100"
+                  {canEdit && <Button variant="ghost" size="icon" className="w-7 h-7 flex-shrink-0 opacity-50 hover:opacity-100"
                     onClick={() => deleteMut.mutate({ id: t.id })}>
                     <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  </Button>}
                 </div>
               ))}
             </div>
@@ -734,7 +736,7 @@ function LancamentosTab({ personType }: { personType: PersonType }) {
 }
 
 // ─── Per-person-type section ──────────────────────────────────────────────────
-function FinanceiroSection({ personType }: { personType: PersonType }) {
+function FinanceiroSection({ personType, viewAsUserId, canEdit }: { personType: PersonType; viewAsUserId?: number; canEdit?: boolean }) {
   return (
     <Tabs defaultValue="lancamentos">
       <TabsList className="grid w-full max-w-sm grid-cols-3">
@@ -744,19 +746,49 @@ function FinanceiroSection({ personType }: { personType: PersonType }) {
         <TabsTrigger value="recorrente" className="gap-1.5 text-xs">
           <RefreshCw className="w-3.5 h-3.5" />Recorrente
         </TabsTrigger>
-        <TabsTrigger value="comprovantes" className="gap-1.5 text-xs">
-          <Paperclip className="w-3.5 h-3.5" />Comprovantes
-        </TabsTrigger>
+        {!viewAsUserId && (
+          <TabsTrigger value="comprovantes" className="gap-1.5 text-xs">
+            <Paperclip className="w-3.5 h-3.5" />Comprovantes
+          </TabsTrigger>
+        )}
       </TabsList>
-      <TabsContent value="lancamentos" className="mt-6"><LancamentosTab personType={personType} /></TabsContent>
-      <TabsContent value="recorrente" className="mt-6"><RecorrenteTab personType={personType} /></TabsContent>
-      <TabsContent value="comprovantes" className="mt-6"><ComprovantesTab personType={personType} /></TabsContent>
+      <TabsContent value="lancamentos" className="mt-6">
+        <LancamentosTab personType={personType} viewAsUserId={viewAsUserId} canEdit={canEdit} />
+      </TabsContent>
+      <TabsContent value="recorrente" className="mt-6">
+        <RecorrenteTab personType={personType} canEdit={canEdit} />
+      </TabsContent>
+      {!viewAsUserId && (
+        <TabsContent value="comprovantes" className="mt-6">
+          <ComprovantesTab personType={personType} />
+        </TabsContent>
+      )}
     </Tabs>
   );
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Financeiro() {
+  const { data: me } = trpc.auth.me.useQuery();
+  const { data: links } = trpc.family.listLinks.useQuery();
+  const [viewAsUserId, setViewAsUserId] = useState<number | undefined>(undefined);
+
+  // Links accepted where I'm the linked user (someone shared their finances with me)
+  const sharedWithMe = (links ?? []).filter(l =>
+    l.linkedUserId === me?.id && l.status === "accepted"
+  );
+
+  // Current active link (if viewing someone else)
+  const activeLink = viewAsUserId
+    ? sharedWithMe.find(l => l.ownerId === viewAsUserId)
+    : null;
+  const canEdit = !activeLink || activeLink.permission === "edit";
+
+  // Determine which CPF/CNPJ tabs to show
+  const sharedPersonTypes = activeLink
+    ? (activeLink.sharePersonTypes as string[])
+    : ["cpf", "cnpj"];
+
   return (
     <AppLayout>
       <div className="page-content space-y-6">
@@ -771,21 +803,56 @@ export default function Financeiro() {
           </div>
         </div>
 
-        <Tabs defaultValue="cpf">
-          <TabsList className="grid w-full max-w-xs grid-cols-2">
-            <TabsTrigger value="cpf" className="gap-2">
-              <User className="h-4 w-4" />CPF
-            </TabsTrigger>
-            <TabsTrigger value="cnpj" className="gap-2">
-              <Building2 className="h-4 w-4" />CNPJ
-            </TabsTrigger>
+        {/* Owner switcher — only shown when someone shared finances with me */}
+        {sharedWithMe.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap p-3 rounded-xl border border-border bg-muted/30">
+            <span className="text-xs text-muted-foreground font-medium">Visualizando:</span>
+            <button
+              onClick={() => setViewAsUserId(undefined)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                !viewAsUserId ? "bg-primary text-primary-foreground" : "hover:bg-muted text-muted-foreground"
+              }`}
+            >
+              Minhas Finanças
+            </button>
+            {sharedWithMe.map(link => (
+              <button
+                key={link.id}
+                onClick={() => setViewAsUserId(link.ownerId)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  viewAsUserId === link.ownerId ? "bg-primary text-primary-foreground" : "hover:bg-muted text-muted-foreground"
+                }`}
+              >
+                {link.type === "spouse" ? "👫" : "💼"} {link.owner?.name || link.owner?.email}
+                {link.permission === "view" && <span className="ml-1 opacity-60">(leitura)</span>}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <Tabs defaultValue={sharedPersonTypes.includes("cpf") ? "cpf" : "cnpj"}>
+          <TabsList className={`grid w-full max-w-xs ${sharedPersonTypes.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+            {sharedPersonTypes.includes("cpf") && (
+              <TabsTrigger value="cpf" className="gap-2">
+                <User className="h-4 w-4" />CPF
+              </TabsTrigger>
+            )}
+            {sharedPersonTypes.includes("cnpj") && (
+              <TabsTrigger value="cnpj" className="gap-2">
+                <Building2 className="h-4 w-4" />CNPJ
+              </TabsTrigger>
+            )}
           </TabsList>
-          <TabsContent value="cpf" className="mt-6">
-            <FinanceiroSection personType="cpf" />
-          </TabsContent>
-          <TabsContent value="cnpj" className="mt-6">
-            <FinanceiroSection personType="cnpj" />
-          </TabsContent>
+          {sharedPersonTypes.includes("cpf") && (
+            <TabsContent value="cpf" className="mt-6">
+              <FinanceiroSection personType="cpf" viewAsUserId={viewAsUserId} canEdit={canEdit} />
+            </TabsContent>
+          )}
+          {sharedPersonTypes.includes("cnpj") && (
+            <TabsContent value="cnpj" className="mt-6">
+              <FinanceiroSection personType="cnpj" viewAsUserId={viewAsUserId} canEdit={canEdit} />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </AppLayout>

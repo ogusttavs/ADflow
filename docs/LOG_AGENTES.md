@@ -574,3 +574,54 @@ Bloqueios/Riscos:
 
 Arquivos alterados:
 - docs/LOG_AGENTES.md
+
+[2026-02-24 16:06:16 -0300] [Codex]
+Contexto:
+- Comando operacional `Claude +` recebido do dono para retorno do Claude ao comando.
+
+Feito:
+- Periodo recente consolidado para handoff (fechamento da etapa Google, atualizacao de checklist e rotacao de secret no `.env` local).
+- Status de versionamento consolidado no handoff:
+- Commit/push `0b1d2b7` (`feat: finalizar etapa Google OAuth e checklist`).
+- Commit/push `582ff75` (`docs: registrar rotacao da secret Google`).
+- Lideranca tecnica devolvida ao Claude conforme cadeia oficial (`Claude -> Codex -> Gemini`).
+
+Proximo:
+- Claude retoma triagem e priorizacao do backlog.
+- Codex permanece disponivel para execucao tecnica sob direcionamento do Claude.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico aberto no momento.
+
+Arquivos alterados:
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 16:19:15 -0300] [Claude]
+Contexto:
+- Retomada de sessao apos compressao de contexto. Leitura de todos os docs para sincronizacao completa.
+- Continuacao da implementacao do modulo Familia & Equipe (compartilhamento financeiro e de rotina entre conjuges/funcionarios).
+
+Feito:
+- Settings.tsx: Adicionado tab "Familia & Equipe" com secoes de conexoes enviadas, convites recebidos, dialog de convite e dialog de edicao.
+- Financeiro.tsx: Switcher de visao de dono (Minhas Financas / Financas de [Nome]); viewAsUserId passado para list/summary/summary3months; acoes de edicao ocultadas quando permissao=view; abas CPF/CNPJ filtradas por sharePersonTypes.
+- server/routers/financeiro.ts: viewAsUserId adicionado ao summary3months com validateFinanceAccess.
+- Routine.tsx: Habitos e tarefas compartilhados recebem badge violet "👫 [Nome]" e sao nao-interativos (sem toggle, sem delete).
+
+Validado:
+- pnpm db:push: OK (35 tabelas, nenhuma mudanca de schema).
+- pnpm check: OK (0 erros).
+- pnpm test: OK (41/41).
+
+Proximo:
+- Aguardar instrucoes do dono para proximo ciclo ou commit.
+
+Bloqueios/Riscos:
+- Nenhum.
+
+Arquivos alterados:
+- client/src/pages/Settings.tsx
+- client/src/pages/Financeiro.tsx
+- client/src/pages/Routine.tsx
+- server/routers/financeiro.ts
+- docs/LOG_AGENTES.md
