@@ -104,6 +104,8 @@ export const financeiroRouter = router({
   update: protectedProcedure
     .input(z.object({
       id: z.number(),
+      personType: z.enum(["cpf", "cnpj"]),
+      viewAsUserId: z.number().optional(),
       type: z.enum(["income", "expense"]).optional(),
       category: z.string().optional(),
       description: z.string().optional(),
@@ -114,19 +116,37 @@ export const financeiroRouter = router({
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      const { id, ...data } = input;
+
+      let targetUserId = ctx.user.id;
+      if (input.viewAsUserId && input.viewAsUserId !== ctx.user.id) {
+        await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType, true);
+        targetUserId = input.viewAsUserId;
+      }
+
+      const { id, personType: _, viewAsUserId: __, ...data } = input;
       await db.update(financeiroTransactions).set(data)
-        .where(and(eq(financeiroTransactions.id, id), eq(financeiroTransactions.userId, ctx.user.id)));
+        .where(and(eq(financeiroTransactions.id, id), eq(financeiroTransactions.userId, targetUserId)));
       return { success: true };
     }),
 
   delete: protectedProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({
+      id: z.number(),
+      personType: z.enum(["cpf", "cnpj"]),
+      viewAsUserId: z.number().optional(),
+    }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+      let targetUserId = ctx.user.id;
+      if (input.viewAsUserId && input.viewAsUserId !== ctx.user.id) {
+        await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType, true);
+        targetUserId = input.viewAsUserId;
+      }
+
       await db.delete(financeiroTransactions)
-        .where(and(eq(financeiroTransactions.id, input.id), eq(financeiroTransactions.userId, ctx.user.id)));
+        .where(and(eq(financeiroTransactions.id, input.id), eq(financeiroTransactions.userId, targetUserId)));
       return { success: true };
     }),
 
@@ -171,7 +191,9 @@ export const financeiroRouter = router({
     .query(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) return [];
-      if (input.viewAsUserId) await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType);
+      if (input.viewAsUserId && input.viewAsUserId !== ctx.user.id) {
+        await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType);
+      }
       const targetUserId = input.viewAsUserId ?? ctx.user.id;
       const all = await db.select().from(financeiroTransactions)
         .where(and(
@@ -197,13 +219,19 @@ export const financeiroRouter = router({
 
   // ─── Custom Categories ───────────────────────────────────────────────────────
   listCategories: protectedProcedure
-    .input(z.object({ personType: z.enum(["cpf", "cnpj"]) }))
+    .input(z.object({ personType: z.enum(["cpf", "cnpj"]), viewAsUserId: z.number().optional() }))
     .query(async ({ ctx, input }) => {
       const db = await getDb();
+      let targetUserId = ctx.user.id;
+      if (db && input.viewAsUserId && input.viewAsUserId !== ctx.user.id) {
+        await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType);
+        targetUserId = input.viewAsUserId;
+      }
+
       const custom = db
         ? await db.select().from(financeiroCategories)
             .where(and(
-              eq(financeiroCategories.userId, ctx.user.id),
+              eq(financeiroCategories.userId, targetUserId),
               eq(financeiroCategories.personType, input.personType),
             ))
         : [];
@@ -226,33 +254,64 @@ export const financeiroRouter = router({
       name: z.string().min(1).max(100),
       type: z.enum(["income", "expense"]),
       personType: z.enum(["cpf", "cnpj"]),
+      viewAsUserId: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      await db.insert(financeiroCategories).values({ ...input, userId: ctx.user.id });
+
+      let targetUserId = ctx.user.id;
+      if (input.viewAsUserId && input.viewAsUserId !== ctx.user.id) {
+        await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType, true);
+        targetUserId = input.viewAsUserId;
+      }
+
+      const { viewAsUserId: _, ...rest } = input;
+      await db.insert(financeiroCategories).values({ ...rest, userId: targetUserId });
       return { success: true };
     }),
 
   deleteCategory: protectedProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({
+      id: z.number(),
+      personType: z.enum(["cpf", "cnpj"]),
+      viewAsUserId: z.number().optional(),
+    }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+      let targetUserId = ctx.user.id;
+      if (input.viewAsUserId && input.viewAsUserId !== ctx.user.id) {
+        await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType, true);
+        targetUserId = input.viewAsUserId;
+      }
+
       await db.delete(financeiroCategories)
-        .where(and(eq(financeiroCategories.id, input.id), eq(financeiroCategories.userId, ctx.user.id)));
+        .where(and(
+          eq(financeiroCategories.id, input.id),
+          eq(financeiroCategories.userId, targetUserId),
+          eq(financeiroCategories.personType, input.personType),
+        ));
       return { success: true };
     }),
 
   // ─── Recurring ──────────────────────────────────────────────────────────────
   listRecurring: protectedProcedure
-    .input(z.object({ personType: z.enum(["cpf", "cnpj"]) }))
+    .input(z.object({ personType: z.enum(["cpf", "cnpj"]), viewAsUserId: z.number().optional() }))
     .query(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) return [];
+
+      let targetUserId = ctx.user.id;
+      if (input.viewAsUserId && input.viewAsUserId !== ctx.user.id) {
+        await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType);
+        targetUserId = input.viewAsUserId;
+      }
+
       const rows = await db.select().from(financeiroRecurring)
         .where(and(
-          eq(financeiroRecurring.userId, ctx.user.id),
+          eq(financeiroRecurring.userId, targetUserId),
           eq(financeiroRecurring.personType, input.personType),
         ))
         .orderBy(financeiroRecurring.recurringDay);
@@ -275,15 +334,24 @@ export const financeiroRouter = router({
       recurringDay: z.number().min(1).max(31),
       endType: z.enum(["indefinite", "month"]).optional(),
       endMonth: z.string().optional(),
+      viewAsUserId: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+      let targetUserId = ctx.user.id;
+      if (input.viewAsUserId && input.viewAsUserId !== ctx.user.id) {
+        await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType, true);
+        targetUserId = input.viewAsUserId;
+      }
+
+      const { viewAsUserId: _, ...data } = input;
       await db.insert(financeiroRecurring).values({
-        ...input,
+        ...data,
         endType: input.endType ?? "indefinite",
         endMonth: input.endMonth ?? null,
-        userId: ctx.user.id,
+        userId: targetUserId,
       });
       return { success: true };
     }),
@@ -291,6 +359,8 @@ export const financeiroRouter = router({
   updateRecurring: protectedProcedure
     .input(z.object({
       id: z.number(),
+      personType: z.enum(["cpf", "cnpj"]),
+      viewAsUserId: z.number().optional(),
       type: z.enum(["income", "expense"]).optional(),
       category: z.string().optional(),
       description: z.string().optional(),
@@ -303,19 +373,37 @@ export const financeiroRouter = router({
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      const { id, ...data } = input;
+
+      let targetUserId = ctx.user.id;
+      if (input.viewAsUserId && input.viewAsUserId !== ctx.user.id) {
+        await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType, true);
+        targetUserId = input.viewAsUserId;
+      }
+
+      const { id, personType: _, viewAsUserId: __, ...data } = input;
       await db.update(financeiroRecurring).set(data)
-        .where(and(eq(financeiroRecurring.id, id), eq(financeiroRecurring.userId, ctx.user.id)));
+        .where(and(eq(financeiroRecurring.id, id), eq(financeiroRecurring.userId, targetUserId)));
       return { success: true };
     }),
 
   deleteRecurring: protectedProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({
+      id: z.number(),
+      personType: z.enum(["cpf", "cnpj"]),
+      viewAsUserId: z.number().optional(),
+    }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+      let targetUserId = ctx.user.id;
+      if (input.viewAsUserId && input.viewAsUserId !== ctx.user.id) {
+        await validateFinanceAccess(db, ctx.user.id, input.viewAsUserId, input.personType, true);
+        targetUserId = input.viewAsUserId;
+      }
+
       await db.delete(financeiroRecurring)
-        .where(and(eq(financeiroRecurring.id, input.id), eq(financeiroRecurring.userId, ctx.user.id)));
+        .where(and(eq(financeiroRecurring.id, input.id), eq(financeiroRecurring.userId, targetUserId)));
       return { success: true };
     }),
 });

@@ -151,5 +151,75 @@ describe("ownership checks", () => {
       })
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
   });
-});
 
+  it("financeiro.create rejects shared create when permission is view", async () => {
+    mockState.selectQueue.push([
+      {
+        id: 1,
+        ownerId: 2,
+        linkedUserId: 1,
+        status: "accepted",
+        permission: "view",
+        sharePersonTypes: ["cpf"],
+      },
+    ]);
+    const caller = appRouter.createCaller(createAuthContext());
+    await expect(
+      caller.financeiro.create({
+        type: "expense",
+        personType: "cpf",
+        category: "Outros",
+        description: "Despesa teste",
+        amount: 1000,
+        date: "2026-02-24",
+        viewAsUserId: 2,
+      })
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("financeiro.create allows shared create when permission is edit", async () => {
+    mockState.selectQueue.push([
+      {
+        id: 2,
+        ownerId: 2,
+        linkedUserId: 1,
+        status: "accepted",
+        permission: "edit",
+        sharePersonTypes: ["cpf", "cnpj"],
+      },
+    ]);
+    const caller = appRouter.createCaller(createAuthContext());
+    await expect(
+      caller.financeiro.create({
+        type: "income",
+        personType: "cpf",
+        category: "Freelance",
+        description: "Receita teste",
+        amount: 250000,
+        date: "2026-02-24",
+        viewAsUserId: 2,
+      })
+    ).resolves.toMatchObject({ success: true });
+  });
+
+  it("financeiro.deleteRecurring rejects shared delete when permission is view", async () => {
+    mockState.selectQueue.push([
+      {
+        id: 3,
+        ownerId: 2,
+        linkedUserId: 1,
+        status: "accepted",
+        permission: "view",
+        sharePersonTypes: ["cnpj"],
+      },
+    ]);
+    const caller = appRouter.createCaller(createAuthContext());
+    await expect(
+      caller.financeiro.deleteRecurring({
+        id: 42,
+        personType: "cnpj",
+        viewAsUserId: 2,
+      })
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+});

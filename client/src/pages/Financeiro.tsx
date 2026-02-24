@@ -223,7 +223,7 @@ function ComprovantesTab({ personType }: { personType: PersonType }) {
 }
 
 // ─── Recurring Tab ────────────────────────────────────────────────────────────
-function RecorrenteTab({ personType, canEdit = true }: { personType: PersonType; canEdit?: boolean }) {
+function RecorrenteTab({ personType, viewAsUserId, canEdit = true }: { personType: PersonType; viewAsUserId?: number; canEdit?: boolean }) {
   const [showNew, setShowNew] = useState(false);
   const [form, setForm] = useState({
     type: "income" as "income" | "expense",
@@ -235,12 +235,12 @@ function RecorrenteTab({ personType, canEdit = true }: { personType: PersonType;
     endMonth: "",
   });
 
-  const { data: categoriesData } = trpc.financeiro.listCategories.useQuery({ personType });
+  const { data: categoriesData } = trpc.financeiro.listCategories.useQuery({ personType, viewAsUserId });
   const categories = form.type === "income"
     ? (categoriesData?.income ?? [])
     : (categoriesData?.expense ?? []);
 
-  const { data: items, refetch } = trpc.financeiro.listRecurring.useQuery({ personType });
+  const { data: items, refetch } = trpc.financeiro.listRecurring.useQuery({ personType, viewAsUserId });
   const createMut = trpc.financeiro.createRecurring.useMutation({
     onSuccess: () => {
       refetch(); setShowNew(false);
@@ -263,6 +263,7 @@ function RecorrenteTab({ personType, canEdit = true }: { personType: PersonType;
     createMut.mutate({
       ...form,
       personType,
+      viewAsUserId,
       amount: amountCents,
       recurringDay: Number(form.recurringDay),
       endMonth: form.endType === "month" ? form.endMonth : undefined,
@@ -400,10 +401,10 @@ function RecorrenteTab({ personType, canEdit = true }: { personType: PersonType;
                   </span>
                   {canEdit && !item.isEnded && (
                     <Switch checked={item.active}
-                      onCheckedChange={v => updateMut.mutate({ id: item.id, active: v })} />
+                      onCheckedChange={v => updateMut.mutate({ id: item.id, personType, viewAsUserId, active: v })} />
                   )}
                   {canEdit && <Button variant="ghost" size="icon" className="w-7 h-7 opacity-50 hover:opacity-100"
-                    onClick={() => deleteMut.mutate({ id: item.id })}>
+                    onClick={() => deleteMut.mutate({ id: item.id, personType, viewAsUserId })}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </Button>}
                 </div>
@@ -417,7 +418,7 @@ function RecorrenteTab({ personType, canEdit = true }: { personType: PersonType;
 }
 
 // ─── New Category Dialog ───────────────────────────────────────────────────────
-function NewCategoryDialog({ personType, type, onCreated }: { personType: PersonType; type: "income" | "expense"; onCreated: () => void }) {
+function NewCategoryDialog({ personType, type, viewAsUserId, onCreated }: { personType: PersonType; type: "income" | "expense"; viewAsUserId?: number; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const createMut = trpc.financeiro.createCategory.useMutation({
@@ -436,7 +437,7 @@ function NewCategoryDialog({ personType, type, onCreated }: { personType: Person
         </DialogHeader>
         <div className="space-y-3 pt-2">
           <Input placeholder="Nome da categoria" value={name} onChange={e => setName(e.target.value)} />
-          <Button className="w-full" onClick={() => createMut.mutate({ name, type, personType })}
+          <Button className="w-full" onClick={() => createMut.mutate({ name, type, personType, viewAsUserId })}
             disabled={!name.trim() || createMut.isPending}>
             Criar
           </Button>
@@ -463,8 +464,8 @@ function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personTy
 
   const { data: transactions, refetch } = trpc.financeiro.list.useQuery({ personType, viewAsUserId });
   const { data: summary } = trpc.financeiro.summary.useQuery({ personType, month: selectedMonth, viewAsUserId });
-  const { data: receipts } = trpc.files.list.useQuery({ entityType: "financeiro_receipt", personType });
-  const { data: categoriesData, refetch: refetchCats } = trpc.financeiro.listCategories.useQuery({ personType });
+  const { data: receipts } = trpc.files.list.useQuery({ entityType: "financeiro_receipt", personType }, { enabled: !viewAsUserId });
+  const { data: categoriesData, refetch: refetchCats } = trpc.financeiro.listCategories.useQuery({ personType, viewAsUserId });
 
   const incomeCategories = categoriesData?.income ?? [];
   const expenseCategories = categoriesData?.expense ?? [];
@@ -506,11 +507,12 @@ function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personTy
     createMut.mutate({
       type: form.type,
       personType,
+      viewAsUserId,
       category: form.category,
       description: form.description,
       amount: amountCents,
       date: form.date,
-      receiptFileId: form.receiptFileId ? Number(form.receiptFileId) : undefined,
+      receiptFileId: !viewAsUserId && form.receiptFileId ? Number(form.receiptFileId) : undefined,
     });
   };
 
@@ -560,7 +562,7 @@ function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personTy
                       {categories.map(c => <SelectItem key={c.name} value={c.name}>{c.name}{c.custom ? " ★" : ""}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                  <NewCategoryDialog personType={personType} type={form.type} onCreated={refetchCats} />
+                  <NewCategoryDialog personType={personType} type={form.type} viewAsUserId={viewAsUserId} onCreated={refetchCats} />
                 </div>
               </div>
               <div>
@@ -722,7 +724,7 @@ function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personTy
                     {t.type === "expense" ? "-" : "+"}{formatBRL(t.amount)}
                   </span>
                   {canEdit && <Button variant="ghost" size="icon" className="w-7 h-7 flex-shrink-0 opacity-50 hover:opacity-100"
-                    onClick={() => deleteMut.mutate({ id: t.id })}>
+                    onClick={() => deleteMut.mutate({ id: t.id, personType, viewAsUserId })}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>}
                 </div>
@@ -756,7 +758,7 @@ function FinanceiroSection({ personType, viewAsUserId, canEdit }: { personType: 
         <LancamentosTab personType={personType} viewAsUserId={viewAsUserId} canEdit={canEdit} />
       </TabsContent>
       <TabsContent value="recorrente" className="mt-6">
-        <RecorrenteTab personType={personType} canEdit={canEdit} />
+        <RecorrenteTab personType={personType} viewAsUserId={viewAsUserId} canEdit={canEdit} />
       </TabsContent>
       {!viewAsUserId && (
         <TabsContent value="comprovantes" className="mt-6">
