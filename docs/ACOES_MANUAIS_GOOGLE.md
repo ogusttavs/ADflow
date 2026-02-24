@@ -1,6 +1,6 @@
 # Acoes Manuais - Google (Execucao)
 
-Ultima atualizacao: 2026-02-24 15:50:08 -0300
+Ultima atualizacao: 2026-02-24 15:54:47 -0300
 
 Objetivo:
 - Ativar de forma real o Google Agenda e o Login com Google no AdFlow.
@@ -40,7 +40,7 @@ No arquivo `.env`, preencher:
 - [x] `GOOGLE_CLIENT_SECRET=...`
 - [x] Opcional: `GOOGLE_OAUTH_REDIRECT_URI=http://localhost:3001/api/oauth/google/callback`
 - [x] Opcional: `GOOGLE_LOGIN_OAUTH_REDIRECT_URI=http://localhost:3001/api/oauth/google/login/callback`
-- [ ] Recomendado: gerar nova `GOOGLE_CLIENT_SECRET` no Google Cloud e atualizar no `.env`.
+- [x] Recomendado: gerar nova `GOOGLE_CLIENT_SECRET` no Google Cloud e atualizar no `.env`.
 
 ## 4) Subir o Projeto Local
 

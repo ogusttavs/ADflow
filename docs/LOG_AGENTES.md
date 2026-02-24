@@ -536,3 +536,41 @@ Arquivos alterados:
 - docs/IDEIAS_PRODUTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
+
+[2026-02-24 15:54:47 -0300] [Codex]
+Contexto:
+- Dono forneceu nova `GOOGLE_CLIENT_SECRET` e solicitou execucao da rotacao operacional no projeto.
+
+Feito:
+- `GOOGLE_CLIENT_SECRET` atualizada no `.env` local.
+- Checklist manual de Google atualizado marcando a rotacao da secret como concluida.
+- Validacao de presenca da variavel executada com mascara (`GOOGLE_CLIENT_SECRET=***REDACTED***`).
+
+Proximo:
+- Reiniciar app local para carregar variavel atualizada.
+- Seguir desenvolvimento normal da etapa Google (sem pendencias de segredo).
+
+Bloqueios/Riscos:
+- Chaves nao devem ser compartilhadas em chat; em caso de exposicao futura, repetir rotacao imediata.
+
+Arquivos alterados:
+- .env
+- docs/ACOES_MANUAIS_GOOGLE.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 15:55:38 -0300] [Codex]
+Contexto:
+- Confirmacao tecnica apos rotacao da `GOOGLE_CLIENT_SECRET` para garantir carga operacional da nova variavel.
+
+Feito:
+- Smoke de inicializacao executado com `pnpm dev` (start ok).
+- Servidor subiu em `http://localhost:3002/` porque a porta `3000` estava ocupada no ambiente no momento do teste.
+
+Proximo:
+- Se voce estiver usando uma instancia antiga em outra porta, reiniciar essa instancia principal para garantir leitura da nova secret.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio de codigo; apenas observacao de porta ocupada no ambiente local.
+
+Arquivos alterados:
+- docs/LOG_AGENTES.md
