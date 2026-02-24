@@ -695,3 +695,21 @@ export const userLinks = mysqlTable("user_links", {
 });
 
 export type UserLink = typeof userLinks.$inferSelect;
+
+// ─── Google Calendar Connections ────────────────────────────────────────────────
+export const googleCalendarConnections = mysqlTable("google_calendar_connections", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  googleEmail: varchar("googleEmail", { length: 320 }),
+  accessToken: text("accessToken").notNull(),
+  refreshToken: text("refreshToken"),
+  tokenType: varchar("tokenType", { length: 32 }),
+  scope: text("scope"),
+  expiryDate: timestamp("expiryDate"),
+  calendarId: varchar("calendarId", { length: 255 }).notNull().default("primary"),
+  connectedAt: timestamp("connectedAt").defaultNow().notNull(),
+  lastSyncAt: timestamp("lastSyncAt"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type GoogleCalendarConnection = typeof googleCalendarConnections.$inferSelect;

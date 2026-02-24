@@ -108,3 +108,27 @@ export async function getUserCount(): Promise<number> {
   const result = await db.select({ count: count() }).from(users);
   return Number(result[0]?.count ?? 0);
 }
+
+export async function updateUserById(
+  id: number,
+  updates: Partial<InsertUser>,
+) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update user: database not available");
+    return undefined;
+  }
+
+  const cleanUpdates = Object.fromEntries(
+    Object.entries(updates).filter(([, value]) => value !== undefined),
+  ) as Partial<InsertUser>;
+
+  if (Object.keys(cleanUpdates).length === 0) {
+    const [existing] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return existing;
+  }
+
+  await db.update(users).set(cleanUpdates).where(eq(users.id, id));
+  const [updated] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return updated;
+}

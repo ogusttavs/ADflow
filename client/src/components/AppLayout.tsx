@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -180,10 +180,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       )
     )?.title ?? "Principal";
 
-  const todayLabel = useMemo(
-    () => new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" }),
-    []
-  );
+  const todayLabel = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
 
   const renderThemeToggle = (compact = false) => {
     if (!switchable) return null;
@@ -323,7 +320,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           <div className="mt-2 rounded-xl border border-sidebar-border/80 bg-sidebar-accent/60 p-2.5">
             <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-full bg-primary/18 flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-primary">{user?.name?.charAt(0).toUpperCase() ?? "U"}</span>
+                <span className="text-xs font-bold text-primary">{user?.name?.charAt(0)?.toUpperCase() ?? "U"}</span>
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs font-semibold text-sidebar-foreground">{user?.name ?? "Usuário"}</p>
@@ -333,7 +330,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-sidebar-foreground/65 hover:text-sidebar-foreground"
-                onClick={() => logout()}
+                onClick={() => { void logout(); }}
               >
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -344,7 +341,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             variant="ghost"
             size="icon"
             className="mx-auto h-8 w-8 text-sidebar-foreground/65 hover:text-sidebar-foreground"
-            onClick={() => logout()}
+            onClick={() => { void logout(); }}
             title="Sair"
           >
             <LogOut className="h-4 w-4" />

@@ -50,6 +50,13 @@ const PRIORITY_COLORS: Record<string, string> = {
   LOW: "border-emerald-500/30 bg-emerald-500/14 text-emerald-700 dark:text-emerald-300",
 };
 
+function toIsoDate(value: unknown) {
+  if (!value) return null;
+  const date = new Date(value as string | number | Date);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString().slice(0, 10);
+}
+
 // ─── Individual Widgets ───────────────────────────────────────────────────────
 function StatsWidget() {
   const { data: stats } = trpc.campaigns.stats.useQuery();
@@ -331,7 +338,7 @@ function ProspectingWidget() {
 
   const { data: leads } = trpc.crm.listLeads.useQuery(undefined);
   const leadsToday = useMemo(
-    () => (leads ?? []).filter(l => l.createdAt && new Date(l.createdAt).toISOString().slice(0, 10) === todayStr).length,
+    () => (leads ?? []).filter(l => toIsoDate(l.createdAt) === todayStr).length,
     [leads, todayStr]
   );
 

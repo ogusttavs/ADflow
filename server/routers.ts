@@ -31,6 +31,7 @@ import { intakeRouter } from "./routers/intake";
 import { diaryRouter } from "./routers/diary";
 import { dreamsRouter } from "./routers/dreams";
 import { familyRouter } from "./routers/family";
+import { googleCalendarRouter } from "./routers/googleCalendar";
 
 export const appRouter = router({
   system: systemRouter,
@@ -39,7 +40,7 @@ export const appRouter = router({
 
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      ctx.res.clearCookie(COOKIE_NAME, cookieOptions);
       return { success: true } as const;
     }),
 
@@ -165,6 +166,7 @@ export const appRouter = router({
   diary: diaryRouter,
   dreams: dreamsRouter,
   family: familyRouter,
+  googleCalendar: googleCalendarRouter,
 });
 
 export type AppRouter = typeof appRouter;

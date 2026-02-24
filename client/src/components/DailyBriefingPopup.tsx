@@ -33,12 +33,16 @@ export function DailyBriefingPopup() {
   const { data: briefing, isLoading } = trpc.productivity.morningBriefing.useQuery(undefined, {
     enabled: open,
   });
+  const missedHabits = briefing?.missedHabits ?? [];
+  const overdueTasks = briefing?.overdueTasks ?? [];
+  const duePayments = briefing?.duePayments ?? [];
 
+  const utils = trpc.useUtils();
   const postponeMut = trpc.productivity.postponeOverdueTasks.useMutation();
 
   // Auto-postpone overdue tasks when popup opens
   useEffect(() => {
-    if (open && !postponed && briefing && briefing.overdueTasks.length > 0) {
+    if (open && !postponed && overdueTasks.length > 0) {
       postponeMut.mutate(undefined, {
         onSuccess: (data) => {
           setPostponed(true);
@@ -49,7 +53,7 @@ export function DailyBriefingPopup() {
         },
       });
     }
-  }, [open, briefing, postponed]);
+  }, [open, overdueTasks.length, postponed, postponeMut, utils.productivity.listTasks]);
 
   const handleDismiss = () => {
     localStorage.setItem(STORAGE_KEY, today);
@@ -59,7 +63,6 @@ export function DailyBriefingPopup() {
   const weekday = new Date().toLocaleDateString("pt-BR", { weekday: "long" });
   const dateLabel = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
 
-  const utils = trpc.useUtils();
   const markPaidMut = trpc.billing.markPaid.useMutation({
     onSuccess: () => { utils.productivity.morningBriefing.invalidate(); toast.success("Marcado como pago!"); },
   });
@@ -69,7 +72,7 @@ export function DailyBriefingPopup() {
 
   const formatBRL = (cents: number) => (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const hasIssues = (briefing?.missedHabits.length ?? 0) > 0 || (briefing?.overdueTasks.length ?? 0) > 0 || ((briefing?.duePayments?.length) ?? 0) > 0;
+  const hasIssues = missedHabits.length > 0 || overdueTasks.length > 0 || duePayments.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
@@ -103,16 +106,16 @@ export function DailyBriefingPopup() {
               <p className="text-sm text-muted-foreground font-medium">Resumo de ontem:</p>
 
               {/* Overdue tasks */}
-              {(briefing?.overdueTasks.length ?? 0) > 0 && (
+              {overdueTasks.length > 0 && (
                 <div className="rounded-lg border border-orange-500/30 bg-orange-500/5 p-3 space-y-2">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-orange-400" />
                     <p className="text-sm font-medium text-orange-300">
-                      {briefing!.overdueTasks.length} tarefa(s) atrasada(s) → movidas para hoje
+                      {overdueTasks.length} tarefa(s) atrasada(s) → movidas para hoje
                     </p>
                   </div>
                   <div className="space-y-1 ml-6">
-                    {briefing!.overdueTasks.slice(0, 4).map(t => (
+                    {overdueTasks.slice(0, 4).map(t => (
                       <div key={t.id} className="flex items-center gap-2">
                         <ArrowRight className="w-3 h-3 text-orange-400/60" />
                         <p className="text-xs text-muted-foreground truncate">{t.title}</p>
@@ -121,24 +124,24 @@ export function DailyBriefingPopup() {
                         </Badge>
                       </div>
                     ))}
-                    {briefing!.overdueTasks.length > 4 && (
-                      <p className="text-xs text-muted-foreground ml-5">+{briefing!.overdueTasks.length - 4} mais...</p>
+                    {overdueTasks.length > 4 && (
+                      <p className="text-xs text-muted-foreground ml-5">+{overdueTasks.length - 4} mais...</p>
                     )}
                   </div>
                 </div>
               )}
 
               {/* Missed habits */}
-              {(briefing?.missedHabits.length ?? 0) > 0 && (
+              {missedHabits.length > 0 && (
                 <div className="rounded-lg border border-muted bg-muted/20 p-3 space-y-2">
                   <div className="flex items-center gap-2">
                     <Target className="w-4 h-4 text-muted-foreground" />
                     <p className="text-sm font-medium">
-                      {briefing!.missedHabits.length} hábito(s) não feito(s) ontem
+                      {missedHabits.length} hábito(s) não feito(s) ontem
                     </p>
                   </div>
                   <div className="space-y-1 ml-6">
-                    {briefing!.missedHabits.map(h => (
+                    {missedHabits.map(h => (
                       <div key={h.id} className="flex items-center gap-2">
                         <span className="text-sm">{h.icon}</span>
                         <p className="text-xs text-muted-foreground">{h.name}</p>
@@ -150,16 +153,16 @@ export function DailyBriefingPopup() {
               )}
 
               {/* Due payments today */}
-              {(briefing?.duePayments?.length ?? 0) > 0 && (
+              {duePayments.length > 0 && (
                 <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-3 space-y-2">
                   <div className="flex items-center gap-2">
                     <Wallet className="w-4 h-4 text-blue-400" />
                     <p className="text-sm font-medium text-blue-300">
-                      {briefing!.duePayments!.length} pagamento(s) vencem hoje
+                      {duePayments.length} pagamento(s) vencem hoje
                     </p>
                   </div>
                   <div className="space-y-2 ml-1">
-                    {briefing!.duePayments!.map(p => (
+                    {duePayments.map(p => (
                       <div key={p.id} className="flex items-center gap-2">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium truncate">{p.clientName}</p>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import {
   ChevronLeft, ChevronRight, Plus, CheckCircle2, Circle, Trash2,
-  Calendar, ListTodo, Target, Clock,
+  Calendar, ListTodo, Target, Clock, Link2, Unplug, RefreshCw, ExternalLink,
 } from "lucide-react";
 
 const WEEKDAY_HEADERS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
@@ -26,6 +26,20 @@ const PRIORITY_COLORS: Record<string, string> = {
 
 function pad(n: number) { return String(n).padStart(2, "0"); }
 function toDateStr(y: number, m: number, d: number) { return `${y}-${pad(m + 1)}-${pad(d)}`; }
+function formatGoogleEventDate(value: string | null, isAllDay: boolean) {
+  if (!value) return "Sem data";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  if (isAllDay) {
+    return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  }
+  return date.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export default function Agenda() {
   const today = new Date();
@@ -43,6 +57,11 @@ export default function Agenda() {
   // Data queries
   const { data: allTasks } = trpc.productivity.listTasks.useQuery({ status: "ALL" });
   const { data: habits } = trpc.productivity.listHabits.useQuery();
+  const googleStatusQuery = trpc.googleCalendar.connectionStatus.useQuery();
+  const googleEventsQuery = trpc.googleCalendar.listUpcomingEvents.useQuery(
+    { limit: 6, days: 14 },
+    { enabled: Boolean(googleStatusQuery.data?.connected) },
+  );
 
   const startOfMonth = useMemo(() => toDateStr(viewYear, viewMonth, 1), [viewYear, viewMonth]);
   const endOfMonth = useMemo(() => {
@@ -56,6 +75,66 @@ export default function Agenda() {
   const updateMut = trpc.productivity.updateTask.useMutation();
   const deleteMut = trpc.productivity.deleteTask.useMutation();
   const utils = trpc.useUtils();
+
+  const googleAuthMut = trpc.googleCalendar.getAuthUrl.useMutation({
+    onSuccess: ({ url }) => {
+      window.location.href = url;
+    },
+    onError: (error) => {
+      toast.error(error.message || "Não foi possível iniciar conexão com Google Agenda.");
+    },
+  });
+
+  const googleDisconnectMut = trpc.googleCalendar.disconnect.useMutation({
+    onSuccess: () => {
+      toast.success("Google Agenda desconectado.");
+      utils.googleCalendar.connectionStatus.invalidate();
+      utils.googleCalendar.listUpcomingEvents.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Falha ao desconectar Google Agenda.");
+    },
+  });
+
+  const googleSyncMut = trpc.googleCalendar.syncTasksForDate.useMutation({
+    onSuccess: ({ created, skipped }) => {
+      if (created === 0) {
+        toast.info("Nenhuma tarefa elegível para sincronizar neste dia.");
+      } else {
+        const skippedText = skipped > 0 ? ` (${skipped} com falha)` : "";
+        toast.success(`${created} tarefa(s) enviada(s) para Google Agenda${skippedText}.`);
+      }
+      utils.googleCalendar.listUpcomingEvents.invalidate();
+      utils.googleCalendar.connectionStatus.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Falha ao sincronizar tarefas com Google Agenda.");
+    },
+  });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("google_calendar");
+    if (!status) return;
+
+    if (status === "connected") {
+      toast.success("Google Agenda conectado com sucesso.");
+    } else if (status === "state_error") {
+      toast.error("Falha de segurança no OAuth. Tente conectar novamente.");
+    } else if (status === "missing_code") {
+      toast.error("Google não retornou código de autorização.");
+    } else {
+      toast.error("Não foi possível concluir conexão com Google Agenda.");
+    }
+
+    params.delete("google_calendar");
+    const query = params.toString();
+    const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+    window.history.replaceState(null, "", nextUrl);
+
+    utils.googleCalendar.connectionStatus.invalidate();
+    utils.googleCalendar.listUpcomingEvents.invalidate();
+  }, [utils.googleCalendar.connectionStatus, utils.googleCalendar.listUpcomingEvents]);
 
   // Build calendar grid
   const calendarDays = useMemo(() => {
@@ -158,6 +237,8 @@ export default function Agenda() {
 
   const isToday = (dateStr: string) => dateStr === todayStr;
   const isSelected = (dateStr: string) => dateStr === selectedDate;
+  const googleConfigured = Boolean(googleStatusQuery.data?.configured);
+  const googleConnected = Boolean(googleStatusQuery.data?.connected);
 
   return (
     <AppLayout>
@@ -170,6 +251,107 @@ export default function Agenda() {
             <p className="text-muted-foreground">Calendário de tarefas, hábitos e compromissos</p>
           </div>
         </div>
+
+        <Card>
+          <CardContent className="pt-5 space-y-3">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="font-semibold flex items-center gap-2">
+                  <Link2 className="w-4 h-4 text-primary" />
+                  Google Agenda
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Conecte sua conta para sincronizar tarefas da Agenda com eventos do Google Calendar.
+                </p>
+                {googleConnected && googleStatusQuery.data?.email && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Conectado como <span className="font-medium">{googleStatusQuery.data.email}</span>
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {!googleConfigured ? (
+                  <Badge variant="outline" className="text-xs">OAuth não configurado</Badge>
+                ) : googleConnected ? (
+                  <Badge className="text-xs">Conectado</Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs">Desconectado</Badge>
+                )}
+
+                {googleConnected ? (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 text-xs"
+                      onClick={() => googleSyncMut.mutate({ date: selectedDate })}
+                      disabled={googleSyncMut.isPending}
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                      {googleSyncMut.isPending ? "Sincronizando..." : "Sincronizar dia"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 text-xs"
+                      onClick={() => googleDisconnectMut.mutate()}
+                      disabled={googleDisconnectMut.isPending}
+                    >
+                      <Unplug className="w-3.5 h-3.5 mr-1" />
+                      {googleDisconnectMut.isPending ? "Desconectando..." : "Desconectar"}
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => googleAuthMut.mutate()}
+                    disabled={!googleConfigured || googleAuthMut.isPending}
+                  >
+                    <Link2 className="w-3.5 h-3.5 mr-1" />
+                    {googleAuthMut.isPending ? "Conectando..." : "Conectar Google"}
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {googleConnected && (
+              <div className="pt-3 border-t border-border space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Próximos eventos no Google
+                </p>
+                {(googleEventsQuery.data ?? []).length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Sem eventos próximos no período selecionado.</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {(googleEventsQuery.data ?? []).map(event => (
+                      <div key={event.id} className="flex items-center justify-between gap-3 rounded-md border border-border p-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{event.summary}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatGoogleEventDate(event.start, event.isAllDay)}
+                          </p>
+                        </div>
+                        {event.htmlLink && (
+                          <a
+                            href={event.htmlLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-primary hover:underline inline-flex items-center gap-1"
+                          >
+                            Abrir
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* ─── Calendar ─── */}

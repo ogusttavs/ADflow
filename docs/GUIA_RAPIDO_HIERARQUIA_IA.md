@@ -1,6 +1,6 @@
 # Guia Rapido da Hierarquia de IA
 
-Ultima atualizacao: 2026-02-24 13:46:39 -0300
+Ultima atualizacao: 2026-02-24 14:09:56 -0300
 
 Objetivo:
 - Explicar de forma simples como as IAs trabalham no projeto.
@@ -39,6 +39,15 @@ Handoff (passagem de contexto):
 - No periodo com `Claude -`, Codex documenta decisoes, tarefas feitas e pendencias.
 - Ao receber `Claude +`, Codex consolida tudo e atualiza a documentacao para o Claude retomar sem perda de contexto.
 - A mesma logica vale para `Codex -/+` e `Gemini -/+`: ao voltar, quem estava fora recebe contexto resumido.
+
+Fluxo de ideias do dono:
+- Lider ativo revisa `docs/IDEIAS_PRODUTO.md`.
+- Lider ativo conversa com o dono antes de executar ideia nova.
+- Depois da conversa, ideia vira `Concluida` (se implementada) ou `Nao viavel` (com motivo).
+
+Regra de commit:
+- Se lider ativo achar que deve commitar no GitHub, ele avisa o dono antes.
+- Depois do push, informa hash do commit e resumo.
 
 Onde acompanhar:
 - Visao geral e regras: `docs/CENTRO_DE_OPERACAO.md`

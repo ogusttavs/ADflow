@@ -32,14 +32,19 @@ export function useAuth(options?: UseAuthOptions) {
         error instanceof TRPCClientError &&
         error.data?.code === "UNAUTHORIZED"
       ) {
-        return;
+        // Session is already invalid; continue local cleanup and redirect.
+      } else {
+        // Do not break logout UX for transient backend/network errors.
+        console.error("[Auth] Logout failed, forcing local sign-out:", error);
       }
-      throw error;
     } finally {
       utils.auth.me.setData(undefined, null);
-      await utils.auth.me.invalidate();
+      void utils.auth.me.invalidate();
+      if (typeof window !== "undefined" && window.location.pathname !== redirectPath) {
+        window.location.replace(redirectPath);
+      }
     }
-  }, [logoutMutation, utils]);
+  }, [logoutMutation, redirectPath, utils]);
 
   const state = useMemo(() => {
     localStorage.setItem(
@@ -48,13 +53,14 @@ export function useAuth(options?: UseAuthOptions) {
     );
     return {
       user: meQuery.data ?? null,
-      loading: meQuery.isLoading || logoutMutation.isPending,
+      loading: meQuery.isLoading || meQuery.isFetching || logoutMutation.isPending,
       error: meQuery.error ?? logoutMutation.error ?? null,
       isAuthenticated: Boolean(meQuery.data),
     };
   }, [
     meQuery.data,
     meQuery.error,
+    meQuery.isFetching,
     meQuery.isLoading,
     logoutMutation.error,
     logoutMutation.isPending,
@@ -62,7 +68,7 @@ export function useAuth(options?: UseAuthOptions) {
 
   useEffect(() => {
     if (!redirectOnUnauthenticated) return;
-    if (meQuery.isLoading || logoutMutation.isPending) return;
+    if (meQuery.isLoading || meQuery.isFetching || logoutMutation.isPending) return;
     if (state.user) return;
     if (typeof window === "undefined") return;
     if (window.location.pathname === redirectPath) return;
@@ -72,6 +78,7 @@ export function useAuth(options?: UseAuthOptions) {
     redirectOnUnauthenticated,
     redirectPath,
     logoutMutation.isPending,
+    meQuery.isFetching,
     meQuery.isLoading,
     state.user,
   ]);

@@ -1,7 +1,8 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -32,39 +33,68 @@ import Diary from "./pages/Diary";
 import Dreams from "./pages/Dreams";
 import Login from "./pages/Login";
 
+function normalizeLocationPath(location: string) {
+  const [pathPart, queryPart] = location.split("?");
+  let normalizedPath = (pathPart || "/").replace(/\/{2,}/g, "/");
+  if (!normalizedPath.startsWith("/")) {
+    normalizedPath = `/${normalizedPath}`;
+  }
+  if (normalizedPath.length > 1) {
+    normalizedPath = normalizedPath.replace(/\/+$/, "");
+  }
+  if (!queryPart) return normalizedPath;
+  return `${normalizedPath}?${queryPart}`;
+}
+
+function PathNormalizer() {
+  const [location, navigate] = useLocation();
+
+  useEffect(() => {
+    const normalized = normalizeLocationPath(location);
+    if (normalized !== location) {
+      navigate(normalized, { replace: true });
+    }
+  }, [location, navigate]);
+
+  return null;
+}
+
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/login" component={Login} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/clients" component={Clients} />
-      <Route path="/clients/:id" component={ClientDetail} />
-      <Route path="/campaigns" component={Campaigns} />
-      <Route path="/campaigns/new" component={NewCampaign} />
-      <Route path="/campaigns/:id" component={CampaignDetail} />
-      <Route path="/calendar" component={Calendar} />
-      <Route path="/agenda" component={Agenda} />
-      <Route path="/whatsapp" component={WhatsApp} />
-      <Route path="/integrations" component={Integrations} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/notifications" component={Notifications} />
-      <Route path="/crm" component={CRM} />
-      <Route path="/ab-tests" component={ABTests} />
-      <Route path="/reports" component={Reports} />
-      <Route path="/performance" component={Performance} />
-      <Route path="/utm" component={UTMBuilder} />
-      <Route path="/budget" component={Budget} />
-      <Route path="/referrals" component={Referrals} />
-      <Route path="/routine" component={Routine} />
-      <Route path="/prospecting" component={Prospecting} />
-      <Route path="/financeiro" component={Financeiro} />
-      <Route path="/intake/:token" component={IntakeForm} />
-      <Route path="/diary" component={Diary} />
-      <Route path="/dreams" component={Dreams} />
-      <Route path="/404" component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      <PathNormalizer />
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/login" component={Login} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/clients" component={Clients} />
+        <Route path="/clients/:id" component={ClientDetail} />
+        <Route path="/campaigns" component={Campaigns} />
+        <Route path="/campaigns/new" component={NewCampaign} />
+        <Route path="/campaigns/:id" component={CampaignDetail} />
+        <Route path="/calendar" component={Calendar} />
+        <Route path="/agenda" component={Agenda} />
+        <Route path="/whatsapp" component={WhatsApp} />
+        <Route path="/integrations" component={Integrations} />
+        <Route path="/settings" component={Settings} />
+        <Route path="/notifications" component={Notifications} />
+        <Route path="/crm" component={CRM} />
+        <Route path="/ab-tests" component={ABTests} />
+        <Route path="/reports" component={Reports} />
+        <Route path="/performance" component={Performance} />
+        <Route path="/utm" component={UTMBuilder} />
+        <Route path="/budget" component={Budget} />
+        <Route path="/referrals" component={Referrals} />
+        <Route path="/routine" component={Routine} />
+        <Route path="/prospecting" component={Prospecting} />
+        <Route path="/financeiro" component={Financeiro} />
+        <Route path="/intake/:token" component={IntakeForm} />
+        <Route path="/diary" component={Diary} />
+        <Route path="/dreams" component={Dreams} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 

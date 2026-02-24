@@ -9,6 +9,13 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { TrendingUp, UserPlus, Users, Pencil, Save, Plus, Target } from "lucide-react";
 
+function toIsoDate(value: unknown) {
+  if (!value) return null;
+  const date = new Date(value as string | number | Date);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString().slice(0, 10);
+}
+
 export function ProspectingGoals() {
   const todayStr = new Date().toISOString().slice(0, 10);
   const storageKey = `prospected_${todayStr}`;
@@ -20,7 +27,7 @@ export function ProspectingGoals() {
 
   const { data: leads } = trpc.crm.listLeads.useQuery(undefined);
   const leadsAddedToday = useMemo(
-    () => (leads ?? []).filter(l => l.createdAt && new Date(l.createdAt).toISOString().slice(0, 10) === todayStr).length,
+    () => (leads ?? []).filter(l => toIsoDate(l.createdAt) === todayStr).length,
     [leads, todayStr]
   );
 

@@ -1,6 +1,6 @@
 # Centro de Operacao - AdFlow
 
-Atualizado em: 2026-02-24 13:46:39 -0300
+Atualizado em: 2026-02-24 15:06:25 -0300
 
 Este arquivo e o ponto unico de sincronizacao entre voce, Codex, Claude e Gemini.
 Hierarquia oficial:
@@ -21,6 +21,8 @@ Regra de ouro:
 - Um agente revisa por vez.
 - Todo mundo atualiza este arquivo no final da tarefa.
 - Toda atualizacao deve incluir data/hora atual do sistema.
+- Lider ativo deve revisar `docs/IDEIAS_PRODUTO.md` em cada ciclo de trabalho.
+- Toda acao relevante deve ser registrada no `docs/LOG_AGENTES.md` (implementacao, decisao, commit, push, migracao e release).
 
 Fluxo recomendado:
 1. Voce define 1 tarefa com resultado objetivo.
@@ -29,6 +31,19 @@ Fluxo recomendado:
 4. Claude revisa (bugs/regressao/testes), valida integracao e consolida status.
 5. Claude se reporta para voce com decisao/recomendacao.
 6. Agente responsavel atualiza "Log de Execucao" com data/hora do sistema.
+
+Fluxo para ideias do dono:
+1. Lider ativo revisa `docs/IDEIAS_PRODUTO.md`.
+2. Lider ativo vem conversar com voce antes de executar a ideia.
+3. Depois da conversa:
+- Se implementado: marcar item como `Concluida`.
+- Se inviavel: marcar item como `Nao viavel` com motivo.
+4. Opcional: mover itens finalizados para o historico do proprio arquivo.
+
+Regra de commit no GitHub:
+- Sempre que o lider ativo achar que deve commitar, ele precisa te avisar antes.
+- Apos commit/push, o lider informa hash curto e resumo do que foi enviado.
+- Se faltar registro de alguma acao, o lider faz registro retroativo imediato com horario real do evento.
 
 Modo contingencia:
 1. Comando do dono: `Claude -` (Claude indisponivel).
@@ -306,3 +321,76 @@ Proximo:
 
 Bloqueios/Riscos:
 - Nenhum.
+
+[2026-02-24 14:09:56 -0300] [Codex]
+Feito:
+- Fluxo do lider ativo atualizado para revisar ideias em `docs/IDEIAS_PRODUTO.md` e conversar com voce antes de executar.
+- Regra formal adicionada para fechar ideias como `Concluida` ou `Nao viavel`.
+- Politica de commit adicionada: lider avisa antes de commitar/push no GitHub e reporta hash depois.
+
+Fazendo:
+- Documentacao sincronizada com o novo fluxo de ideias e commits.
+
+Proximo:
+- Aplicar esse processo em toda nova ideia que entrar no backlog.
+
+Bloqueios/Riscos:
+- Nenhum.
+
+[2026-02-24 14:21:34 -0300] [Codex]
+Feito:
+- MVP de Google Agenda implementado (OAuth callback, persistencia de tokens, listagem de eventos e sincronizacao por dia).
+- Tela `Agenda` atualizada com conexao Google, eventos proximos e acao de sincronizar tarefas.
+- Ideia "Google Login para a plataforma" adicionada no backlog de produto.
+
+Fazendo:
+- Fluxo pronto para evoluir para login social com Google na autenticacao principal.
+
+Proximo:
+- Implementar fase 2 de auth com `Entrar com Google`.
+
+Bloqueios/Riscos:
+- Necessario configurar credenciais Google OAuth e aplicar migracao de banco para nova tabela.
+
+[2026-02-24 14:25:06 -0300] [Codex]
+Feito:
+- Registro retroativo adicionado para o primeiro ciclo de versionamento Git/GitHub.
+- Regra reforcada: toda acao relevante deve ser documentada no log (inclusive commit/push).
+
+Fazendo:
+- Ajuste de governanca para eliminar lacunas de historico.
+
+Proximo:
+- Continuar registrando cada acao tecnica no momento em que acontecer.
+
+Bloqueios/Riscos:
+- Nenhum.
+
+[2026-02-24 14:28:18 -0300] [Codex]
+Feito:
+- Migracao de banco executada com sucesso (`pnpm db:push`).
+- Tabela `google_calendar_connections` criada localmente para suportar integracao real com Google Agenda.
+
+Fazendo:
+- Ambiente pronto para conectar conta Google apos configurar credenciais OAuth no `.env`.
+
+Proximo:
+- Validar conexao pela tela Agenda com credenciais reais do Google Cloud.
+
+Bloqueios/Riscos:
+- Depende de configuracao OAuth no Google Cloud (fora do codigo).
+
+[2026-02-24 14:35:23 -0300] [Codex]
+Feito:
+- Documento de acoes manuais criado para execucao posterior (`docs/ACOES_MANUAIS_GOOGLE.md`).
+- Fluxo de Login Google implementado no backend (rotas de inicio/callback OAuth + criacao/vinculo de conta + sessao).
+- Tela de Login atualizada com botao "Entrar com Google" e tratamento de status de erro.
+
+Fazendo:
+- Base pronta para validar login social com credenciais reais do Google Cloud.
+
+Proximo:
+- Teste end-to-end do login Google com `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`.
+
+Bloqueios/Riscos:
+- Dependencia externa de configuracao OAuth no Google Cloud.

@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Zap, Loader2 } from "lucide-react";
+import { Zap, Loader2, Chrome } from "lucide-react";
 
 type Tab = "login" | "register";
 
@@ -18,8 +18,8 @@ export default function Login() {
   const [registerForm, setRegisterForm] = useState({ name: "", email: "", password: "" });
 
   const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: async () => {
-      await utils.auth.me.invalidate();
+    onSuccess: () => {
+      void utils.auth.me.invalidate();
       navigate("/dashboard");
     },
     onError: (err) => {
@@ -28,8 +28,8 @@ export default function Login() {
   });
 
   const registerMutation = trpc.auth.register.useMutation({
-    onSuccess: async () => {
-      await utils.auth.me.invalidate();
+    onSuccess: () => {
+      void utils.auth.me.invalidate();
       navigate("/dashboard");
     },
     onError: (err) => {
@@ -60,6 +60,31 @@ export default function Login() {
   };
 
   const isLoading = loginMutation.isPending || registerMutation.isPending;
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("google_login");
+    if (!status) return;
+
+    if (status === "config_missing") {
+      toast.error("Login Google não está configurado no servidor.");
+    } else if (status === "state_error") {
+      toast.error("Falha de segurança no login Google. Tente novamente.");
+    } else if (status === "missing_code") {
+      toast.error("Google não retornou código de autorização.");
+    } else if (status === "email_conflict") {
+      toast.error("Este email já está vinculado a outra conta Google.");
+    } else if (status === "user_error") {
+      toast.error("Não foi possível finalizar seu login Google.");
+    } else if (status === "error") {
+      toast.error("Falha ao entrar com Google.");
+    }
+
+    params.delete("google_login");
+    const query = params.toString();
+    const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+    window.history.replaceState(null, "", nextUrl);
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-background flex items-center justify-center p-4">
@@ -101,6 +126,20 @@ export default function Login() {
               Criar conta
             </button>
           </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full mb-4"
+            onClick={() => { window.location.href = "/api/oauth/google/login"; }}
+            disabled={isLoading}
+          >
+            <Chrome className="w-4 h-4 mr-2" />
+            Entrar com Google
+          </Button>
+          <p className="text-[11px] text-center text-muted-foreground mb-4">
+            ou continue com email e senha
+          </p>
 
           {tab === "login" ? (
             <form onSubmit={handleLogin} className="space-y-4">

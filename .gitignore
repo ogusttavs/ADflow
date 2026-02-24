@@ -113,3 +113,6 @@ temp/
 .claude/
 .manus/
 .manus-logs/
+
+# Private credentials (never commit)
+docs/CREDENCIAIS_PRIVADAS.md
