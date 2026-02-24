@@ -614,7 +614,7 @@ Validado:
 - pnpm test: OK (41/41).
 
 Proximo:
-- Aguardar instrucoes do dono para proximo ciclo ou commit.
+- Aguardar instrucoes do dono para proximo ciclo.
 
 Bloqueios/Riscos:
 - Nenhum.
@@ -624,4 +624,289 @@ Arquivos alterados:
 - client/src/pages/Financeiro.tsx
 - client/src/pages/Routine.tsx
 - server/routers/financeiro.ts
+- docs/LOG_AGENTES.md
+
+Commit/Push: `7660118` -> `feat: implementar modulo Familia & Equipe`
+
+[2026-02-24 16:29:40 -0300] [Codex]
+Contexto:
+- Dono solicitou aprofundamento de pesquisa (UX, seguranca e direcao visual "instagramavel" sem cara de IA), leitura critica do documento do Gemini e consolidacao para discussao com Claude.
+
+Feito:
+- Leitura completa de  e analise critica das lacunas.
+- Pesquisa adicional com fontes oficiais e tecnicas (OWASP, NIST, W3C, web.dev, estudos de HCI/branding).
+- Arquivo renomeado para refletir escopo ampliado: .
+- Conteudo reescrito com estrutura de decisao: evidencias, inferencias, decisoes praticas, backlog P0/P1/P2, KPIs e perguntas para debate com Claude.
+
+Proximo:
+- Validar com o dono e Claude as decisoes de prioridade (principalmente P0 de confianca/seguranca).
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico para continuar a execucao.
+
+Arquivos alterados:
+- docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md
+- docs/LOG_AGENTES.md
+[2026-02-24 16:29:51 -0300] [Codex]
+Contexto:
+- Dono solicitou aprofundamento de pesquisa (UX, seguranca e direcao visual "instagramavel" sem cara de IA), leitura critica do documento do Gemini e consolidacao para discussao com Claude.
+
+Feito:
+- Leitura completa de docs/ESTRATEGIA_MERCADO.md e analise critica das lacunas.
+- Pesquisa adicional com fontes oficiais e tecnicas (OWASP, NIST, W3C, web.dev, estudos de HCI/branding).
+- Arquivo renomeado para refletir escopo ampliado: docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md.
+- Conteudo reescrito com estrutura de decisao: evidencias, inferencias, decisoes praticas, backlog P0/P1/P2, KPIs e perguntas para debate com Claude.
+
+Proximo:
+- Validar com o dono e Claude as decisoes de prioridade (principalmente P0 de confianca/seguranca).
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico para continuar a execucao.
+
+Arquivos alterados:
+- docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 16:30:34 -0300] [Codex]
+Contexto:
+- Registro de integridade do historico apos erro de shell com crases em tentativa anterior de append.
+
+Feito:
+- Confirmado que entradas anteriores em 2026-02-24 16:29:40 -0300 (LOG_AGENTES) e 2026-02-24 16:30:09 -0300 (CENTRO_DE_OPERACAO) ficaram truncadas por expansao de shell.
+- Entrada correta foi registrada logo em seguida com os caminhos completos.
+- Historico preservado sem edicao retroativa, conforme regra de governanca.
+
+Proximo:
+- Manter append com heredoc protegido em atualizacoes futuras.
+
+Bloqueios/Riscos:
+- Nenhum.
+
+Arquivos alterados:
+- docs/LOG_AGENTES.md
+- docs/CENTRO_DE_OPERACAO.md
+
+[2026-02-24 16:44:10 -0300] [Codex]
+Contexto:
+- Dono solicitou aprofundar ainda mais a pesquisa e adicionar mais fontes para deixar o documento estrategico mais completo.
+
+Feito:
+- Pesquisa ampliada em UX, acessibilidade, performance, experimentacao, AppSec, supply chain, privacidade/LGPD, IA segura e referencias de viralidade/branding.
+- Documento docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md reestruturado e expandido (de 203 para 418 linhas).
+- Inclusao de novos blocos de decisao: privacidade/LGPD, governanca de IA, priorizacao por explorabilidade (KEV/CVSSv4), checklists operacionais e criterios de aceite por fase.
+- Secao de referencias ampliada com fontes oficiais e academicas adicionais para basear debate com Claude.
+
+Proximo:
+- Converter este material em backlog tecnico executavel P0/P1/P2 com tarefas por arquivo/modulo.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico para continuidade.
+
+Arquivos alterados:
+- docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 16:49:28 -0300] [Codex]
+Contexto:
+- Dono solicitou repaginacao da LP principal com base em pesquisa de UX, conversao, seguranca e posicionamento de marca.
+
+Feito:
+- Home.tsx reescrito com nova estrutura de LP orientada a conversao (hero com proposta clara, secoes de valor real, antes/depois, como funciona, confianca/transparencia, FAQ e CTA final).
+- Mensagem ajustada para evitar promessas de features nao prontas e vender o valor real atual do produto.
+- Metadados da pagina atualizados em client/index.html (title, description, og tags) para melhorar compartilhamento e aquisicao.
+- Documento estrategico ampliado com blueprint especifico de LP e fontes extras de conversao em ads/landing pages.
+- Validacao tecnica executada com sucesso: pnpm check.
+
+Proximo:
+- Se aprovado pelo dono, quebrar LP em micro-iteracoes de CRO com instrumentacao de metricas (CTR, cadastro iniciado/concluido, scroll depth).
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico para continuidade.
+
+Arquivos alterados:
+- client/src/pages/Home.tsx
+- client/index.html
+- docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 16:53:10 -0300] [Codex]
+Contexto:
+- Dono solicitou adicionar na documentacao a conversa sobre IA via n8n, integracao de WhatsApp com n8n e possibilidades praticas com n8n.
+
+Feito:
+- Documento estrategico atualizado com secao dedicada `4.8 Estrategia n8n (IA + WhatsApp + automacoes)` incluindo arquitetura recomendada, riscos, controles, KPIs e fluxos sugeridos.
+- Plano e perguntas estrategicas atualizados com itens especificos de n8n/WhatsApp.
+- Referencias ampliadas com fontes oficiais de n8n e WhatsApp Cloud API.
+- `docs/IDEIAS_PRODUTO.md` atualizado com 3 ideias novas em status `Em conversa` (IA via n8n, WhatsApp via n8n e pacote de automacoes business).
+- `docs/CENTRO_DE_OPERACAO.md` atualizado em `Ideias da nossa conversa` com detalhamento operacional de n8n.
+
+Proximo:
+- Se aprovado pelo dono, quebrar as ideias em backlog tecnico com ordem de rollout (MVP -> hardening -> escala).
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico para documentacao.
+
+Arquivos alterados:
+- docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md
+- docs/IDEIAS_PRODUTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 16:55:03 -0300] [Codex]
+Contexto:
+- Dono solicitou incluir na documentacao o fluxo de Email do app e definir como implementar (incluindo uso de n8n).
+
+Feito:
+- `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md` atualizado com secao `4.9 Fluxo de Email no App`.
+- Definidas categorias de email (transacional, operacional e lifecycle), arquitetura hibrida (backend + n8n), boas praticas de entregabilidade, fluxo MVP e KPIs de email.
+- Plano e perguntas estrategicas atualizados com itens especificos de email.
+- Secao de referencias ampliada com fontes de email transacional/entregabilidade e provedores.
+- `docs/IDEIAS_PRODUTO.md` atualizado com nova ideia de fluxo de email em status `Em conversa`.
+- `docs/CENTRO_DE_OPERACAO.md` atualizado com resumo operacional de email via n8n.
+
+Proximo:
+- Se aprovado pelo dono, transformar fluxo de email MVP em backlog tecnico (eventos de dominio, templates, n8n workflows e webhooks de entrega).
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico para documentacao.
+
+Arquivos alterados:
+- docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md
+- docs/IDEIAS_PRODUTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 16:55:57 -0300] [Codex]
+Contexto:
+- Comando operacional `Claude -` recebido pelo dono.
+
+Feito:
+- Modo contingencia ativado conforme governanca oficial.
+- Lideranca tecnica transferida para Codex (lider interino ativo).
+- `docs/CENTRO_DE_OPERACAO.md` atualizado no quadro de agentes e log de execucao.
+
+Proximo:
+- Codex conduz triagem e execucao tecnica ate comando de retorno `Claude +`.
+- Continuar registrando toda decisao relevante durante a contingencia.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico aberto no momento.
+
+Arquivos alterados:
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 20:15:21 -0300] [Codex]
+Contexto:
+- Dono solicitou fechamento do plano de correcoes de warnings de formulario e desativacao do debug collector, com commit/push e status de execucao para visualizacao.
+
+Feito:
+- `vite.config.ts` atualizado para habilitar `vitePluginManusDebugCollector()` apenas quando `ENABLE_MANUS_DEBUG_COLLECTOR=1` (default desligado).
+- Correcao de acessibilidade aplicada nas telas de formulario com padrao consistente de `Label htmlFor` + `id/name` em campos e ajustes de grupos de controle.
+- Validacao estrutural AST feita para as paginas alteradas, zerando pendencias de `Label` sem `htmlFor` e de campos sem `id/name`.
+- Commit realizado: `c4173c0` (`fix(a11y): normalize form labels/ids and gate debug collector`).
+- Push realizado para `origin/main` com sucesso (`c3195a3..c4173c0`).
+- Servidor local iniciado e confirmado em `http://localhost:3001/` (porta 3000 ocupada).
+
+Proximo:
+- Subir instancia publica na VPS (PM2 + Nginx + dominio/SSL) para validacao externa.
+
+Bloqueios/Riscos:
+- Sem acesso SSH direto da VPS nesta sessao; link publico depende da execucao no servidor remoto.
+
+Arquivos alterados:
+- vite.config.ts
+- client/src/pages/ABTests.tsx
+- client/src/pages/Agenda.tsx
+- client/src/pages/Budget.tsx
+- client/src/pages/CRM.tsx
+- client/src/pages/Campaigns.tsx
+- client/src/pages/ClientDetail.tsx
+- client/src/pages/Clients.tsx
+- client/src/pages/ComponentShowcase.tsx
+- client/src/pages/Diary.tsx
+- client/src/pages/Dreams.tsx
+- client/src/pages/Financeiro.tsx
+- client/src/pages/IntakeForm.tsx
+- client/src/pages/Integrations.tsx
+- client/src/pages/Login.tsx
+- client/src/pages/NewCampaign.tsx
+- client/src/pages/Prospecting.tsx
+- client/src/pages/Referrals.tsx
+- client/src/pages/Reports.tsx
+- client/src/pages/Routine.tsx
+- client/src/pages/Settings.tsx
+- client/src/pages/UTMBuilder.tsx
+- client/src/pages/WhatsApp.tsx
+- docs/LOG_AGENTES.md
+
+[2026-02-24 20:15:21 -0300] [Codex]
+Contexto:
+- Dono cobrou ausencia de atualizacao da pasta `docs` apos as ultimas entregas.
+
+Feito:
+- `docs/CENTRO_DE_OPERACAO.md` atualizado com timestamp corrente, status tecnico real do ambiente e novo registro de execucao.
+- `docs/LOG_AGENTES.md` atualizado retroativamente com as ultimas acoes tecnicas e operacionais (codigo, commit, push, execucao local e plano de VPS).
+
+Proximo:
+- Manter append em `docs` em toda acao relevante sem lacunas.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico para manter o fluxo de documentacao.
+
+Arquivos alterados:
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 20:19:17 -0300] [Codex]
+Contexto:
+- Dono questionou lacuna de atualizacao em `docs` e pediu forma de nunca esquecer o update ao final das tarefas.
+
+Feito:
+- Mecanismo automatico implementado para forcar disciplina de documentacao no commit local.
+- Criado `scripts/check-docs-sync.sh`: bloqueia commit com mudancas fora de `docs` se `docs/LOG_AGENTES.md` e `docs/CENTRO_DE_OPERACAO.md` nao estiverem staged.
+- Criado `.githooks/pre-commit` para executar a validacao automaticamente.
+- Criado `scripts/install-hooks.sh` para instalar o hook em qualquer clone/maquina (`core.hooksPath=.githooks`).
+- Validacao pratica executada: commit de teste sem docs foi bloqueado com sucesso.
+
+Proximo:
+- Manter o hook ativo em todos os ambientes e seguir append em `docs` ao fim de cada ciclo.
+
+Bloqueios/Riscos:
+- Hook de pre-commit e local ao clone; precisa rodar `./scripts/install-hooks.sh` uma vez por ambiente.
+
+Arquivos alterados:
+- scripts/check-docs-sync.sh
+- .githooks/pre-commit
+- scripts/install-hooks.sh
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 20:22:15 -0300] [Codex]
+Contexto:
+- Dono pediu que o mecanismo de nao esquecer `docs` valha para qualquer IA do projeto (nao apenas o fluxo local do Codex).
+
+Feito:
+- Guardrail expandido para nivel de repositorio e remoto:
+- Criado `AGENTS.md` com regra obrigatoria de update de `docs/LOG_AGENTES.md` e `docs/CENTRO_DE_OPERACAO.md` em toda alteracao relevante.
+- `scripts/check-docs-sync.sh` evoluido para modo `staged` (pre-commit) e `range` (pre-push/CI).
+- Criado hook `.githooks/pre-push` para validar branch local contra upstream antes de enviar.
+- Criado workflow `.github/workflows/docs-guardrail.yml` para validar a politica no GitHub em `push` e `pull_request`.
+- Atualizado `scripts/install-hooks.sh` para instalar `pre-commit` e `pre-push`.
+- Reinstalacao de hooks executada com sucesso (`core.hooksPath=.githooks`).
+
+Proximo:
+- Commitar e enviar esta politica para que passe a valer para todo agente/clone vinculado ao repositorio remoto.
+
+Bloqueios/Riscos:
+- Hooks locais dependem de `./scripts/install-hooks.sh` por clone; a camada de CI cobre esse risco no remoto.
+
+Arquivos alterados:
+- AGENTS.md
+- scripts/check-docs-sync.sh
+- scripts/install-hooks.sh
+- .githooks/pre-commit
+- .githooks/pre-push
+- .github/workflows/docs-guardrail.yml
+- docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md

@@ -1,0 +1,46 @@
+name: Docs Guardrail
+
+on:
+  pull_request:
+    branches: ["**"]
+  push:
+    branches: ["**"]
+
+jobs:
+  enforce-docs-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine diff range
+        id: range
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="origin/${{ github.base_ref }}"
+            git fetch origin "${{ github.base_ref }}" --depth=1
+            echo "range=${base}...HEAD" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          before="${{ github.event.before }}"
+          if [[ -n "$before" && "$before" != "0000000000000000000000000000000000000000" ]]; then
+            echo "range=${before}...HEAD" >> "$GITHUB_OUTPUT"
+          else
+            if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+              echo "range=HEAD~1...HEAD" >> "$GITHUB_OUTPUT"
+            else
+              echo "range=HEAD...HEAD" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Enforce docs sync policy
+        shell: bash
+        run: |
+          chmod +x scripts/check-docs-sync.sh
+          scripts/check-docs-sync.sh --range "${{ steps.range.outputs.range }}"

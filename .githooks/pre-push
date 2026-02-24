@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+script="${repo_root}/scripts/check-docs-sync.sh"
+
+upstream="$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || true)"
+if [[ -z "$upstream" ]]; then
+  echo "Aviso: branch sem upstream; pulando validacao de pre-push por range."
+  exit 0
+fi
+
+range="${upstream}...HEAD"
+"$script" --range "$range"

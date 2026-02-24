@@ -1,6 +1,6 @@
 # Centro de Operacao - AdFlow
 
-Atualizado em: 2026-02-24 16:06:16 -0300
+Atualizado em: 2026-02-24 20:22:15 -0300
 
 Este arquivo e o ponto unico de sincronizacao entre voce, Codex, Claude e Gemini.
 Hierarquia oficial:
@@ -89,8 +89,8 @@ Comando padrao para timestamp:
 
 | Agente | Papel principal | Estado atual |
 |---|---|---|
-| Claude | Chefe tecnico, triagem, revisao final e reporte ao dono | Lider ativo |
-| Codex | Dev auxiliar senior: implementacao + validacao + lider interino na ausencia do Claude | Ativo |
+| Claude | Chefe tecnico, triagem, revisao final e reporte ao dono | Indisponivel (Claude -) |
+| Codex | Dev auxiliar senior: implementacao + validacao + lider interino na ausencia do Claude | Lider interino ativo |
 | Gemini | Dev auxiliar: tarefas simples, apoio de implementacao e pesquisa tecnica | Ativo |
 
 ## 3) Snapshot tecnico do projeto
@@ -107,10 +107,13 @@ Comandos principais:
 - `pnpm test`
 - `pnpm build`
 - `pnpm db:push`
+- `./scripts/install-hooks.sh` (instala hook de pre-commit para exigir update dos docs obrigatorios)
 
 Status tecnico atual:
-- `pnpm check`: OK
-- `pnpm test`: OK (41/41)
+- `pnpm dev`: OK (subindo em `http://localhost:3001/` quando `3000` esta ocupada)
+- `pnpm check`: sem retorno conclusivo no ambiente atual (processo ficou pendente em execucoes longas)
+- `pnpm test`: sem retorno conclusivo no ambiente atual (processo ficou pendente em execucoes longas)
+- `pnpm build`: sem retorno conclusivo no ambiente atual (processo ficou pendente em execucoes longas)
 
 ## 4) Arquitetura resumida
 
@@ -221,6 +224,10 @@ Produto:
 
 Operacao:
 - Modelo hibrido recomendado: backend proprio para regras/dados + n8n para fluxos.
+- IA via n8n: usar pipelines com sanitizacao, contexto do cliente, validacao de saida e fallback humano.
+- WhatsApp via n8n: webhook -> deduplicacao -> classificacao de intencao -> acao no AdFlow -> resposta ao cliente.
+- Email via n8n: orquestracao de fluxos transacionais/operacionais; backend controla consentimento, preferencia e auditoria.
+- Possibilidades com n8n (business): follow-up automatico, alertas de prazo/financeiro, resumo diario e reengajamento de cliente.
 - Meta Ads / Google Ads via app e possivel, mas exige OAuth, permissoes e manutencao de API.
 
 IA/Agentes:
@@ -412,3 +419,172 @@ Proximo:
 
 Bloqueios/Riscos:
 - Nenhum bloqueio tecnico aberto no momento.
+
+[2026-02-24 16:30:09 -0300] [Codex]
+Feito:
+- Revisao critica do documento de estrategia de mercado legado.
+- Pesquisa adicional consolidada sobre UX, acessibilidade, seguranca de software e diferenciacao visual de produto.
+- Documento estrategico renomeado e reescrito para discussao com Claude: .
+
+Fazendo:
+- Pronto para detalhar backlog executavel (P0/P1/P2) em tarefas tecnicas quando aprovado pelo dono.
+
+Proximo:
+- Validar prioridades com Claude e iniciar execucao do bloco P0.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico aberto para a proxima etapa.
+[2026-02-24 16:30:16 -0300] [Codex]
+Feito:
+- Revisao critica do documento de estrategia de mercado legado.
+- Pesquisa adicional consolidada sobre UX, acessibilidade, seguranca de software e diferenciacao visual de produto.
+- Documento estrategico renomeado e reescrito para discussao com Claude: docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md.
+
+Fazendo:
+- Pronto para detalhar backlog executavel (P0/P1/P2) em tarefas tecnicas quando aprovado pelo dono.
+
+Proximo:
+- Validar prioridades com Claude e iniciar execucao do bloco P0.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico aberto para a proxima etapa.
+
+[2026-02-24 16:30:34 -0300] [Codex]
+Feito:
+- Nota de integridade adicionada: entrada anterior em 2026-02-24 16:30:09 -0300 teve truncamento por expansao de shell.
+- Entrada correta subsequente em 2026-02-24 16:30:16 -0300 contem os caminhos completos.
+- Historico mantido sem alteracao retroativa.
+
+Fazendo:
+- Fluxo de documentacao normalizado com append protegido.
+
+Proximo:
+- Seguir governanca de log sem novas lacunas.
+
+Bloqueios/Riscos:
+- Nenhum.
+
+[2026-02-24 16:44:10 -0300] [Codex]
+Feito:
+- Documento estrategico ampliado com pesquisa adicional e novas fontes: docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md.
+- Escopo agora cobre UX, acessibilidade, performance, AppSec, supply chain, privacidade/LGPD, IA segura e diferenciacao visual com base em evidencia.
+- Estrutura atualizada para execucao: decisoes praticas, checklists, criterios de aceite, KPIs e perguntas de debate com Claude.
+
+Fazendo:
+- Pronto para transformar em backlog tecnico priorizado quando aprovado pelo dono.
+
+Proximo:
+- Priorizar bloco P0 e quebrar em tasks por sprint.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico aberto.
+
+[2026-02-24 16:49:28 -0300] [Codex]
+Feito:
+- Repaginacao da LP principal executada no frontend com foco em conversao e transparencia de produto (Home.tsx).
+- Metadados da pagina principal atualizados para aquisicao e compartilhamento (client/index.html).
+- Documento estrategico atualizado com blueprint da LP + referencias adicionais de conversion optimization.
+- Validacao tecnica: pnpm check OK.
+
+Fazendo:
+- Pronto para detalhar proxima fase de CRO com eventos e testes por secao da LP.
+
+Proximo:
+- Priorizar instrumentacao de eventos do funil da LP apos validacao visual do dono.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico aberto.
+
+[2026-02-24 16:53:10 -0300] [Codex]
+Feito:
+- Conversa sobre IA via n8n e WhatsApp via n8n adicionada na documentacao estrategica e operacional.
+- Secao de estrategia recebeu blueprint de arquitetura, fluxos recomendados, riscos/controles e KPIs para n8n.
+- Secao de ideias recebeu novos itens em conversa para priorizacao posterior.
+
+Fazendo:
+- Pronto para transformar os blocos n8n em plano tecnico executavel por sprint.
+
+Proximo:
+- Definir com o dono quais 2 workflows entram primeiro no MVP (ex.: briefing WhatsApp e follow-up).
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico aberto.
+
+[2026-02-24 16:55:03 -0300] [Codex]
+Feito:
+- Fluxo de Email no App incorporado na estrategia (transacional + operacional + lifecycle).
+- Modelo de implementacao definido: backend como source of truth + n8n para orquestracao e entrega.
+- Backlog de ideias atualizado com item especifico de email.
+
+Fazendo:
+- Pronto para detalhar arquitetura tecnica do MVP de email por sprint.
+
+Proximo:
+- Definir provedor inicial de email e ordem dos 5 fluxos prioritarios.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico aberto.
+
+[2026-02-24 16:55:57 -0300] [Codex]
+Feito:
+- Comando operacional `Claude -` recebido.
+- Modo contingencia ativado conforme governanca.
+- Estado dos agentes atualizado: Claude indisponivel; Codex lider interino ativo.
+
+Fazendo:
+- Codex assume triagem e execucao tecnica ate novo comando de retorno (`Claude +`).
+
+Proximo:
+- Seguir backlog prioritario e registrar todas as decisoes de contingencia no `docs/LOG_AGENTES.md`.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico aberto neste momento.
+
+[2026-02-24 20:15:21 -0300] [Codex]
+Feito:
+- Correcao ampla de acessibilidade de formularios executada em paginas ativas (labels com `htmlFor`, campos com `id`/`name`, ajustes de `fieldset/legend` e `aria-label` quando necessario).
+- Coletor de debug Manus passou a ser opt-in por env var (`ENABLE_MANUS_DEBUG_COLLECTOR=1`); default desativado em dev.
+- Commit e push realizados em `main`: `c4173c0` (`fix(a11y): normalize form labels/ids and gate debug collector`).
+- App iniciado localmente para validacao manual e disponibilidade imediata no link `http://localhost:3001/`.
+- Instrucoes operacionais completas para subida em VPS entregues ao dono (Node + PM2 + Nginx + MySQL + dominio/SSL).
+
+Fazendo:
+- Suporte de deploy para disponibilizar link publico na VPS do dono.
+
+Proximo:
+- Executar deploy guiado na VPS e confirmar URL publica final (dominio ou IP com SSL).
+
+Bloqueios/Riscos:
+- Sem acesso SSH da VPS neste momento; deploy publico depende da execucao dos comandos no servidor do dono.
+
+[2026-02-24 20:19:17 -0300] [Codex]
+Feito:
+- Guardrail anti-esquecimento implementado: hook de pre-commit bloqueia commit com mudancas fora de `docs` se `docs/LOG_AGENTES.md` e `docs/CENTRO_DE_OPERACAO.md` nao estiverem staged.
+- Scripts adicionados para padronizar o comportamento em qualquer clone local (`scripts/check-docs-sync.sh` e `scripts/install-hooks.sh`).
+- Hook ativado no repositorio atual via `git config core.hooksPath .githooks`.
+
+Fazendo:
+- Mantendo registro continuo nos docs a cada ciclo de trabalho.
+
+Proximo:
+- Ao iniciar trabalho em nova maquina/clone, rodar `./scripts/install-hooks.sh`.
+
+Bloqueios/Riscos:
+- O hook age no pre-commit local; em outro clone ele precisa ser instalado uma vez.
+
+[2026-02-24 20:22:15 -0300] [Codex]
+Feito:
+- Politica elevada para qualquer IA do projeto com tres camadas:
+- `AGENTS.md` no repo com regra obrigatoria de update de docs em toda alteracao relevante.
+- Hook local reforcado com `pre-commit` + `pre-push` em `.githooks/`.
+- Validacao server-side no GitHub Actions (`.github/workflows/docs-guardrail.yml`).
+- Script `scripts/check-docs-sync.sh` evoluido para validar por staged (local) e por range (CI/pre-push).
+
+Fazendo:
+- Mantendo os registros finais em docs em todo fechamento de ciclo.
+
+Proximo:
+- Commitar e subir esta politica para tornar o guardrail efetivo para todos os agentes que atuarem no repositorio remoto.
+
+Bloqueios/Riscos:
+- Em clones novos, hooks locais exigem `./scripts/install-hooks.sh` (CI cobre mesmo sem setup local).
