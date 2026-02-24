@@ -910,3 +910,32 @@ Arquivos alterados:
 - .github/workflows/docs-guardrail.yml
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
+
+[2026-02-24 20:30:05 -0300] [Codex]
+Contexto:
+- Dono autorizou publicacao em dominio da VPS mesmo com produto em evolucao e pediu fluxo pratico para continuar editando localmente.
+
+Feito:
+- Criado kit completo de deploy para VPS em `scripts/vps/`:
+- `setup-ubuntu.sh`: bootstrap de servidor (Ubuntu, Node/pnpm, PM2, MySQL, firewall).
+- `deploy-app.sh`: deploy recorrente seguro (pull, install, build, migrate opcional, restart PM2).
+- `configure-nginx.sh`: configuracao de reverse proxy no dominio.
+- `enable-ssl.sh`: emissao e configuracao de SSL via Certbot.
+- `quick-deploy.sh`: deploy remoto por SSH em 1 comando.
+- Publicado guia unico com passo a passo em `docs/DEPLOY_VPS.md`.
+
+Proximo:
+- Executar deploy real na VPS do dono assim que receber acesso SSH (usuario@ip) e dominio.
+
+Bloqueios/Riscos:
+- Sem acesso SSH no momento; publicacao depende de credenciais/acesso da VPS.
+
+Arquivos alterados:
+- scripts/vps/setup-ubuntu.sh
+- scripts/vps/deploy-app.sh
+- scripts/vps/configure-nginx.sh
+- scripts/vps/enable-ssl.sh
+- scripts/vps/quick-deploy.sh
+- docs/DEPLOY_VPS.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md

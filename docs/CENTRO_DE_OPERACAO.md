@@ -1,6 +1,6 @@
 # Centro de Operacao - AdFlow
 
-Atualizado em: 2026-02-24 20:22:15 -0300
+Atualizado em: 2026-02-24 20:30:05 -0300
 
 Este arquivo e o ponto unico de sincronizacao entre voce, Codex, Claude e Gemini.
 Hierarquia oficial:
@@ -588,3 +588,22 @@ Proximo:
 
 Bloqueios/Riscos:
 - Em clones novos, hooks locais exigem `./scripts/install-hooks.sh` (CI cobre mesmo sem setup local).
+
+[2026-02-24 20:30:05 -0300] [Codex]
+Feito:
+- Kit de deploy para VPS criado no repositorio:
+- `scripts/vps/setup-ubuntu.sh` (setup inicial da VPS: pacotes, Node, pnpm, PM2, MySQL, firewall).
+- `scripts/vps/deploy-app.sh` (deploy recorrente: pull, install, build, migrate opcional, restart PM2).
+- `scripts/vps/configure-nginx.sh` (proxy publico HTTP no dominio).
+- `scripts/vps/enable-ssl.sh` (HTTPS com Certbot).
+- `scripts/vps/quick-deploy.sh` (deploy remoto em 1 comando via SSH).
+- Guia operacional completo publicado em `docs/DEPLOY_VPS.md`.
+
+Fazendo:
+- Preparado para executar publicacao em dominio na VPS do dono.
+
+Proximo:
+- Receber IP/usuario SSH e dominio para executar os scripts e validar URL publica final.
+
+Bloqueios/Riscos:
+- Publicacao final depende de acesso SSH e DNS apontado para o IP da VPS.
