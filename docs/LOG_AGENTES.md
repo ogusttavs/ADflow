@@ -462,3 +462,77 @@ Arquivos alterados:
 - client/src/components/AppLayout.tsx
 - docs/ACOES_MANUAIS_GOOGLE.md
 - docs/LOG_AGENTES.md
+
+[2026-02-24 15:41:21 -0300] [Codex]
+Contexto:
+- Dono pediu para verificar pendencias e seguir execucao da etapa Google.
+
+Feito:
+- Estado validado no banco: Google Login ativo com usuario Google criado (`loginMethod=google`).
+- Estado validado no banco: Google Agenda conectada (`google_calendar_connections=1`, `calendarId=primary`).
+- `.env` ajustado com overrides explicitos de redirect para porta local atual (`3001`) para reduzir risco de mismatch.
+- Checklist manual atualizado com itens concluidos de Google Cloud, OAuth Client, variaveis e conexao da Agenda.
+
+Proximo:
+- Executar teste final de `Sincronizar dia` na tela `Agenda` (pendencia atual).
+- Depois, preparar configuracoes de producao (URIs HTTPS reais) quando for subir.
+
+Bloqueios/Riscos:
+- `lastSyncAt` ainda `null`; sincronizacao de dia ainda nao executada.
+
+Arquivos alterados:
+- .env
+- docs/ACOES_MANUAIS_GOOGLE.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 15:42:59 -0300] [Codex]
+Contexto:
+- Continuidade da finalizacao Google com execucao pratica das pendencias restantes.
+
+Feito:
+- Validacao em banco executada:
+- Usuarios: 2 (incluindo 1 conta Google com `loginMethod=google`).
+- Conexao Google Agenda: 1 registro ativo para o usuario Google (`calendarId=primary`).
+- `.env` atualizado com overrides de redirect para porta local atual (`3001`) para estabilizar callbacks OAuth.
+- Ajuste tecnico adicional: remocao de placeholders de analytics no `index.html` e carga condicional via `main.tsx` para evitar erros de URI malformada no servidor.
+- Checklist manual atualizado marcando etapas concluidas e deixando pendencias finais (sincronizar dia + rotacionar client secret).
+- Validacao executada com sucesso: `pnpm check` e `pnpm test` (41/41).
+
+Proximo:
+- Executar `Sincronizar dia` na tela `Agenda` e confirmar atualizacao de `lastSyncAt`.
+- Rotacionar `GOOGLE_CLIENT_SECRET` no Google Cloud e atualizar `.env`.
+
+Bloqueios/Riscos:
+- `lastSyncAt` ainda `null` (sync final ainda nao executado).
+- Chave secreta Google foi compartilhada em chat; recomenda-se rotacao imediata.
+
+Arquivos alterados:
+- .env
+- client/index.html
+- client/src/main.tsx
+- docs/ACOES_MANUAIS_GOOGLE.md
+- docs/LOG_AGENTES.md
+
+[2026-02-24 15:50:08 -0300] [Codex]
+Contexto:
+- Dono solicitou finalizacao da etapa Google e fechamento para commit.
+
+Feito:
+- Evidencia operacional confirmada em logs: `googleCalendar.syncTasksForDate` executado com sucesso em `2026-02-24 15:40:48 -0300` (`created=0`, `skipped=0`) na data sem tarefas.
+- Checklist manual atualizado marcando `Sincronizar dia` como concluido.
+- Ideias de produto atualizadas para status `Concluida` em Google Login e Google Agenda.
+- Centro de operacao atualizado com timestamp de fechamento.
+- Validacao tecnica executada: `pnpm check` e `pnpm test` (41/41).
+
+Proximo:
+- Rotacionar `GOOGLE_CLIENT_SECRET` no Google Cloud e atualizar `.env` local.
+- Quando subir para producao, cadastrar redirects HTTPS no Google Cloud.
+
+Bloqueios/Riscos:
+- Rotacao de segredo depende de acao manual no Google Cloud (externo ao repositorio).
+
+Arquivos alterados:
+- docs/ACOES_MANUAIS_GOOGLE.md
+- docs/IDEIAS_PRODUTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md

@@ -8,6 +8,8 @@ import { ENV } from "./env";
 const GOOGLE_AUTH_BASE_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
+const GOOGLE_OPENID_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
+const GOOGLE_OAUTH2_USERINFO_ENDPOINT = "https://www.googleapis.com/oauth2/v2/userinfo";
 const TOKEN_REFRESH_BUFFER_MS = 60_000;
 
 export const GOOGLE_CALENDAR_OAUTH_STATE_COOKIE = "adflow_google_calendar_oauth_state";
@@ -37,6 +39,7 @@ const googleTokenSchema = z.object({
 
 const googleUserInfoSchema = z.object({
   sub: z.string().optional(),
+  id: z.string().optional(),
   name: z.string().optional(),
   email: z.string().email().optional(),
 });
@@ -159,27 +162,41 @@ async function fetchGoogleToken(body: URLSearchParams) {
 }
 
 async function fetchGoogleUserEmail(accessToken: string) {
-  const response = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  if (!response.ok) return undefined;
-  const parsed = googleUserInfoSchema.safeParse(await response.json());
-  if (!parsed.success) return undefined;
-  return parsed.data.email;
+  const userInfo = await fetchGoogleUserInfo(accessToken);
+  return userInfo?.email;
 }
 
 export async function fetchGoogleUserProfile(accessToken: string): Promise<GoogleUserProfile | null> {
-  const response = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  if (!response.ok) return null;
-  const parsed = googleUserInfoSchema.safeParse(await response.json());
-  if (!parsed.success || !parsed.data.sub) return null;
+  const userInfo = await fetchGoogleUserInfo(accessToken);
+  if (!userInfo) return null;
+
+  const subject = userInfo.sub ?? userInfo.id;
+  if (!subject) return null;
+
   return {
-    sub: parsed.data.sub,
-    name: parsed.data.name,
-    email: parsed.data.email,
+    sub: subject,
+    name: userInfo.name,
+    email: userInfo.email,
   };
+}
+
+async function fetchGoogleUserInfo(accessToken: string) {
+  const endpoints = [
+    GOOGLE_OPENID_USERINFO_ENDPOINT,
+    GOOGLE_OAUTH2_USERINFO_ENDPOINT,
+  ];
+
+  for (const endpoint of endpoints) {
+    const response = await fetch(endpoint, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!response.ok) continue;
+
+    const parsed = googleUserInfoSchema.safeParse(await response.json());
+    if (parsed.success) return parsed.data;
+  }
+
+  return null;
 }
 
 export async function exchangeGoogleCodeForTokens(

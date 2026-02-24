@@ -10,6 +10,30 @@ import "./index.css";
 
 const queryClient = new QueryClient();
 
+function setupAnalyticsScript() {
+  const endpoint = (import.meta.env.VITE_ANALYTICS_ENDPOINT as string | undefined)?.trim();
+  const websiteId = (import.meta.env.VITE_ANALYTICS_WEBSITE_ID as string | undefined)?.trim();
+
+  if (!endpoint || !websiteId) return;
+
+  const normalizedEndpoint = endpoint.replace(/\/+$/, "");
+  if (!/^https?:\/\//.test(normalizedEndpoint)) {
+    console.warn("[Analytics] Ignoring invalid VITE_ANALYTICS_ENDPOINT");
+    return;
+  }
+
+  if (document.querySelector('script[data-adflow-analytics="umami"]')) {
+    return;
+  }
+
+  const script = document.createElement("script");
+  script.defer = true;
+  script.src = `${normalizedEndpoint}/umami`;
+  script.dataset.websiteId = websiteId;
+  script.dataset.adflowAnalytics = "umami";
+  document.body.appendChild(script);
+}
+
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
   if (typeof window === "undefined") return;
@@ -51,6 +75,8 @@ const trpcClient = trpc.createClient({
     }),
   ],
 });
+
+setupAnalyticsScript();
 
 createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>

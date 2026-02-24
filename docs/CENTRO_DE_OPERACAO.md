@@ -1,6 +1,6 @@
 # Centro de Operacao - AdFlow
 
-Atualizado em: 2026-02-24 15:06:25 -0300
+Atualizado em: 2026-02-24 15:50:08 -0300
 
 Este arquivo e o ponto unico de sincronizacao entre voce, Codex, Claude e Gemini.
 Hierarquia oficial:

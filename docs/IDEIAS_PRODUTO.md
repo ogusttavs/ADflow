@@ -1,6 +1,6 @@
 # Ideias do Produto - AdFlow
 
-Ultima atualizacao: 2026-02-24 14:34:27 -0300
+Ultima atualizacao: 2026-02-24 15:50:08 -0300
 
 Como usar:
 - Sempre adicione novas ideias no topo.
@@ -17,13 +17,13 @@ Como usar:
 [2026-02-24 14:09:56 -0300]
 - Ideia: Google como login da plataforma inteira
 - Prioridade: Alta
-- Status: Em andamento
-- Observacoes: Botao e fluxo OAuth iniciados; falta validar com credenciais reais no Google Cloud.
+- Status: Concluida
+- Observacoes: Fluxo OAuth validado com sessao ativa e redirecionamento para `/dashboard`; pendente apenas rotacao operacional da `GOOGLE_CLIENT_SECRET` no Google Cloud.
 
 [2026-02-24 14:06:37 -0300]
 - Ideia: Conectar calendario com Google Agenda
 - Prioridade: Alta
-- Status: Em andamento
-- Observacoes: MVP implementado (OAuth + listar eventos + sincronizar tarefas por dia). Ainda pode evoluir com sync bidirecional completo.
+- Status: Concluida
+- Observacoes: MVP concluido e validado (OAuth + listar eventos + sincronizar tarefas por dia). `syncTasksForDate` executado com sucesso (`created: 0`, `skipped: 0`) em data sem tarefas.
 
 ## Historico
