@@ -147,6 +147,7 @@ export default function Login() {
                 <Label htmlFor="login-email">Email</Label>
                 <Input
                   id="login-email"
+                  name="login-email"
                   type="email"
                   placeholder="seu@email.com"
                   value={loginForm.email}
@@ -159,6 +160,7 @@ export default function Login() {
                 <Label htmlFor="login-password">Senha</Label>
                 <Input
                   id="login-password"
+                  name="login-password"
                   type="password"
                   placeholder="••••••••"
                   value={loginForm.password}
@@ -177,6 +179,7 @@ export default function Login() {
                 <Label htmlFor="reg-name">Nome</Label>
                 <Input
                   id="reg-name"
+                  name="reg-name"
                   type="text"
                   placeholder="Seu nome"
                   value={registerForm.name}
@@ -189,6 +192,7 @@ export default function Login() {
                 <Label htmlFor="reg-email">Email</Label>
                 <Input
                   id="reg-email"
+                  name="reg-email"
                   type="email"
                   placeholder="seu@email.com"
                   value={registerForm.email}
@@ -201,6 +205,7 @@ export default function Login() {
                 <Label htmlFor="reg-password">Senha</Label>
                 <Input
                   id="reg-password"
+                  name="reg-password"
                   type="password"
                   placeholder="Mínimo 6 caracteres"
                   value={registerForm.password}

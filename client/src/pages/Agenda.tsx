@@ -458,20 +458,20 @@ export default function Agenda() {
                       </DialogHeader>
                       <div className="space-y-3 pt-2">
                         <div>
-                          <Label>Título</Label>
-                          <Input className="mt-1" placeholder="Ex: Reunião com cliente" value={newTitle}
+                          <Label htmlFor="pages-agenda-titulo">Título</Label>
+                          <Input name="pages-agenda-titulo" id="pages-agenda-titulo" className="mt-1" placeholder="Ex: Reunião com cliente" value={newTitle}
                             onChange={e => setNewTitle(e.target.value)} />
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <Label>Hora</Label>
-                            <Input className="mt-1" type="time" value={newTime}
+                            <Label htmlFor="pages-agenda-hora">Hora</Label>
+                            <Input name="pages-agenda-hora" id="pages-agenda-hora" className="mt-1" type="time" value={newTime}
                               onChange={e => setNewTime(e.target.value)} />
                           </div>
                           <div>
-                            <Label>Prioridade</Label>
+                            <Label htmlFor="pages-agenda-prioridade">Prioridade</Label>
                             <Select value={newPriority} onValueChange={setNewPriority}>
-                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectTrigger id="pages-agenda-prioridade" aria-label="Prioridade da tarefa" className="mt-1"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="HIGH">Alta</SelectItem>
                                 <SelectItem value="MEDIUM">Média</SelectItem>
@@ -481,9 +481,9 @@ export default function Agenda() {
                           </div>
                         </div>
                         <div>
-                          <Label>Categoria</Label>
+                          <Label htmlFor="pages-agenda-categoria">Categoria</Label>
                           <Select value={newCategory} onValueChange={setNewCategory}>
-                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectTrigger id="pages-agenda-categoria" aria-label="Categoria da tarefa" className="mt-1"><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="WORK">Trabalho</SelectItem>
                               <SelectItem value="PERSONAL">Pessoal</SelectItem>

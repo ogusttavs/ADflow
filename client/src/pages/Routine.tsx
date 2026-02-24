@@ -86,7 +86,15 @@ function PomodoroTimer() {
             <Progress value={progress} className="mt-4 h-1.5" />
           </div>
 
-          <Input placeholder="Rótulo (ex: Criar copies para cliente)" value={label} onChange={e => setLabel(e.target.value)} className="text-sm" />
+          <Input
+            id="pages-routine-pomodoro-rotulo"
+            name="pages-routine-pomodoro-rotulo"
+            aria-label="Rótulo do pomodoro"
+            placeholder="Rótulo (ex: Criar copies para cliente)"
+            value={label}
+            onChange={e => setLabel(e.target.value)}
+            className="text-sm"
+          />
 
           <div className="flex gap-2 justify-center">
             <Button onClick={() => setIsRunning(!isRunning)} size="lg" className="gap-2">
@@ -165,17 +173,17 @@ function HabitsTracker() {
             <DialogContent>
               <DialogHeader><DialogTitle>Novo Hábito</DialogTitle></DialogHeader>
               <div className="space-y-3">
-                <div><Label>Nome</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Treino, Leitura, Meditação" /></div>
-                <div><Label>Ícone</Label><Input value={icon} onChange={e => setIcon(e.target.value)} className="w-20" /></div>
-                <div>
-                  <Label>Dias da Semana</Label>
+                <div><Label htmlFor="pages-routine-nome">Nome</Label><Input name="pages-routine-nome" id="pages-routine-nome" value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Treino, Leitura, Meditação" /></div>
+                <div><Label htmlFor="pages-routine-icone">Ícone</Label><Input name="pages-routine-icone" id="pages-routine-icone" value={icon} onChange={e => setIcon(e.target.value)} className="w-20" /></div>
+                <fieldset>
+                  <legend className="text-sm font-medium">Dias da Semana</legend>
                   <div className="flex gap-1 mt-1">
                     {DAYS.map((d, i) => (
                       <Button key={i} variant={selectedDays.includes(i) ? "default" : "outline"} size="sm" className="w-10 h-8 text-xs p-0"
                         onClick={() => setSelectedDays(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i])}>{d}</Button>
                     ))}
                   </div>
-                </div>
+                </fieldset>
                 <Button className="w-full" onClick={() => {
                   if (!name.trim()) return;
                   createMut.mutate({ name, icon, daysOfWeek: selectedDays }, {
@@ -258,16 +266,16 @@ function TasksList() {
               <DialogContent>
                 <DialogHeader><DialogTitle>Nova Tarefa</DialogTitle></DialogHeader>
                 <div className="space-y-3">
-                  <div><Label>Título</Label><Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Ligar pro cliente MyCreatine" /></div>
+                  <div><Label htmlFor="pages-routine-titulo">Título</Label><Input name="pages-routine-titulo" id="pages-routine-titulo" value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Ligar pro cliente MyCreatine" /></div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div><Label>Data</Label><Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} /></div>
-                    <div><Label>Hora</Label><Input type="time" value={dueTime} onChange={e => setDueTime(e.target.value)} /></div>
+                    <div><Label htmlFor="pages-routine-data">Data</Label><Input name="pages-routine-data" id="pages-routine-data" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} /></div>
+                    <div><Label htmlFor="pages-routine-hora">Hora</Label><Input name="pages-routine-hora" id="pages-routine-hora" type="time" value={dueTime} onChange={e => setDueTime(e.target.value)} /></div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <Label>Prioridade</Label>
+                      <Label htmlFor="pages-routine-prioridade">Prioridade</Label>
                       <Select value={priority} onValueChange={setPriority}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger id="pages-routine-prioridade" aria-label="Prioridade da tarefa"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="HIGH">Alta</SelectItem>
                           <SelectItem value="MEDIUM">Média</SelectItem>
@@ -276,9 +284,9 @@ function TasksList() {
                       </Select>
                     </div>
                     <div>
-                      <Label>Categoria</Label>
+                      <Label htmlFor="pages-routine-categoria">Categoria</Label>
                       <Select value={category} onValueChange={setCategory}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger id="pages-routine-categoria" aria-label="Categoria da tarefa"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="WORK">Trabalho</SelectItem>
                           <SelectItem value="PERSONAL">Pessoal</SelectItem>

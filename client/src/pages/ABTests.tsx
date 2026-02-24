@@ -70,13 +70,13 @@ export default function ABTests() {
             <DialogHeader><DialogTitle>Criar Teste A/B com IA</DialogTitle></DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Nome do Teste</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Ex: Teste headline Black Friday" /></div>
-                <div><Label>ID da Campanha</Label><Input type="number" value={form.campaignId || ""} onChange={e => setForm(p => ({ ...p, campaignId: parseInt(e.target.value) || 0 }))} /></div>
+                <div><Label htmlFor="pages-abtests-nome-do-teste">Nome do Teste</Label><Input name="pages-abtests-nome-do-teste" id="pages-abtests-nome-do-teste" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Ex: Teste headline Black Friday" /></div>
+                <div><Label htmlFor="pages-abtests-id-da-campanha">ID da Campanha</Label><Input name="pages-abtests-id-da-campanha" id="pages-abtests-id-da-campanha" type="number" value={form.campaignId || ""} onChange={e => setForm(p => ({ ...p, campaignId: parseInt(e.target.value) || 0 }))} /></div>
               </div>
               <div>
-                <Label>Canal</Label>
+                <Label htmlFor="pages-abtests-canal">Canal</Label>
                 <Select value={form.channel} onValueChange={v => setForm(p => ({ ...p, channel: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger id="pages-abtests-canal" aria-label="Canal do teste"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="instagram_feed">Instagram Feed</SelectItem>
                     <SelectItem value="instagram_stories">Instagram Stories</SelectItem>
@@ -86,9 +86,9 @@ export default function ABTests() {
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>Headline (Variante A)</Label><Input value={form.originalHeadline} onChange={e => setForm(p => ({ ...p, originalHeadline: e.target.value }))} /></div>
-              <div><Label>Corpo (Variante A)</Label><Textarea value={form.originalBody} onChange={e => setForm(p => ({ ...p, originalBody: e.target.value }))} /></div>
-              <div><Label>CTA (Variante A)</Label><Input value={form.originalCta} onChange={e => setForm(p => ({ ...p, originalCta: e.target.value }))} /></div>
+              <div><Label htmlFor="pages-abtests-headline-variante-a">Headline (Variante A)</Label><Input name="pages-abtests-headline-variante-a" id="pages-abtests-headline-variante-a" value={form.originalHeadline} onChange={e => setForm(p => ({ ...p, originalHeadline: e.target.value }))} /></div>
+              <div><Label htmlFor="pages-abtests-corpo-variante-a">Corpo (Variante A)</Label><Textarea name="pages-abtests-corpo-variante-a" id="pages-abtests-corpo-variante-a" value={form.originalBody} onChange={e => setForm(p => ({ ...p, originalBody: e.target.value }))} /></div>
+              <div><Label htmlFor="pages-abtests-cta-variante-a">CTA (Variante A)</Label><Input name="pages-abtests-cta-variante-a" id="pages-abtests-cta-variante-a" value={form.originalCta} onChange={e => setForm(p => ({ ...p, originalCta: e.target.value }))} /></div>
               <Button className="w-full gap-2" onClick={() => generate.mutate(form)} disabled={generate.isPending || !form.name || !form.originalHeadline}>
                 {generate.isPending ? "Gerando Variante B com IA..." : <><Sparkles className="h-4 w-4" /> Gerar Variante B com IA</>}
               </Button>

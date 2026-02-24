@@ -69,7 +69,7 @@ export default function Budget() {
           <p className="text-muted-foreground">Distribua e otimize o orçamento por canal com IA</p>
         </div>
         <Select value={String(selectedClientId)} onValueChange={v => setSelectedClientId(parseInt(v))}>
-          <SelectTrigger className="w-[250px]"><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
+          <SelectTrigger id="pages-budget-cliente" aria-label="Selecionar cliente" className="w-[250px]"><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="0">Selecione um cliente</SelectItem>
             {(clients.data || []).map(c => (
@@ -97,14 +97,14 @@ export default function Budget() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label>Orçamento Total Mensal (R$)</Label>
-                  <Input type="number" value={totalBudget / 100} onChange={e => setTotalBudget(parseFloat(e.target.value) * 100 || 0)} />
+                  <Label htmlFor="pages-budget-orcamento-total-mensal-r">Orçamento Total Mensal (R$)</Label>
+                  <Input name="pages-budget-orcamento-total-mensal-r" id="pages-budget-orcamento-total-mensal-r" type="number" value={totalBudget / 100} onChange={e => setTotalBudget(parseFloat(e.target.value) * 100 || 0)} />
                 </div>
 
                 {CHANNELS.map(ch => (
                   <div key={ch} className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <Label className="flex items-center gap-2">
+                      <Label htmlFor={`pages-budget-${ch}-allocation`} className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: channelColors[ch] }} />
                         {channelLabels[ch]}
                       </Label>
@@ -114,7 +114,7 @@ export default function Budget() {
                     </div>
                     <div className="flex items-center gap-3">
                       <Progress value={allocations[ch] || 0} className="flex-1" />
-                      <Input type="number" min={0} max={100} className="w-20" value={allocations[ch] || 0}
+                      <Input id={`pages-budget-${ch}-allocation`} name={`pages-budget-${ch}-allocation`} type="number" min={0} max={100} className="w-20" value={allocations[ch] || 0}
                         onChange={e => setAllocations(p => ({ ...p, [ch]: parseInt(e.target.value) || 0 }))} />
                     </div>
                   </div>
@@ -142,9 +142,9 @@ export default function Budget() {
             </Card>
 
             <div>
-              <Label>Objetivo da Otimização</Label>
+              <Label htmlFor="pages-budget-objetivo-otimizacao">Objetivo da Otimização</Label>
               <Select value={objective} onValueChange={setObjective}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="pages-budget-objetivo-otimizacao" aria-label="Objetivo da otimização"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Maximizar conversões">Maximizar conversões</SelectItem>
                   <SelectItem value="Maximizar alcance">Maximizar alcance</SelectItem>

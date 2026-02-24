@@ -82,7 +82,7 @@ export default function Referrals() {
           <CardHeader><CardTitle>Convidar por Email</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-2">
-              <Input type="email" placeholder="email@exemplo.com" value={email} onChange={e => setEmail(e.target.value)} />
+              <Input id="pages-referrals-email" name="pages-referrals-email" aria-label="Email para convite" type="email" placeholder="email@exemplo.com" value={email} onChange={e => setEmail(e.target.value)} />
               <Button className="gap-2" onClick={() => invite.mutate({ email })} disabled={invite.isPending || !email}>
                 <Send className="h-4 w-4" /> Enviar
               </Button>

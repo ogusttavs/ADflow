@@ -128,8 +128,8 @@ export default function CRM() {
                   Leads em "Contactado" sem resposta após X dias são sinalizados para follow-up.
                 </p>
                 <div>
-                  <Label>Dias sem resposta para sinalizar follow-up</Label>
-                  <Input
+                  <Label htmlFor="pages-crm-dias-sem-resposta-para-sinalizar-follow-up">Dias sem resposta para sinalizar follow-up</Label>
+                  <Input name="pages-crm-dias-sem-resposta-para-sinalizar-follow-up" id="pages-crm-dias-sem-resposta-para-sinalizar-follow-up"
                     type="number" min={1} max={90}
                     value={followUpDaysInput}
                     onChange={e => setFollowUpDaysInput(Number(e.target.value))}
@@ -156,24 +156,24 @@ export default function CRM() {
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <div>
-                  <Label>Indústria / Nicho</Label>
-                  <Input placeholder="Ex: E-commerce de moda feminina" value={aiParams.industry}
+                  <Label htmlFor="pages-crm-industria-nicho">Indústria / Nicho</Label>
+                  <Input name="pages-crm-industria-nicho" id="pages-crm-industria-nicho" placeholder="Ex: E-commerce de moda feminina" value={aiParams.industry}
                     onChange={e => setAiParams(p => ({ ...p, industry: e.target.value }))} />
                 </div>
                 <div>
-                  <Label>Público-alvo</Label>
-                  <Textarea placeholder="Descreva o perfil ideal do lead..." value={aiParams.targetAudience}
+                  <Label htmlFor="pages-crm-publico-alvo">Público-alvo</Label>
+                  <Textarea name="pages-crm-publico-alvo" id="pages-crm-publico-alvo" placeholder="Descreva o perfil ideal do lead..." value={aiParams.targetAudience}
                     onChange={e => setAiParams(p => ({ ...p, targetAudience: e.target.value }))} />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label>Localização</Label>
-                    <Input value={aiParams.location}
+                    <Label htmlFor="pages-crm-localizacao">Localização</Label>
+                    <Input name="pages-crm-localizacao" id="pages-crm-localizacao" value={aiParams.location}
                       onChange={e => setAiParams(p => ({ ...p, location: e.target.value }))} />
                   </div>
                   <div>
-                    <Label>Quantidade</Label>
-                    <Input type="number" min={1} max={20} value={aiParams.count}
+                    <Label htmlFor="pages-crm-quantidade">Quantidade</Label>
+                    <Input name="pages-crm-quantidade" id="pages-crm-quantidade" type="number" min={1} max={20} value={aiParams.count}
                       onChange={e => setAiParams(p => ({ ...p, count: parseInt(e.target.value) || 10 }))} />
                   </div>
                 </div>
@@ -193,19 +193,19 @@ export default function CRM() {
               <DialogHeader><DialogTitle>Novo Lead</DialogTitle></DialogHeader>
               <div className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><Label>Nome *</Label><Input value={newLead.name} onChange={e => setNewLead(p => ({ ...p, name: e.target.value }))} /></div>
-                  <div><Label>Email</Label><Input type="email" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} /></div>
+                  <div><Label htmlFor="pages-crm-nome">Nome *</Label><Input name="pages-crm-nome" id="pages-crm-nome" value={newLead.name} onChange={e => setNewLead(p => ({ ...p, name: e.target.value }))} /></div>
+                  <div><Label htmlFor="pages-crm-email">Email</Label><Input name="pages-crm-email" id="pages-crm-email" type="email" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} /></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><Label>Telefone</Label><Input value={newLead.phone} onChange={e => setNewLead(p => ({ ...p, phone: e.target.value }))} /></div>
-                  <div><Label>Empresa</Label><Input value={newLead.company} onChange={e => setNewLead(p => ({ ...p, company: e.target.value }))} /></div>
+                  <div><Label htmlFor="pages-crm-telefone">Telefone</Label><Input name="pages-crm-telefone" id="pages-crm-telefone" value={newLead.phone} onChange={e => setNewLead(p => ({ ...p, phone: e.target.value }))} /></div>
+                  <div><Label htmlFor="pages-crm-empresa">Empresa</Label><Input name="pages-crm-empresa" id="pages-crm-empresa" value={newLead.company} onChange={e => setNewLead(p => ({ ...p, company: e.target.value }))} /></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><Label>Cargo</Label><Input value={newLead.position} onChange={e => setNewLead(p => ({ ...p, position: e.target.value }))} /></div>
+                  <div><Label htmlFor="pages-crm-cargo">Cargo</Label><Input name="pages-crm-cargo" id="pages-crm-cargo" value={newLead.position} onChange={e => setNewLead(p => ({ ...p, position: e.target.value }))} /></div>
                   <div>
-                    <Label>Fonte</Label>
+                    <Label htmlFor="pages-crm-fonte">Fonte</Label>
                     <Select value={newLead.source} onValueChange={v => setNewLead(p => ({ ...p, source: v }))}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger id="pages-crm-fonte" aria-label="Fonte do lead"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="manual">Manual</SelectItem>
                         <SelectItem value="website">Website</SelectItem>
@@ -217,7 +217,7 @@ export default function CRM() {
                     </Select>
                   </div>
                 </div>
-                <div><Label>Notas</Label><Textarea value={newLead.notes} onChange={e => setNewLead(p => ({ ...p, notes: e.target.value }))} /></div>
+                <div><Label htmlFor="pages-crm-notas">Notas</Label><Textarea name="pages-crm-notas" id="pages-crm-notas" value={newLead.notes} onChange={e => setNewLead(p => ({ ...p, notes: e.target.value }))} /></div>
                 <Button className="w-full" onClick={() => createLead.mutate(newLead)} disabled={!newLead.name || createLead.isPending}>
                   {createLead.isPending ? "Criando..." : "Criar Lead"}
                 </Button>
@@ -270,7 +270,7 @@ export default function CRM() {
       <div className="surface-card p-2.5 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input className="pl-10" placeholder="Buscar leads..." value={search} onChange={e => setSearch(e.target.value)} />
+          <Input id="pages-crm-search" name="pages-crm-search" aria-label="Buscar leads" className="pl-10" placeholder="Buscar leads..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="flex gap-1 rounded-lg border border-border/80 bg-muted/45 p-1">
           <Button variant={viewMode === "kanban" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("kanban")}>Kanban</Button>

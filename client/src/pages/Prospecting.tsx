@@ -73,12 +73,12 @@ export function ProspectingGoals() {
             <p className="text-xs text-muted-foreground font-medium">Defina suas metas diárias</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">Leads no CRM / dia</Label>
-                <Input type="number" min="0" value={addGoal} onChange={e => setAddGoal(Number(e.target.value))} className="h-8 text-sm mt-1" />
+                <Label htmlFor="pages-prospecting-leads-no-crm-dia" className="text-xs">Leads no CRM / dia</Label>
+                <Input name="pages-prospecting-leads-no-crm-dia" id="pages-prospecting-leads-no-crm-dia" type="number" min="0" value={addGoal} onChange={e => setAddGoal(Number(e.target.value))} className="h-8 text-sm mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Leads prospectados / dia</Label>
-                <Input type="number" min="0" value={prospectGoal} onChange={e => setProspectGoal(Number(e.target.value))} className="h-8 text-sm mt-1" />
+                <Label htmlFor="pages-prospecting-leads-prospectados-dia" className="text-xs">Leads prospectados / dia</Label>
+                <Input name="pages-prospecting-leads-prospectados-dia" id="pages-prospecting-leads-prospectados-dia" type="number" min="0" value={prospectGoal} onChange={e => setProspectGoal(Number(e.target.value))} className="h-8 text-sm mt-1" />
               </div>
             </div>
             <Button size="sm" className="w-full gap-2" onClick={saveGoals}>

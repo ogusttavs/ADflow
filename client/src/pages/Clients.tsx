@@ -85,37 +85,37 @@ export default function Clients() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label>Nome *</Label>
-                    <Input {...register("name", { required: true })} placeholder="João Silva" className="bg-input border-border" />
+                    <Label htmlFor="pages-clients-nome">Nome *</Label>
+                    <Input name="pages-clients-nome" id="pages-clients-nome" {...register("name", { required: true })} placeholder="João Silva" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Empresa</Label>
-                    <Input {...register("company")} placeholder="Empresa Ltda" className="bg-input border-border" />
+                    <Label htmlFor="pages-clients-empresa">Empresa</Label>
+                    <Input name="pages-clients-empresa" id="pages-clients-empresa" {...register("company")} placeholder="Empresa Ltda" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>E-mail</Label>
-                    <Input {...register("email")} type="email" placeholder="email@empresa.com" className="bg-input border-border" />
+                    <Label htmlFor="pages-clients-e-mail">E-mail</Label>
+                    <Input name="pages-clients-e-mail" id="pages-clients-e-mail" {...register("email")} type="email" placeholder="email@empresa.com" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Telefone</Label>
-                    <Input {...register("phone")} placeholder="+55 11 99999-9999" className="bg-input border-border" />
+                    <Label htmlFor="pages-clients-telefone">Telefone</Label>
+                    <Input name="pages-clients-telefone" id="pages-clients-telefone" {...register("phone")} placeholder="+55 11 99999-9999" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>WhatsApp</Label>
-                    <Input {...register("whatsappNumber")} placeholder="+5511999999999" className="bg-input border-border" />
+                    <Label htmlFor="pages-clients-whatsapp">WhatsApp</Label>
+                    <Input name="pages-clients-whatsapp" id="pages-clients-whatsapp" {...register("whatsappNumber")} placeholder="+5511999999999" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Setor</Label>
-                    <Input {...register("industry")} placeholder="E-commerce, Saúde..." className="bg-input border-border" />
+                    <Label htmlFor="pages-clients-setor">Setor</Label>
+                    <Input name="pages-clients-setor" id="pages-clients-setor" {...register("industry")} placeholder="E-commerce, Saúde..." className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label>Website</Label>
-                    <Input {...register("website")} placeholder="https://empresa.com.br" className="bg-input border-border" />
+                    <Label htmlFor="pages-clients-website">Website</Label>
+                    <Input name="pages-clients-website" id="pages-clients-website" {...register("website")} placeholder="https://empresa.com.br" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label>Status</Label>
+                    <Label htmlFor="pages-clients-status">Status</Label>
                     <Select defaultValue="active" onValueChange={(v) => setValue("status", v as any)}>
-                      <SelectTrigger className="bg-input border-border">
+                      <SelectTrigger id="pages-clients-status" aria-label="Status do cliente" className="bg-input border-border">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-card border-border">
@@ -143,6 +143,9 @@ export default function Clients() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
+              id="pages-clients-search"
+              name="pages-clients-search"
+              aria-label="Buscar clientes"
               placeholder="Buscar clientes..."
               value={search}
               onChange={e => setSearch(e.target.value)}

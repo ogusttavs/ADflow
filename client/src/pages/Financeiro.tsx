@@ -162,11 +162,11 @@ function ComprovantesTab({ personType }: { personType: PersonType }) {
         </CardHeader>
         <CardContent className="space-y-3">
           <div>
-            <Label className="text-xs">Descrição (opcional)</Label>
-            <Input className="mt-1 h-8 text-sm" placeholder="Ex: Nota fiscal Fevereiro" value={description}
+            <Label htmlFor="pages-financeiro-descricao-opcional" className="text-xs">Descrição (opcional)</Label>
+            <Input name="pages-financeiro-descricao-opcional" id="pages-financeiro-descricao-opcional" className="mt-1 h-8 text-sm" placeholder="Ex: Nota fiscal Fevereiro" value={description}
               onChange={e => setDescription(e.target.value)} />
           </div>
-          <input ref={fileRef} type="file" className="hidden" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+          <input id="pages-financeiro-upload-comprovante" name="pages-financeiro-upload-comprovante" ref={fileRef} type="file" className="hidden" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
             onChange={handleFileChange} />
           <Button onClick={() => fileRef.current?.click()} disabled={uploading} className="w-full gap-2">
             <Plus className="w-4 h-4" />{uploading ? "Enviando..." : "Selecionar Arquivo"}
@@ -177,7 +177,7 @@ function ComprovantesTab({ personType }: { personType: PersonType }) {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input className="pl-9 h-9" placeholder="Buscar comprovante..." value={search}
+        <Input id="pages-financeiro-search-comprovantes" name="pages-financeiro-search-comprovantes" aria-label="Buscar comprovante" className="pl-9 h-9" placeholder="Buscar comprovante..." value={search}
           onChange={e => setSearch(e.target.value)} />
       </div>
 
@@ -307,8 +307,8 @@ function RecorrenteTab({ personType, viewAsUserId, canEdit = true }: { personTyp
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
-              <div>
-                <Label>Tipo</Label>
+              <fieldset>
+                <legend className="text-sm font-medium">Tipo</legend>
                 <div className="flex gap-2 mt-1">
                   <Button variant={form.type === "income" ? "default" : "outline"} size="sm" className="flex-1 gap-2"
                     onClick={() => setForm(f => ({ ...f, type: "income", category: "" }))}>
@@ -319,36 +319,36 @@ function RecorrenteTab({ personType, viewAsUserId, canEdit = true }: { personTyp
                     <TrendingDown className="w-4 h-4" />Despesa
                   </Button>
                 </div>
-              </div>
+              </fieldset>
               <div>
-                <Label>Categoria</Label>
+                <Label htmlFor="pages-financeiro-recorrente-categoria">Categoria</Label>
                 <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                  <SelectTrigger id="pages-financeiro-recorrente-categoria" aria-label="Categoria da recorrência" className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                   <SelectContent>
                     {categories.map(c => <SelectItem key={c.name} value={c.name}>{c.name}{c.custom ? " ★" : ""}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>Descrição</Label>
-                <Input className="mt-1" placeholder="Ex: Assinatura Adobe, Aluguel..." value={form.description}
+                <Label htmlFor="pages-financeiro-descricao">Descrição</Label>
+                <Input name="pages-financeiro-descricao" id="pages-financeiro-descricao" className="mt-1" placeholder="Ex: Assinatura Adobe, Aluguel..." value={form.description}
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Valor (R$)</Label>
-                  <Input className="mt-1" placeholder="0,00" value={form.amount}
+                  <Label htmlFor="pages-financeiro-valor-r">Valor (R$)</Label>
+                  <Input name="pages-financeiro-valor-r" id="pages-financeiro-valor-r" className="mt-1" placeholder="0,00" value={form.amount}
                     onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
                 </div>
                 <div>
-                  <Label>Dia do Mês</Label>
-                  <Input className="mt-1" type="number" min="1" max="31" placeholder="1-31" value={form.recurringDay}
+                  <Label htmlFor="pages-financeiro-dia-do-mes">Dia do Mês</Label>
+                  <Input name="pages-financeiro-dia-do-mes" id="pages-financeiro-dia-do-mes" className="mt-1" type="number" min="1" max="31" placeholder="1-31" value={form.recurringDay}
                     onChange={e => setForm(f => ({ ...f, recurringDay: e.target.value }))} />
                 </div>
               </div>
               {/* End date */}
               <div>
-                <Label>Encerramento</Label>
+                <Label htmlFor="pages-financeiro-encerramento">Encerramento</Label>
                 <div className="flex gap-2 mt-1">
                   <Button variant={form.endType === "indefinite" ? "default" : "outline"} size="sm" className="flex-1 text-xs"
                     onClick={() => setForm(f => ({ ...f, endType: "indefinite", endMonth: "" }))}>Indefinido</Button>
@@ -356,7 +356,7 @@ function RecorrenteTab({ personType, viewAsUserId, canEdit = true }: { personTyp
                     onClick={() => setForm(f => ({ ...f, endType: "month" }))}>Até mês</Button>
                 </div>
                 {form.endType === "month" && (
-                  <Input className="mt-2" type="month" value={form.endMonth}
+                  <Input name="pages-financeiro-encerramento" id="pages-financeiro-encerramento" className="mt-2" type="month" value={form.endMonth}
                     onChange={e => setForm(f => ({ ...f, endMonth: e.target.value }))} />
                 )}
               </div>
@@ -436,7 +436,7 @@ function NewCategoryDialog({ personType, type, viewAsUserId, onCreated }: { pers
           <DialogTitle>Nova Categoria</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 pt-2">
-          <Input placeholder="Nome da categoria" value={name} onChange={e => setName(e.target.value)} />
+          <Input id="pages-financeiro-nova-categoria" name="pages-financeiro-nova-categoria" aria-label="Nome da categoria" placeholder="Nome da categoria" value={name} onChange={e => setName(e.target.value)} />
           <Button className="w-full" onClick={() => createMut.mutate({ name, type, personType, viewAsUserId })}
             disabled={!name.trim() || createMut.isPending}>
             Criar
@@ -519,9 +519,9 @@ function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personTy
   return (
     <div className="space-y-6">
       <div className="surface-card flex items-center gap-3 flex-wrap p-3">
-        <Label className="text-sm font-medium">Mês:</Label>
+        <Label htmlFor="pages-financeiro-mes" className="text-sm font-medium">Mês:</Label>
         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectTrigger id="pages-financeiro-mes" aria-label="Selecionar mês" className="w-40"><SelectValue /></SelectTrigger>
           <SelectContent>
             {monthOptions.map(m => (
               <SelectItem key={m} value={m}>{monthLabel(m)}</SelectItem>
@@ -540,8 +540,8 @@ function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personTy
               <DialogTitle>Novo Lançamento — {personType.toUpperCase()}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
-              <div>
-                <Label>Tipo</Label>
+              <fieldset>
+                <legend className="text-sm font-medium">Tipo</legend>
                 <div className="flex gap-2 mt-1">
                   <Button variant={form.type === "income" ? "default" : "outline"} size="sm" className="flex-1 gap-2"
                     onClick={() => setForm(f => ({ ...f, type: "income", category: "" }))}>
@@ -552,12 +552,12 @@ function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personTy
                     <TrendingDown className="h-4 w-4" />Despesa
                   </Button>
                 </div>
-              </div>
+              </fieldset>
               <div>
-                <Label>Categoria</Label>
+                <Label htmlFor="pages-financeiro-lancamento-categoria">Categoria</Label>
                 <div className="flex gap-2 mt-1">
                   <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
-                    <SelectTrigger className="flex-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectTrigger id="pages-financeiro-lancamento-categoria" aria-label="Categoria do lançamento" className="flex-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                     <SelectContent>
                       {categories.map(c => <SelectItem key={c.name} value={c.name}>{c.name}{c.custom ? " ★" : ""}</SelectItem>)}
                     </SelectContent>
@@ -566,29 +566,29 @@ function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personTy
                 </div>
               </div>
               <div>
-                <Label>Descrição</Label>
-                <Input className="mt-1" placeholder="Ex: Pagamento cliente XYZ" value={form.description}
+                <Label htmlFor="pages-financeiro-descricao-2">Descrição</Label>
+                <Input name="pages-financeiro-descricao-2" id="pages-financeiro-descricao-2" className="mt-1" placeholder="Ex: Pagamento cliente XYZ" value={form.description}
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <Label>Valor (R$)</Label>
-                  <Input className="mt-1" placeholder="0,00" value={form.amount}
+                  <Label htmlFor="pages-financeiro-valor-r-2">Valor (R$)</Label>
+                  <Input name="pages-financeiro-valor-r-2" id="pages-financeiro-valor-r-2" className="mt-1" placeholder="0,00" value={form.amount}
                     onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
                 </div>
                 <div>
-                  <Label>Data</Label>
-                  <Input className="mt-1" type="date" value={form.date}
+                  <Label htmlFor="pages-financeiro-data">Data</Label>
+                  <Input name="pages-financeiro-data" id="pages-financeiro-data" className="mt-1" type="date" value={form.date}
                     onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
                 </div>
               </div>
               {(receipts ?? []).length > 0 && (
                 <div>
-                  <Label>Comprovante (opcional)</Label>
+                  <Label htmlFor="pages-financeiro-comprovante-opcional">Comprovante (opcional)</Label>
                   <div className="flex gap-2 mt-1">
                     <Select value={form.receiptFileId}
                       onValueChange={v => setForm(f => ({ ...f, receiptFileId: v }))}>
-                      <SelectTrigger className="flex-1">
+                      <SelectTrigger id="pages-financeiro-comprovante-opcional" aria-label="Comprovante opcional" className="flex-1">
                         <SelectValue placeholder="Nenhum comprovante" />
                       </SelectTrigger>
                       <SelectContent>
@@ -694,7 +694,7 @@ function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personTy
             </CardTitle>
             <div className="relative w-48">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <Input className="pl-8 h-7 text-xs" placeholder="Buscar..." value={search}
+              <Input id="pages-financeiro-search-lancamentos" name="pages-financeiro-search-lancamentos" aria-label="Buscar lançamentos" className="pl-8 h-7 text-xs" placeholder="Buscar..." value={search}
                 onChange={e => setSearch(e.target.value)} />
             </div>
           </div>

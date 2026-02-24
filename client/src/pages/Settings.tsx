@@ -123,25 +123,25 @@ export default function Settings() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label>Nome da Agência</Label>
-                      <Input defaultValue="AdFlow Agency" className="bg-input border-border" />
+                      <Label htmlFor="pages-settings-nome-da-agencia">Nome da Agência</Label>
+                      <Input name="pages-settings-nome-da-agencia" id="pages-settings-nome-da-agencia" defaultValue="AdFlow Agency" className="bg-input border-border" />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Website</Label>
-                      <Input defaultValue="https://adflow.com.br" className="bg-input border-border" />
+                      <Label htmlFor="pages-settings-website">Website</Label>
+                      <Input name="pages-settings-website" id="pages-settings-website" defaultValue="https://adflow.com.br" className="bg-input border-border" />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>E-mail de Contato</Label>
-                      <Input type="email" defaultValue="contato@adflow.com.br" className="bg-input border-border" />
+                      <Label htmlFor="pages-settings-e-mail-de-contato">E-mail de Contato</Label>
+                      <Input name="pages-settings-e-mail-de-contato" id="pages-settings-e-mail-de-contato" type="email" defaultValue="contato@adflow.com.br" className="bg-input border-border" />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Telefone / WhatsApp</Label>
-                      <Input defaultValue="+55 11 99999-9999" className="bg-input border-border" />
+                      <Label htmlFor="pages-settings-telefone-whatsapp">Telefone / WhatsApp</Label>
+                      <Input name="pages-settings-telefone-whatsapp" id="pages-settings-telefone-whatsapp" defaultValue="+55 11 99999-9999" className="bg-input border-border" />
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Descrição da Agência</Label>
-                    <Textarea
+                    <Label htmlFor="pages-settings-descricao-da-agencia">Descrição da Agência</Label>
+                    <Textarea name="pages-settings-descricao-da-agencia" id="pages-settings-descricao-da-agencia"
                       defaultValue="Agência de marketing digital especializada em automação e IA."
                       className="bg-input border-border resize-none"
                       rows={3}
@@ -156,12 +156,12 @@ export default function Settings() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label>Idioma Padrão para Geração</Label>
-                    <Input defaultValue="Português Brasileiro (pt-BR)" className="bg-input border-border" />
+                    <Label htmlFor="pages-settings-idioma-padrao-para-geracao">Idioma Padrão para Geração</Label>
+                    <Input name="pages-settings-idioma-padrao-para-geracao" id="pages-settings-idioma-padrao-para-geracao" defaultValue="Português Brasileiro (pt-BR)" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Instrução Global para IA</Label>
-                    <Textarea
+                    <Label htmlFor="pages-settings-instrucao-global-para-ia">Instrução Global para IA</Label>
+                    <Textarea name="pages-settings-instrucao-global-para-ia" id="pages-settings-instrucao-global-para-ia"
                       defaultValue="Sempre crie conteúdo em português brasileiro, com linguagem adequada ao público-alvo. Evite clichês e seja criativo."
                       className="bg-input border-border resize-none"
                       rows={4}
@@ -513,23 +513,23 @@ function FamilyTab() {
           <DialogHeader><DialogTitle>Convidar Pessoa</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label>E-mail do usuário</Label>
-              <Input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
+              <Label htmlFor="pages-settings-e-mail-do-usuario">E-mail do usuário</Label>
+              <Input name="pages-settings-e-mail-do-usuario" id="pages-settings-e-mail-do-usuario" type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
                 placeholder="email@exemplo.com" />
               <p className="text-xs text-muted-foreground">A pessoa precisa já ter uma conta no sistema.</p>
             </div>
             <div className="space-y-1.5">
-              <Label>Tipo de vínculo</Label>
+              <Label htmlFor="pages-settings-invite-type">Tipo de vínculo</Label>
               <Select value={inviteType} onValueChange={v => setInviteType(v as "spouse" | "employee")}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="pages-settings-invite-type" aria-label="Tipo de vínculo"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="spouse">👫 Cônjuge</SelectItem>
                   <SelectItem value="employee">💼 Funcionário</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label>Compartilhar finanças de</Label>
+            <fieldset className="space-y-1.5">
+              <legend className="text-sm font-medium">Compartilhar finanças de</legend>
               <div className="flex gap-3">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <Switch checked={inviteShareCpf} onCheckedChange={setInviteShareCpf} />
@@ -540,11 +540,11 @@ function FamilyTab() {
                   <span className="text-sm">CNPJ (Empresa)</span>
                 </label>
               </div>
-            </div>
+            </fieldset>
             <div className="space-y-1.5">
-              <Label>Permissão</Label>
+              <Label htmlFor="pages-settings-invite-permission">Permissão</Label>
               <Select value={invitePermission} onValueChange={v => setInvitePermission(v as "view" | "edit")}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="pages-settings-invite-permission" aria-label="Permissão do convite"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="view">Somente leitura</SelectItem>
                   <SelectItem value="edit">Pode editar (criar/excluir)</SelectItem>
@@ -573,8 +573,8 @@ function FamilyTab() {
         <DialogContent>
           <DialogHeader><DialogTitle>Editar Conexão</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>Compartilhar finanças de</Label>
+            <fieldset className="space-y-1.5">
+              <legend className="text-sm font-medium">Compartilhar finanças de</legend>
               <div className="flex gap-3">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <Switch checked={editShareCpf} onCheckedChange={setEditShareCpf} />
@@ -585,11 +585,11 @@ function FamilyTab() {
                   <span className="text-sm">CNPJ (Empresa)</span>
                 </label>
               </div>
-            </div>
+            </fieldset>
             <div className="space-y-1.5">
-              <Label>Permissão</Label>
+              <Label htmlFor="pages-settings-edit-permission">Permissão</Label>
               <Select value={editPermission} onValueChange={v => setEditPermission(v as "view" | "edit")}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="pages-settings-edit-permission" aria-label="Permissão da conexão"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="view">Somente leitura</SelectItem>
                   <SelectItem value="edit">Pode editar (criar/excluir)</SelectItem>

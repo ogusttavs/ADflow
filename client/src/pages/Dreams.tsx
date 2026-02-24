@@ -179,20 +179,20 @@ export default function Dreams() {
             </DialogHeader>
             <div className="space-y-4 pt-2">
               <div>
-                <Label>Título *</Label>
-                <Input className="mt-1" placeholder="Ex: Viajar para o Japão" value={form.title}
+                <Label htmlFor="pages-dreams-titulo">Título *</Label>
+                <Input name="pages-dreams-titulo" id="pages-dreams-titulo" className="mt-1" placeholder="Ex: Viajar para o Japão" value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
               </div>
               <div>
-                <Label>Descrição</Label>
-                <Textarea className="mt-1 resize-none min-h-20" placeholder="Descreva seu sonho..."
+                <Label htmlFor="pages-dreams-descricao">Descrição</Label>
+                <Textarea name="pages-dreams-descricao" id="pages-dreams-descricao" className="mt-1 resize-none min-h-20" placeholder="Descreva seu sonho..."
                   value={form.description}
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
 
               {/* Image picker */}
               <div>
-                <Label>Imagem</Label>
+                <Label htmlFor="pages-dreams-imagem">Imagem</Label>
                 <Tabs value={form.imageTab} onValueChange={v => setForm(f => ({ ...f, imageTab: v as "upload" | "url" }))}
                   className="mt-1">
                   <TabsList className="grid w-full grid-cols-2">
@@ -200,7 +200,7 @@ export default function Dreams() {
                     <TabsTrigger value="url" className="gap-1.5 text-xs"><Link className="w-3.5 h-3.5" />URL</TabsTrigger>
                   </TabsList>
                   <TabsContent value="upload" className="mt-2 space-y-2">
-                    <input ref={fileRef} type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                    <input name="pages-dreams-imagem" id="pages-dreams-imagem" ref={fileRef} type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                     <Button variant="outline" className="w-full gap-2" onClick={() => fileRef.current?.click()}>
                       <Upload className="w-4 h-4" />
                       {form.imageBase64 ? "Trocar imagem" : "Selecionar imagem"}
@@ -213,7 +213,7 @@ export default function Dreams() {
                     <p className="text-[10px] text-muted-foreground">Máx 5 MB · JPG, PNG, WebP</p>
                   </TabsContent>
                   <TabsContent value="url" className="mt-2 space-y-2">
-                    <Input placeholder="https://..." value={form.imageUrl}
+                    <Input id="pages-dreams-image-url" name="pages-dreams-image-url" aria-label="URL da imagem" placeholder="https://..." value={form.imageUrl}
                       onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value, imageBase64: "" }))} />
                     {form.imageUrl && (
                       <div className="rounded-lg overflow-hidden aspect-video">

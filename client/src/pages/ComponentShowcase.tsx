@@ -410,19 +410,20 @@ export default function ComponentsShowcase() {
               <CardContent className="pt-6 space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="Email" />
+                  <Input id="email" name="email" type="email" placeholder="Email" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="message">Message</Label>
                   <Textarea
                     id="message"
+                    name="message"
                     placeholder="Type your message here."
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Select</Label>
+                  <Label htmlFor="component-showcase-select-fruit">Select</Label>
                   <Select>
-                    <SelectTrigger>
+                    <SelectTrigger id="component-showcase-select-fruit" aria-label="Select a fruit">
                       <SelectValue placeholder="Select a fruit" />
                     </SelectTrigger>
                     <SelectContent>
@@ -440,8 +441,8 @@ export default function ComponentsShowcase() {
                   <Switch id="airplane-mode" />
                   <Label htmlFor="airplane-mode">Airplane Mode</Label>
                 </div>
-                <div className="space-y-2">
-                  <Label>Radio Group</Label>
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-medium">Radio Group</legend>
                   <RadioGroup defaultValue="option-one">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="option-one" id="option-one" />
@@ -452,13 +453,13 @@ export default function ComponentsShowcase() {
                       <Label htmlFor="option-two">Option Two</Label>
                     </div>
                   </RadioGroup>
-                </div>
+                </fieldset>
                 <div className="space-y-2">
-                  <Label>Slider</Label>
+                  <p className="text-sm font-medium">Slider</p>
                   <Slider defaultValue={[50]} max={100} step={1} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Input OTP</Label>
+                  <p className="text-sm font-medium">Input OTP</p>
                   <InputOTP maxLength={6}>
                     <InputOTPGroup>
                       <InputOTPSlot index={0} />
@@ -471,7 +472,7 @@ export default function ComponentsShowcase() {
                   </InputOTP>
                 </div>
                 <div className="space-y-2">
-                  <Label>Date Time Picker</Label>
+                  <p className="text-sm font-medium">Date Time Picker</p>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -496,12 +497,14 @@ export default function ComponentsShowcase() {
                           onSelect={setDatePickerDate}
                         />
                         <div className="border-t pt-3 space-y-2">
-                          <Label className="flex items-center gap-2">
+                          <Label htmlFor="component-showcase-time-input" className="flex items-center gap-2">
                             <Clock className="h-4 w-4" />
                             Time
                           </Label>
                           <div className="flex gap-2">
                             <Input
+                              id="component-showcase-time-input"
+                              name="component-showcase-time-input"
                               type="time"
                               value={
                                 datePickerDate
@@ -534,7 +537,7 @@ export default function ComponentsShowcase() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Searchable Dropdown</Label>
+                  <p className="text-sm font-medium">Searchable Dropdown</p>
                   <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                     <PopoverTrigger asChild>
                       <Button
@@ -683,7 +686,7 @@ export default function ComponentsShowcase() {
             <Card>
               <CardContent className="pt-6 space-y-6">
                 <div className="space-y-2">
-                  <Label>Badges</Label>
+                  <p className="text-sm font-medium">Badges</p>
                   <div className="flex flex-wrap gap-2">
                     <Badge>Default</Badge>
                     <Badge variant="secondary">Secondary</Badge>
@@ -693,7 +696,7 @@ export default function ComponentsShowcase() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label>Avatar</Label>
+                  <p className="text-sm font-medium">Avatar</p>
                   <div className="flex gap-4">
                     <Avatar>
                       <AvatarImage src="https://github.com/shadcn.png" />
@@ -706,7 +709,7 @@ export default function ComponentsShowcase() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label>Progress</Label>
+                  <p className="text-sm font-medium">Progress</p>
                   <Progress value={progress} />
                   <div className="flex gap-2">
                     <Button
@@ -725,7 +728,7 @@ export default function ComponentsShowcase() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label>Skeleton</Label>
+                  <p className="text-sm font-medium">Skeleton</p>
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-full" />
                     <Skeleton className="h-4 w-3/4" />
@@ -734,7 +737,7 @@ export default function ComponentsShowcase() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label>Pagination</Label>
+                  <p className="text-sm font-medium">Pagination</p>
                   <Pagination>
                     <PaginationContent>
                       <PaginationItem>
@@ -777,7 +780,7 @@ export default function ComponentsShowcase() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label>Table</Label>
+                  <p className="text-sm font-medium">Table</p>
                   <Table>
                     <TableCaption>A list of your recent invoices.</TableCaption>
                     <TableHeader>
@@ -812,7 +815,7 @@ export default function ComponentsShowcase() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label>Menubar</Label>
+                  <p className="text-sm font-medium">Menubar</p>
                   <Menubar>
                     <MenubarMenu>
                       <MenubarTrigger>File</MenubarTrigger>
@@ -843,7 +846,7 @@ export default function ComponentsShowcase() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label>Breadcrumb</Label>
+                  <p className="text-sm font-medium">Breadcrumb</p>
                   <Breadcrumb>
                     <BreadcrumbList>
                       <BreadcrumbItem>
@@ -907,7 +910,7 @@ export default function ComponentsShowcase() {
                   <CardContent className="space-y-2">
                     <div className="space-y-1">
                       <Label htmlFor="name">Name</Label>
-                      <Input id="name" defaultValue="Pedro Duarte" />
+                      <Input id="name" name="name" defaultValue="Pedro Duarte" />
                     </div>
                   </CardContent>
                   <CardFooter>
@@ -926,11 +929,11 @@ export default function ComponentsShowcase() {
                   <CardContent className="space-y-2">
                     <div className="space-y-1">
                       <Label htmlFor="current">Current password</Label>
-                      <Input id="current" type="password" />
+                      <Input id="current" name="current" type="password" />
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor="new">New password</Label>
-                      <Input id="new" type="password" />
+                      <Input id="new" name="new" type="password" />
                     </div>
                   </CardContent>
                   <CardFooter>
@@ -1036,6 +1039,7 @@ export default function ComponentsShowcase() {
                           <Label htmlFor="dialog-input">Input</Label>
                           <Input
                             id="dialog-input"
+                            name="dialog-input"
                             placeholder="Type something..."
                             value={dialogInput}
                             onChange={(e) => setDialogInput(e.target.value)}
@@ -1218,7 +1222,7 @@ export default function ComponentsShowcase() {
             <Card>
               <CardContent className="pt-6 space-y-4">
                 <div className="space-y-2">
-                  <Label>Toggle</Label>
+                  <p className="text-sm font-medium">Toggle</p>
                   <div className="flex gap-2">
                     <Toggle aria-label="Toggle italic">
                       <span className="font-bold">B</span>
@@ -1233,7 +1237,7 @@ export default function ComponentsShowcase() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label>Toggle Group</Label>
+                  <p className="text-sm font-medium">Toggle Group</p>
                   <ToggleGroup type="multiple">
                     <ToggleGroupItem value="bold" aria-label="Toggle bold">
                       <span className="font-bold">B</span>
@@ -1259,7 +1263,7 @@ export default function ComponentsShowcase() {
             <Card>
               <CardContent className="pt-6 space-y-6">
                 <div className="space-y-2">
-                  <Label>Aspect Ratio (16/9)</Label>
+                  <p className="text-sm font-medium">Aspect Ratio (16/9)</p>
                   <AspectRatio ratio={16 / 9} className="bg-muted">
                     <div className="flex h-full items-center justify-center">
                       <p className="text-muted-foreground">16:9 Aspect Ratio</p>
@@ -1268,7 +1272,7 @@ export default function ComponentsShowcase() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label>Scroll Area</Label>
+                  <p className="text-sm font-medium">Scroll Area</p>
                   <ScrollArea className="h-[200px] w-full rounded-md border overflow-hidden">
                     <div className="p-4">
                       <div className="space-y-4">
@@ -1316,7 +1320,7 @@ export default function ComponentsShowcase() {
             <Card>
               <CardContent className="pt-6 space-y-4">
                 <div className="space-y-2">
-                  <Label>Sonner Toast</Label>
+                  <p className="text-sm font-medium">Sonner Toast</p>
                   <div className="flex flex-wrap gap-2">
                     <Button
                       variant="outline"

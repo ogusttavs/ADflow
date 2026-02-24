@@ -189,10 +189,14 @@ export default function Integrations() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-1.5">
                       <Key className="w-3 h-3 text-muted-foreground" />
-                      <Label className="text-xs text-muted-foreground">{integration.configKey}</Label>
+                      <Label htmlFor={`pages-integrations-${integration.id}-api-key`} className="text-xs text-muted-foreground">
+                        {integration.configKey}
+                      </Label>
                     </div>
                     <div className="flex gap-2">
                       <Input
+                        id={`pages-integrations-${integration.id}-api-key`}
+                        name={`pages-integrations-${integration.id}-api-key`}
                         type="password"
                         placeholder="sk-..."
                         value={apiKeys[integration.id] ?? ""}

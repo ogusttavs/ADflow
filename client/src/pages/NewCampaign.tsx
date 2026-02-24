@@ -109,10 +109,10 @@ export default function NewCampaign() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <Label>Cliente *</Label>
+                <Label htmlFor="pages-newcampaign-cliente">Cliente *</Label>
                 <Controller name="clientId" control={control} render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="bg-input border-border">
+                    <SelectTrigger id="pages-newcampaign-cliente" aria-label="Cliente da campanha" className="bg-input border-border">
                       <SelectValue placeholder="Selecione um cliente..." />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border">
@@ -126,16 +126,16 @@ export default function NewCampaign() {
                 )} />
               </div>
               <div className="space-y-1.5">
-                <Label>Título da Campanha *</Label>
-                <Input
+                <Label htmlFor="pages-newcampaign-titulo-da-campanha">Título da Campanha *</Label>
+                <Input name="pages-newcampaign-titulo-da-campanha" id="pages-newcampaign-titulo-da-campanha"
                   {...register("title", { required: true })}
                   placeholder="Ex: Lançamento Produto X - Janeiro 2025"
                   className="bg-input border-border"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Objetivo da Campanha</Label>
-                <Textarea
+                <Label htmlFor="pages-newcampaign-objetivo-da-campanha">Objetivo da Campanha</Label>
+                <Textarea name="pages-newcampaign-objetivo-da-campanha" id="pages-newcampaign-objetivo-da-campanha"
                   {...register("objective")}
                   placeholder="Ex: Aumentar vendas do produto X em 30%, gerar leads qualificados, lançar nova linha..."
                   className="bg-input border-border resize-none"
@@ -189,12 +189,13 @@ export default function NewCampaign() {
                   <div className="flex items-center gap-2 mt-3">
                     <input
                       type="checkbox"
-                      id="autoGenerate"
+                      id="pages-newcampaign-auto-generate"
+                      name="pages-newcampaign-auto-generate"
                       {...register("autoGenerate")}
                       defaultChecked
                       className="w-4 h-4 accent-primary"
                     />
-                    <label htmlFor="autoGenerate" className="text-sm font-medium cursor-pointer">
+                    <label htmlFor="pages-newcampaign-auto-generate" className="text-sm font-medium cursor-pointer">
                       Gerar estratégia e cópias automaticamente
                     </label>
                   </div>

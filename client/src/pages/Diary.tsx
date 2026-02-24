@@ -154,15 +154,15 @@ export default function Diary() {
               <div className="space-y-4 pt-2">
                 {/* Date (if new, default today, allow change) */}
                 <div>
-                  <Label className="text-xs">Data</Label>
-                  <input type="date" className="mt-1 w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+                  <Label htmlFor="pages-diary-data" className="text-xs">Data</Label>
+                  <input name="pages-diary-data" id="pages-diary-data" type="date" className="mt-1 w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
                     max={today} value={editEntry.date}
                     onChange={e => setEditEntry(v => v ? { ...v, date: e.target.value } : v)} />
                 </div>
 
                 {/* Mood */}
-                <div>
-                  <Label className="text-xs">Como você está?</Label>
+                <fieldset>
+                  <legend className="text-xs font-medium">Como você está?</legend>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {MOODS.map(m => (
                       <button key={m.emoji}
@@ -173,12 +173,12 @@ export default function Diary() {
                       </button>
                     ))}
                   </div>
-                </div>
+                </fieldset>
 
                 {/* Content */}
                 <div>
-                  <Label className="text-xs">Anotações</Label>
-                  <Textarea className="mt-1 min-h-36 resize-none" placeholder="Como foi o seu dia? O que você está sentindo?"
+                  <Label htmlFor="pages-diary-anotacoes" className="text-xs">Anotações</Label>
+                  <Textarea name="pages-diary-anotacoes" id="pages-diary-anotacoes" className="mt-1 min-h-36 resize-none" placeholder="Como foi o seu dia? O que você está sentindo?"
                     value={editEntry.content}
                     onChange={e => setEditEntry(v => v ? { ...v, content: e.target.value } : v)} />
                 </div>

@@ -93,11 +93,11 @@ export default function Reports() {
           <DialogContent>
             <DialogHeader><DialogTitle>Gerar Relatório com IA</DialogTitle></DialogHeader>
             <div className="space-y-4 pt-4">
-              <div><Label>Título</Label><Input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Ex: Relatório Mensal de Performance" /></div>
+              <div><Label htmlFor="pages-reports-titulo">Título</Label><Input name="pages-reports-titulo" id="pages-reports-titulo" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Ex: Relatório Mensal de Performance" /></div>
               <div>
-                <Label>Tipo</Label>
+                <Label htmlFor="pages-reports-tipo">Tipo</Label>
                 <Select value={form.type} onValueChange={v => setForm(p => ({ ...p, type: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger id="pages-reports-tipo" aria-label="Tipo de relatório"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="performance">Performance Geral</SelectItem>
                     <SelectItem value="campaigns">Campanhas</SelectItem>
@@ -107,9 +107,9 @@ export default function Reports() {
                 </Select>
               </div>
               <div>
-                <Label>Período</Label>
+                <Label htmlFor="pages-reports-periodo">Período</Label>
                 <Select value={form.period} onValueChange={v => setForm(p => ({ ...p, period: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger id="pages-reports-periodo" aria-label="Período do relatório"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Última semana">Última semana</SelectItem>
                     <SelectItem value="Último mês">Último mês</SelectItem>
@@ -118,7 +118,7 @@ export default function Reports() {
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>ID do Cliente (opcional)</Label><Input type="number" value={form.clientId || ""} onChange={e => setForm(p => ({ ...p, clientId: parseInt(e.target.value) || 0 }))} /></div>
+              <div><Label htmlFor="pages-reports-id-do-cliente-opcional">ID do Cliente (opcional)</Label><Input name="pages-reports-id-do-cliente-opcional" id="pages-reports-id-do-cliente-opcional" type="number" value={form.clientId || ""} onChange={e => setForm(p => ({ ...p, clientId: parseInt(e.target.value) || 0 }))} /></div>
               <Button className="w-full gap-2" onClick={() => generate.mutate({ ...form, clientId: form.clientId || undefined })}
                 disabled={generate.isPending || !form.title}>
                 {generate.isPending ? "Gerando com IA..." : <><Sparkles className="h-4 w-4" /> Gerar Relatório com IA</>}

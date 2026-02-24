@@ -102,8 +102,8 @@ export default function WhatsApp() {
               <CardContent>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label>Número de Teste</Label>
-                    <Input
+                    <Label htmlFor="pages-whatsapp-numero-de-teste">Número de Teste</Label>
+                    <Input name="pages-whatsapp-numero-de-teste" id="pages-whatsapp-numero-de-teste"
                       value={phone}
                       onChange={e => setPhone(e.target.value)}
                       placeholder="+5511999999999"
@@ -111,9 +111,9 @@ export default function WhatsApp() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Cliente Associado</Label>
+                    <Label htmlFor="pages-whatsapp-cliente-associado">Cliente Associado</Label>
                     <Select value={clientId} onValueChange={setClientId}>
-                      <SelectTrigger className="bg-input border-border">
+                      <SelectTrigger id="pages-whatsapp-cliente-associado" aria-label="Cliente associado" className="bg-input border-border">
                         <SelectValue placeholder="Selecionar cliente..." />
                       </SelectTrigger>
                       <SelectContent className="bg-card border-border">
@@ -188,6 +188,9 @@ export default function WhatsApp() {
                 {/* Input */}
                 <div className="p-3 border-t border-border flex gap-2">
                   <Input
+                    id="pages-whatsapp-mensagem"
+                    name="pages-whatsapp-mensagem"
+                    aria-label="Mensagem"
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
@@ -214,6 +217,9 @@ export default function WhatsApp() {
                 <p className="text-xs text-muted-foreground">Configure este URL no Meta Business Manager para receber mensagens reais do WhatsApp Business API.</p>
                 <div className="flex gap-2">
                   <Input
+                    id="pages-whatsapp-webhook-url"
+                    name="pages-whatsapp-webhook-url"
+                    aria-label="Webhook URL"
                     value={`${window.location.origin}/api/whatsapp/webhook`}
                     readOnly
                     className="bg-input border-border text-xs"

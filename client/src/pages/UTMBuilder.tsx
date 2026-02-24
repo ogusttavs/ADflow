@@ -61,15 +61,15 @@ export default function UTMBuilder() {
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle>Criar Link UTM</DialogTitle></DialogHeader>
             <div className="space-y-4 pt-4">
-              <div><Label>URL Base *</Label><Input value={form.baseUrl} onChange={e => setForm(p => ({ ...p, baseUrl: e.target.value }))} placeholder="https://seusite.com.br/landing" /></div>
+              <div><Label htmlFor="pages-utmbuilder-url-base">URL Base *</Label><Input name="pages-utmbuilder-url-base" id="pages-utmbuilder-url-base" value={form.baseUrl} onChange={e => setForm(p => ({ ...p, baseUrl: e.target.value }))} placeholder="https://seusite.com.br/landing" /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Source *</Label><Input value={form.utmSource} onChange={e => setForm(p => ({ ...p, utmSource: e.target.value }))} placeholder="instagram, facebook, google" /></div>
-                <div><Label>Medium *</Label><Input value={form.utmMedium} onChange={e => setForm(p => ({ ...p, utmMedium: e.target.value }))} placeholder="social, cpc, email" /></div>
+                <div><Label htmlFor="pages-utmbuilder-source">Source *</Label><Input name="pages-utmbuilder-source" id="pages-utmbuilder-source" value={form.utmSource} onChange={e => setForm(p => ({ ...p, utmSource: e.target.value }))} placeholder="instagram, facebook, google" /></div>
+                <div><Label htmlFor="pages-utmbuilder-medium">Medium *</Label><Input name="pages-utmbuilder-medium" id="pages-utmbuilder-medium" value={form.utmMedium} onChange={e => setForm(p => ({ ...p, utmMedium: e.target.value }))} placeholder="social, cpc, email" /></div>
               </div>
-              <div><Label>Campaign *</Label><Input value={form.utmCampaign} onChange={e => setForm(p => ({ ...p, utmCampaign: e.target.value }))} placeholder="black-friday-2026" /></div>
+              <div><Label htmlFor="pages-utmbuilder-campaign">Campaign *</Label><Input name="pages-utmbuilder-campaign" id="pages-utmbuilder-campaign" value={form.utmCampaign} onChange={e => setForm(p => ({ ...p, utmCampaign: e.target.value }))} placeholder="black-friday-2026" /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Term (opcional)</Label><Input value={form.utmTerm} onChange={e => setForm(p => ({ ...p, utmTerm: e.target.value }))} placeholder="palavra-chave" /></div>
-                <div><Label>Content (opcional)</Label><Input value={form.utmContent} onChange={e => setForm(p => ({ ...p, utmContent: e.target.value }))} placeholder="banner-topo" /></div>
+                <div><Label htmlFor="pages-utmbuilder-term-opcional">Term (opcional)</Label><Input name="pages-utmbuilder-term-opcional" id="pages-utmbuilder-term-opcional" value={form.utmTerm} onChange={e => setForm(p => ({ ...p, utmTerm: e.target.value }))} placeholder="palavra-chave" /></div>
+                <div><Label htmlFor="pages-utmbuilder-content-opcional">Content (opcional)</Label><Input name="pages-utmbuilder-content-opcional" id="pages-utmbuilder-content-opcional" value={form.utmContent} onChange={e => setForm(p => ({ ...p, utmContent: e.target.value }))} placeholder="banner-topo" /></div>
               </div>
               {form.baseUrl && (
                 <div className="p-3 bg-muted/50 rounded-lg">

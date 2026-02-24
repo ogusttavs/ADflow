@@ -96,11 +96,11 @@ function FilesTab({ clientId, entityType, label }: { clientId: number; entityTyp
       <Card>
         <CardContent className="pt-4 space-y-3">
           <div>
-            <Label className="text-xs">Descrição (opcional)</Label>
-            <Input className="mt-1 h-8 text-sm" placeholder={`Ex: Logo versão dark`} value={description}
+            <Label htmlFor="pages-clientdetail-descricao-opcional" className="text-xs">Descrição (opcional)</Label>
+            <Input name="pages-clientdetail-descricao-opcional" id="pages-clientdetail-descricao-opcional" className="mt-1 h-8 text-sm" placeholder={`Ex: Logo versão dark`} value={description}
               onChange={e => setDescription(e.target.value)} />
           </div>
-          <input ref={fileRef} type="file" className="hidden" onChange={handleFile} />
+          <input id={`pages-clientdetail-${entityType}-upload`} name={`pages-clientdetail-${entityType}-upload`} ref={fileRef} type="file" className="hidden" onChange={handleFile} />
           <Button onClick={() => fileRef.current?.click()} disabled={uploadMut.isPending} className="w-full gap-2">
             <Plus className="w-4 h-4" />{uploadMut.isPending ? "Enviando..." : `Adicionar ${label}`}
           </Button>
@@ -185,30 +185,30 @@ function CredenciaisTab({ clientId }: { clientId: number }) {
             </DialogHeader>
             <div className="space-y-3 pt-2">
               <div>
-                <Label>Serviço / Plataforma</Label>
-                <Input className="mt-1" placeholder="Ex: Facebook Ads, Google Ads, Hotmart..." value={form.service}
+                <Label htmlFor="pages-clientdetail-servico-plataforma">Serviço / Plataforma</Label>
+                <Input name="pages-clientdetail-servico-plataforma" id="pages-clientdetail-servico-plataforma" className="mt-1" placeholder="Ex: Facebook Ads, Google Ads, Hotmart..." value={form.service}
                   onChange={e => setForm(f => ({ ...f, service: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Usuário / Email</Label>
-                  <Input className="mt-1" placeholder="email@exemplo.com" value={form.username}
+                  <Label htmlFor="pages-clientdetail-usuario-email">Usuário / Email</Label>
+                  <Input name="pages-clientdetail-usuario-email" id="pages-clientdetail-usuario-email" className="mt-1" placeholder="email@exemplo.com" value={form.username}
                     onChange={e => setForm(f => ({ ...f, username: e.target.value }))} />
                 </div>
                 <div>
-                  <Label>Senha</Label>
-                  <Input className="mt-1" type="password" placeholder="••••••••" value={form.password}
+                  <Label htmlFor="pages-clientdetail-senha">Senha</Label>
+                  <Input name="pages-clientdetail-senha" id="pages-clientdetail-senha" className="mt-1" type="password" placeholder="••••••••" value={form.password}
                     onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
                 </div>
               </div>
               <div>
-                <Label>URL</Label>
-                <Input className="mt-1" placeholder="https://..." value={form.url}
+                <Label htmlFor="pages-clientdetail-url">URL</Label>
+                <Input name="pages-clientdetail-url" id="pages-clientdetail-url" className="mt-1" placeholder="https://..." value={form.url}
                   onChange={e => setForm(f => ({ ...f, url: e.target.value }))} />
               </div>
               <div>
-                <Label>Notas</Label>
-                <Textarea className="mt-1 resize-none" rows={2} placeholder="Observações adicionais..." value={form.notes}
+                <Label htmlFor="pages-clientdetail-notas">Notas</Label>
+                <Textarea name="pages-clientdetail-notas" id="pages-clientdetail-notas" className="mt-1 resize-none" rows={2} placeholder="Observações adicionais..." value={form.notes}
                   onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
               </div>
               <Button className="w-full" onClick={() => createMut.mutate({ clientId, ...form })} disabled={!form.service || createMut.isPending}>
@@ -355,17 +355,17 @@ function FormularioTab({ clientId }: { clientId: number }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label>Título</Label>
-            <Input className="mt-1" value={title} onChange={e => setTitle(e.target.value)} />
+            <Label htmlFor="pages-clientdetail-titulo">Título</Label>
+            <Input name="pages-clientdetail-titulo" id="pages-clientdetail-titulo" className="mt-1" value={title} onChange={e => setTitle(e.target.value)} />
           </div>
           <div>
-            <Label>Mensagem de instrução</Label>
-            <Textarea className="mt-1 resize-none" rows={2} value={description}
+            <Label htmlFor="pages-clientdetail-mensagem-de-instrucao">Mensagem de instrução</Label>
+            <Textarea name="pages-clientdetail-mensagem-de-instrucao" id="pages-clientdetail-mensagem-de-instrucao" className="mt-1 resize-none" rows={2} value={description}
               placeholder="Ex: Olá! Preencha as informações abaixo para começarmos sua campanha."
               onChange={e => setDescription(e.target.value)} />
           </div>
           <div>
-            <Label className="text-sm font-medium">Campos do formulário</Label>
+            <p className="text-sm font-medium">Campos do formulário</p>
             <div className="mt-2 space-y-2">
               {fields.map(f => (
                 <div key={f.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30">
@@ -523,10 +523,10 @@ export default function ClientDetail() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label>Tom de Voz</Label>
+                      <Label htmlFor="pages-clientdetail-tone-of-voice">Tom de Voz</Label>
                       <Controller name="toneOfVoice" control={control} render={({ field }) => (
                         <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger className="bg-input border-border"><SelectValue /></SelectTrigger>
+                          <SelectTrigger id="pages-clientdetail-tone-of-voice" aria-label="Tom de voz" className="bg-input border-border"><SelectValue /></SelectTrigger>
                           <SelectContent className="bg-card border-border">
                             <SelectItem value="professional">Profissional</SelectItem>
                             <SelectItem value="casual">Casual</SelectItem>
@@ -539,12 +539,12 @@ export default function ClientDetail() {
                       )} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Personalidade da Marca</Label>
-                      <Textarea {...register("brandPersonality")} placeholder="Ex: Inovadora, acessível, confiável..." className="bg-input border-border resize-none" rows={3} />
+                      <Label htmlFor="pages-clientdetail-personalidade-da-marca">Personalidade da Marca</Label>
+                      <Textarea name="pages-clientdetail-personalidade-da-marca" id="pages-clientdetail-personalidade-da-marca" {...register("brandPersonality")} placeholder="Ex: Inovadora, acessível, confiável..." className="bg-input border-border resize-none" rows={3} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Proposta de Valor Principal</Label>
-                      <Textarea {...register("mainValueProposition")} placeholder="O que diferencia esta marca..." className="bg-input border-border resize-none" rows={3} />
+                      <Label htmlFor="pages-clientdetail-proposta-de-valor-principal">Proposta de Valor Principal</Label>
+                      <Textarea name="pages-clientdetail-proposta-de-valor-principal" id="pages-clientdetail-proposta-de-valor-principal" {...register("mainValueProposition")} placeholder="O que diferencia esta marca..." className="bg-input border-border resize-none" rows={3} />
                     </div>
                   </CardContent>
                 </Card>
@@ -555,19 +555,19 @@ export default function ClientDetail() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label>Descrição do Público</Label>
-                      <Textarea {...register("targetAudience")} placeholder="Ex: Empreendedores entre 25-40 anos..." className="bg-input border-border resize-none" rows={3} />
+                      <Label htmlFor="pages-clientdetail-descricao-do-publico">Descrição do Público</Label>
+                      <Textarea name="pages-clientdetail-descricao-do-publico" id="pages-clientdetail-descricao-do-publico" {...register("targetAudience")} placeholder="Ex: Empreendedores entre 25-40 anos..." className="bg-input border-border resize-none" rows={3} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label>Faixa Etária</Label>
-                        <Input {...register("ageRange")} placeholder="Ex: 25-45 anos" className="bg-input border-border" />
+                        <Label htmlFor="pages-clientdetail-faixa-etaria">Faixa Etária</Label>
+                        <Input name="pages-clientdetail-faixa-etaria" id="pages-clientdetail-faixa-etaria" {...register("ageRange")} placeholder="Ex: 25-45 anos" className="bg-input border-border" />
                       </div>
                       <div className="space-y-1.5">
-                        <Label>Gênero</Label>
+                        <Label htmlFor="pages-clientdetail-gender">Gênero</Label>
                         <Controller name="gender" control={control} render={({ field }) => (
                           <Select value={field.value} onValueChange={field.onChange}>
-                            <SelectTrigger className="bg-input border-border"><SelectValue /></SelectTrigger>
+                            <SelectTrigger id="pages-clientdetail-gender" aria-label="Gênero" className="bg-input border-border"><SelectValue /></SelectTrigger>
                             <SelectContent className="bg-card border-border">
                               <SelectItem value="all">Todos</SelectItem>
                               <SelectItem value="male">Masculino</SelectItem>
@@ -579,12 +579,12 @@ export default function ClientDetail() {
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Localização</Label>
-                      <Input {...register("location")} placeholder="Ex: São Paulo, Brasil" className="bg-input border-border" />
+                      <Label htmlFor="pages-clientdetail-localizacao">Localização</Label>
+                      <Input name="pages-clientdetail-localizacao" id="pages-clientdetail-localizacao" {...register("location")} placeholder="Ex: São Paulo, Brasil" className="bg-input border-border" />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Interesses</Label>
-                      <Input {...register("interests")} placeholder="Ex: Tecnologia, negócios, fitness..." className="bg-input border-border" />
+                      <Label htmlFor="pages-clientdetail-interesses">Interesses</Label>
+                      <Input name="pages-clientdetail-interesses" id="pages-clientdetail-interesses" {...register("interests")} placeholder="Ex: Tecnologia, negócios, fitness..." className="bg-input border-border" />
                     </div>
                   </CardContent>
                 </Card>
@@ -595,12 +595,12 @@ export default function ClientDetail() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label>Produtos/Serviços Principais</Label>
-                      <Textarea {...register("productsServices")} placeholder="Liste os principais produtos ou serviços..." className="bg-input border-border resize-none" rows={4} />
+                      <Label htmlFor="pages-clientdetail-produtos-servicos-principais">Produtos/Serviços Principais</Label>
+                      <Textarea name="pages-clientdetail-produtos-servicos-principais" id="pages-clientdetail-produtos-servicos-principais" {...register("productsServices")} placeholder="Liste os principais produtos ou serviços..." className="bg-input border-border resize-none" rows={4} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Concorrentes</Label>
-                      <Input {...register("competitors")} placeholder="Ex: Empresa A, Empresa B..." className="bg-input border-border" />
+                      <Label htmlFor="pages-clientdetail-concorrentes">Concorrentes</Label>
+                      <Input name="pages-clientdetail-concorrentes" id="pages-clientdetail-concorrentes" {...register("competitors")} placeholder="Ex: Empresa A, Empresa B..." className="bg-input border-border" />
                     </div>
                   </CardContent>
                 </Card>
@@ -612,25 +612,25 @@ export default function ClientDetail() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label>Cor Primária</Label>
+                        <Label htmlFor="pages-clientdetail-cor-primaria">Cor Primária</Label>
                         <div className="flex gap-2">
-                          <input type="color" {...register("primaryColor")} className="w-10 h-10 rounded cursor-pointer bg-transparent border-0" />
-                          <Input {...register("primaryColor")} className="bg-input border-border" />
+                          <input name="pages-clientdetail-cor-primaria" id="pages-clientdetail-cor-primaria" type="color" {...register("primaryColor")} className="w-10 h-10 rounded cursor-pointer bg-transparent border-0" />
+                          <Input id="pages-clientdetail-cor-primaria-texto" name="pages-clientdetail-cor-primaria-texto" {...register("primaryColor")} className="bg-input border-border" />
                         </div>
                       </div>
                       <div className="space-y-1.5">
-                        <Label>Cor Secundária</Label>
+                        <Label htmlFor="pages-clientdetail-cor-secundaria">Cor Secundária</Label>
                         <div className="flex gap-2">
-                          <input type="color" {...register("secondaryColor")} className="w-10 h-10 rounded cursor-pointer bg-transparent border-0" />
-                          <Input {...register("secondaryColor")} className="bg-input border-border" />
+                          <input name="pages-clientdetail-cor-secundaria" id="pages-clientdetail-cor-secundaria" type="color" {...register("secondaryColor")} className="w-10 h-10 rounded cursor-pointer bg-transparent border-0" />
+                          <Input id="pages-clientdetail-cor-secundaria-texto" name="pages-clientdetail-cor-secundaria-texto" {...register("secondaryColor")} className="bg-input border-border" />
                         </div>
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Estilo Visual</Label>
+                      <Label htmlFor="pages-clientdetail-visual-style">Estilo Visual</Label>
                       <Controller name="visualStyle" control={control} render={({ field }) => (
                         <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger className="bg-input border-border"><SelectValue /></SelectTrigger>
+                          <SelectTrigger id="pages-clientdetail-visual-style" aria-label="Estilo visual" className="bg-input border-border"><SelectValue /></SelectTrigger>
                           <SelectContent className="bg-card border-border">
                             <SelectItem value="minimalist">Minimalista</SelectItem>
                             <SelectItem value="bold">Arrojado</SelectItem>
@@ -642,8 +642,8 @@ export default function ClientDetail() {
                         </Select>
                       )} />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Canais Ativos</Label>
+                    <fieldset className="space-y-2">
+                      <legend className="text-sm font-medium">Canais Ativos</legend>
                       <div className="flex flex-wrap gap-2">
                         {CHANNELS.map(ch => (
                           <button key={ch.id} type="button" onClick={() => toggleChannel(ch.id)}
@@ -652,7 +652,7 @@ export default function ClientDetail() {
                           </button>
                         ))}
                       </div>
-                    </div>
+                    </fieldset>
                   </CardContent>
                 </Card>
 
@@ -661,7 +661,7 @@ export default function ClientDetail() {
                     <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Contexto Adicional para IA</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Textarea {...register("additionalContext")}
+                    <Textarea id="pages-clientdetail-additional-context" name="pages-clientdetail-additional-context" {...register("additionalContext")}
                       placeholder="Informações extras que a IA deve considerar ao criar campanhas..."
                       className="bg-input border-border resize-none" rows={4} />
                   </CardContent>

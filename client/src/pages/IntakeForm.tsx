@@ -109,6 +109,7 @@ export default function IntakeForm() {
             {field.type === "textarea" ? (
               <Textarea
                 id={field.id}
+                name={field.id}
                 placeholder={field.placeholder}
                 value={values[field.id] ?? ""}
                 onChange={(e) => setValues((v) => ({ ...v, [field.id]: e.target.value }))}
@@ -134,6 +135,7 @@ export default function IntakeForm() {
             ) : (
               <Input
                 id={field.id}
+                name={field.id}
                 type={field.type === "email" ? "email" : field.type === "phone" ? "tel" : "text"}
                 placeholder={field.placeholder}
                 value={values[field.id] ?? ""}
