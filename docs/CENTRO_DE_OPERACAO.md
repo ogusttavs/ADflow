@@ -1,6 +1,6 @@
 # Centro de Operacao - AdFlow
 
-Atualizado em: 2026-02-24 20:30:05 -0300
+Atualizado em: 2026-02-24 20:33:17 -0300
 
 Este arquivo e o ponto unico de sincronizacao entre voce, Codex, Claude e Gemini.
 Hierarquia oficial:
@@ -607,3 +607,18 @@ Proximo:
 
 Bloqueios/Riscos:
 - Publicacao final depende de acesso SSH e DNS apontado para o IP da VPS.
+
+[2026-02-24 20:33:17 -0300] [Codex]
+Feito:
+- Ajuste de robustez em `scripts/vps/setup-ubuntu.sh` para cenarios comuns da Hostinger (login direto como `root`).
+- Fallback implementado para executar comandos como usuario alvo com `sudo` quando disponivel ou `su` quando necessario.
+- `APP_USER` agora assume `root` por padrao quando `SUDO_USER` nao existe.
+
+Fazendo:
+- Preparando tutorial passo a passo para execucao em hPanel/Hostinger sem dependencia de conhecimento previo.
+
+Proximo:
+- Guiar publicacao do dominio em producao junto com o dono via checklist operacional.
+
+Bloqueios/Riscos:
+- Sem dados de acesso SSH ainda; execucao real depende de credenciais da VPS e DNS.

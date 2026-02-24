@@ -7,7 +7,7 @@ if [[ "${EUID}" -ne 0 ]]; then
 fi
 
 APP_DIR="${APP_DIR:-/var/www/adflow}"
-APP_USER="${APP_USER:-$SUDO_USER}"
+APP_USER="${APP_USER:-${SUDO_USER:-root}}"
 REPO_URL="${REPO_URL:-https://github.com/ogusttavs/ADflow.git}"
 BRANCH="${BRANCH:-main}"
 NODE_MAJOR="${NODE_MAJOR:-20}"
@@ -50,14 +50,33 @@ echo "[setup] Preparando app em ${APP_DIR}..."
 mkdir -p "$APP_DIR"
 chown -R "$APP_USER":"$APP_USER" "$APP_DIR"
 
+run_as_app() {
+  if [[ "$(id -un)" == "$APP_USER" ]]; then
+    "$@"
+    return
+  fi
+
+  if command -v sudo >/dev/null 2>&1; then
+    sudo -u "$APP_USER" "$@"
+    return
+  fi
+
+  local escaped=()
+  local arg
+  for arg in "$@"; do
+    escaped+=("$(printf '%q' "$arg")")
+  done
+  su - "$APP_USER" -s /bin/bash -c "${escaped[*]}"
+}
+
 if [[ ! -d "$APP_DIR/.git" ]]; then
-  sudo -u "$APP_USER" git clone "$REPO_URL" "$APP_DIR"
+  run_as_app git clone "$REPO_URL" "$APP_DIR"
 fi
 
 cd "$APP_DIR"
-sudo -u "$APP_USER" git fetch origin "$BRANCH"
-sudo -u "$APP_USER" git checkout "$BRANCH"
-sudo -u "$APP_USER" git pull --ff-only origin "$BRANCH"
+run_as_app git fetch origin "$BRANCH"
+run_as_app git checkout "$BRANCH"
+run_as_app git pull --ff-only origin "$BRANCH"
 
 if [[ ! -f "$APP_DIR/.env" ]]; then
   cp "$APP_DIR/.env.example" "$APP_DIR/.env"

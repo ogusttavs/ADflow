@@ -939,3 +939,24 @@ Arquivos alterados:
 - docs/DEPLOY_VPS.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
+
+[2026-02-24 20:33:17 -0300] [Codex]
+Contexto:
+- Dono pediu passo a passo especifico para publicar na Hostinger VPS e sinalizou baixo nivel de familiaridade com o processo.
+
+Feito:
+- Ajustado `scripts/vps/setup-ubuntu.sh` para funcionar tambem com login direto como `root` (comum em VPS Hostinger).
+- `APP_USER` agora usa fallback `root` quando `SUDO_USER` nao existe.
+- Execucao como usuario alvo tornou-se robusta com fallback `sudo`/`su`.
+- Validacao de sintaxe do script concluida (`bash -n` OK).
+
+Proximo:
+- Entregar guia operacional em linguagem de copiar/colar para publicar o dominio na Hostinger sem ambiguidade.
+
+Bloqueios/Riscos:
+- Sem acesso SSH e dados de dominio nesta sessao; publicacao depende dessas informacoes.
+
+Arquivos alterados:
+- scripts/vps/setup-ubuntu.sh
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
