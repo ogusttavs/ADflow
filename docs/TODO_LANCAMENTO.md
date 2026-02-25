@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 19:12:28 -0300
+Atualizado em: 2026-02-25 19:19:21 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -10,7 +10,7 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida, deployada em producao no release `5efe746` e validada manualmente em fluxo real de email).
+- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida, deployada em producao no release `5efe746` e validada manualmente em fluxo real de email; acoes do dono focadas agora em webhook Asaas).
 
 ---
 
@@ -153,10 +153,12 @@ Status atual: concluido. `ThemeProvider` agora inicia em dark por padrao e a Hom
 
 - [ ] A1. Google Cloud: adicionar redirect URIs de producao
 - [ ] A2. Google Cloud: publicar app OAuth (sair de Testing)
-- [ ] A3. Rotacionar credenciais e atualizar `.env` no servidor
+- [x] A3. Rotacionar credenciais e atualizar `.env` no servidor
+Status atual: concluido (confirmado pelo dono).
 - [x] A4. Configurar `CREDENTIAL_ENCRYPTION_KEY` em producao
 - [x] A5. Definir dominio final da marca Orbita
 - [ ] A6. Criar conta Asaas e configurar webhook
+Status atual: em andamento. Conta Asaas criada; falta configurar webhook e validar recepcao de eventos.
 - [x] A7. Liberar acesso SSH de deploy (chave/usuario) para executar `quick-deploy` remoto
 - [x] A8. Configurar Resend em producao (dominio/DNS + `RESEND_API_KEY` + `EMAIL_FROM` + `EMAIL_PROVIDER=resend`)
 Status atual: concluido. ENV operacional aplicado na VPS (`APP_BASE_URL`, `EMAIL_PROVIDER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`), smoke executado e checklist manual de browser concluido (verificacao, reset, reenvio e rate limit).
@@ -165,11 +167,11 @@ Status atual: concluido. Chave dedicada configurada na VPS com tamanho valido (3
 
 ### Proximas tarefas do dono (ordem sugerida)
 
-1. A1 + A2 (Google OAuth em producao)
+1. A6 (Asaas)
+- Configurar webhook de producao no painel Asaas, validar entrega de eventos e confirmar atualizacao de status de pagamento/assinatura no backend.
+
+2. A1 + A2 (Google OAuth em producao)
 - Adicionar redirect URIs de producao e publicar o app fora de `Testing`.
 
-2. A6 (Asaas)
-- Criar conta, gerar chave/API e configurar webhook de producao.
-
-3. A3 (rotacao de segredos)
-- Rotacionar credenciais sensiveis do servidor (`JWT_SECRET`, OAuth client secret e demais chaves operacionais).
+3. Rotacao recorrente de segredos (operacional)
+- Definir periodicidade para rotacao de credenciais sensiveis do servidor (`JWT_SECRET`, OAuth client secret e demais chaves operacionais).

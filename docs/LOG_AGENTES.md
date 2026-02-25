@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 19:12:28 -0300
+Atualizado em: 2026-02-25 19:19:21 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -31,6 +31,27 @@ Arquivos alterados:
 ```
 
 ## Historico ativo
+
+[2026-02-25 19:19:21 -0300] [Codex]
+Contexto:
+- Dono confirmou status operacional das acoes fora de codigo: A3 concluido, A6 parcialmente concluido (conta Asaas criada, webhook pendente) e A1/A2 adiados para perto do ultimo sprint.
+
+Feito:
+- Backlog oficial atualizado:
+  - A3 marcado como concluido;
+  - A6 mantido em andamento com descricao objetiva do que falta.
+- Centro de operacao sincronizado com novo foco de curto prazo (webhook Asaas primeiro, A1/A2 depois).
+
+Proximo:
+- Orientar passo a passo de configuracao do webhook Asaas com validacao segura em producao.
+
+Bloqueios/Riscos:
+- Sem endpoint de webhook Asaas implementado ainda no backend; configuracao no painel depende do endpoint definitivo da Sprint 4.
+
+Arquivos alterados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
 
 [2026-02-25 19:12:28 -0300] [Codex]
 Contexto:
