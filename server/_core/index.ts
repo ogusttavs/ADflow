@@ -88,6 +88,37 @@ async function startServer() {
     message: { error: "Muitas tentativas de cadastro. Tente novamente em 1 hora." },
   });
 
+  const forgotPasswordRateLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 3,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: req =>
+      process.env.NODE_ENV !== "production" ||
+      !hasTrpcProcedure(req, "auth.requestPasswordReset"),
+    message: { error: "Muitas tentativas de recuperação. Tente novamente em 1 hora." },
+  });
+
+  const resetPasswordRateLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 3,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: req =>
+      process.env.NODE_ENV !== "production" || !hasTrpcProcedure(req, "auth.resetPassword"),
+    message: { error: "Muitas tentativas de redefinição. Tente novamente em 1 hora." },
+  });
+
+  const resendVerificationRateLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: req =>
+      process.env.NODE_ENV !== "production" || !hasTrpcProcedure(req, "auth.resendVerification"),
+    message: { error: "Muitas tentativas de reenvio. Tente novamente em 1 hora." },
+  });
+
   const globalApiRateLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: 200,
@@ -103,7 +134,14 @@ async function startServer() {
   app.use("/api", globalApiRateLimiter);
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
-  app.use("/api/trpc", loginRateLimiter, registerRateLimiter);
+  app.use(
+    "/api/trpc",
+    loginRateLimiter,
+    registerRateLimiter,
+    forgotPasswordRateLimiter,
+    resetPasswordRateLimiter,
+    resendVerificationRateLimiter,
+  );
   // tRPC API
   app.use(
     "/api/trpc",

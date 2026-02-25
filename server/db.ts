@@ -1,6 +1,6 @@
-import { count, eq } from "drizzle-orm";
+import { and, count, desc, eq, gt, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertAuthToken, InsertUser, authTokens, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -47,6 +47,15 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     };
 
     textFields.forEach(assignNullable);
+
+    if (user.emailVerified !== undefined) {
+      values.emailVerified = user.emailVerified;
+      updateSet.emailVerified = user.emailVerified;
+    }
+    if (user.emailVerifiedAt !== undefined) {
+      values.emailVerifiedAt = user.emailVerifiedAt;
+      updateSet.emailVerifiedAt = user.emailVerifiedAt;
+    }
 
     if (user.lastSignedIn !== undefined) {
       values.lastSignedIn = user.lastSignedIn;
@@ -101,6 +110,17 @@ export async function getUserByEmail(email: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getUserById(id: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user by id: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
 export async function getUserCount(): Promise<number> {
   const db = await getDb();
   if (!db) return 0;
@@ -131,4 +151,59 @@ export async function updateUserById(
   await db.update(users).set(cleanUpdates).where(eq(users.id, id));
   const [updated] = await db.select().from(users).where(eq(users.id, id)).limit(1);
   return updated;
+}
+
+type CreateAuthTokenInput = Pick<
+  InsertAuthToken,
+  "userId" | "type" | "tokenHash" | "expiresAt"
+>;
+
+export async function createAuthToken(input: CreateAuthTokenInput) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create auth token: database not available");
+    return undefined;
+  }
+
+  const [result] = await db.insert(authTokens).values(input);
+  return Number((result as { insertId?: number }).insertId ?? 0) || undefined;
+}
+
+export async function getActiveAuthTokenByHash(input: {
+  tokenHash: string;
+  type: "email_verification" | "password_reset";
+  now?: Date;
+}) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get auth token: database not available");
+    return undefined;
+  }
+
+  const now = input.now ?? new Date();
+  const result = await db
+    .select()
+    .from(authTokens)
+    .where(
+      and(
+        eq(authTokens.tokenHash, input.tokenHash),
+        eq(authTokens.type, input.type),
+        isNull(authTokens.usedAt),
+        gt(authTokens.expiresAt, now),
+      ),
+    )
+    .orderBy(desc(authTokens.createdAt))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function markAuthTokenUsed(id: number, usedAt: Date = new Date()) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update auth token: database not available");
+    return;
+  }
+
+  await db.update(authTokens).set({ usedAt }).where(eq(authTokens.id, id));
 }

@@ -57,6 +57,13 @@
       "when": 1771954080244,
       "tag": "0007_freezing_malice",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1772046210167,
+      "tag": "0008_conscious_psynapse",
+      "breakpoints": true
     }
   ]
 }

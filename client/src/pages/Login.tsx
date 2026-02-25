@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ export default function Login() {
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: () => {
       void utils.auth.me.invalidate();
+      toast.success("Conta criada. Enviamos um email de verificação.");
       navigate(getStartPageRoute());
     },
     onError: (err) => {
@@ -169,6 +170,14 @@ export default function Login() {
                   disabled={isLoading}
                   autoComplete="current-password"
                 />
+                <div className="text-right pt-1">
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Esqueci minha senha
+                  </Link>
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Entrar"}

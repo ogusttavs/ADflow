@@ -1,6 +1,6 @@
 # Deploy VPS - Operacao Oficial
 
-Atualizado em: 2026-02-25 14:23:54 -0300
+Atualizado em: 2026-02-25 16:13:30 -0300
 
 Objetivo: publicar e manter o app em VPS com PM2 + Nginx + SSL.
 
@@ -29,6 +29,10 @@ DATABASE_URL=mysql://adflow:SENHA_FORTE_AQUI@localhost:3306/adflow
 JWT_SECRET=UM_SEGREDO_FORTE_E_UNICO
 VITE_APP_ID=orbita
 CREDENTIAL_ENCRYPTION_KEY=CHAVE_32_BYTES_HEX_OU_BASE64
+APP_BASE_URL=https://getorbita.com.br
+EMAIL_PROVIDER=resend
+EMAIL_FROM=Orbita <noreply@getorbita.com.br>
+RESEND_API_KEY=NOVA_CHAVE_RESEND
 ```
 
 Se usar Google OAuth:
@@ -37,6 +41,24 @@ Se usar Google OAuth:
 GOOGLE_OAUTH_REDIRECT_URI=https://SEU_DOMINIO/api/oauth/google/callback
 GOOGLE_LOGIN_OAUTH_REDIRECT_URI=https://SEU_DOMINIO/api/oauth/google/login/callback
 ```
+
+## 2.1) Email transacional (Resend) - operacional
+
+Antes de configurar na VPS:
+- Revogar qualquer API key exposta.
+- Criar nova key no Resend (ex.: `orbita-prod`).
+- Validar dominio `getorbita.com.br` no Resend (SPF/DKIM e registros extras do painel).
+
+Atualizacao segura do `.env` na VPS:
+
+```bash
+cd /var/www/adflow
+bash scripts/vps/set-resend-env.sh
+```
+
+Observacao:
+- O script pede a `RESEND_API_KEY` sem eco no terminal.
+- Nao comitar `.env` com segredo real.
 
 ## 3) Deploy recorrente (oficial)
 
@@ -72,6 +94,20 @@ curl -I http://SEU_DOMINIO
 Esperado:
 - HTTPS `200 OK`
 - HTTP `301` para HTTPS
+
+Smoke operacional de Auth + Email:
+
+```bash
+cd /var/www/adflow
+DOMAIN=getorbita.com.br bash scripts/vps/smoke-auth-email.sh
+```
+
+Esse script valida:
+- ENV obrigatorias de email;
+- `EMAIL_PROVIDER=resend`;
+- restart de PM2 com `--update-env`;
+- health HTTPS;
+- varredura inicial de erros de email em log.
 
 ## 6) Regras operacionais
 

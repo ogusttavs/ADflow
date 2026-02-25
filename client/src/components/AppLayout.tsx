@@ -5,6 +5,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import {
   LayoutDashboard,
   Users,
@@ -33,6 +34,8 @@ import {
   Sun,
   BookOpen,
   Star,
+  MailCheck,
+  Loader2,
   type LucideIcon,
 } from "lucide-react";
 import { VoiceCommandButton } from "@/components/VoiceCommand";
@@ -116,16 +119,33 @@ interface AppLayoutProps {
 export default function AppLayout({ children }: AppLayoutProps) {
   const [location, navigate] = useLocation();
   const { user, loading, isAuthenticated, logout } = useAuth();
+  const utils = trpc.useUtils();
   const { theme, toggleTheme, switchable } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showCustomize, setShowCustomize] = useState(false);
+  const [showEmailVerificationPopup, setShowEmailVerificationPopup] = useState(false);
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(loadHiddenItems);
 
   const { data: unreadCount } = trpc.notifications.unreadCount.useQuery(undefined, {
     enabled: isAuthenticated,
     refetchInterval: 30000,
   });
+  const resendVerificationMutation = trpc.auth.resendVerification.useMutation({
+    onSuccess: (result) => {
+      if (result.alreadyVerified) {
+        toast.success("Seu email já está verificado.");
+        setShowEmailVerificationPopup(false);
+        void utils.auth.me.invalidate();
+        return;
+      }
+      toast.success("Enviamos um novo link de verificação para seu email.");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+  const requiresEmailVerification = Boolean(user?.email) && !user?.emailVerified;
 
   useEffect(() => {
     if (!loading && !isAuthenticated) navigate("/login");
@@ -134,6 +154,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
   useEffect(() => {
     setMobileOpen(false);
   }, [location]);
+
+  useEffect(() => {
+    if (requiresEmailVerification) {
+      setShowEmailVerificationPopup(true);
+      return;
+    }
+    setShowEmailVerificationPopup(false);
+  }, [requiresEmailVerification, user?.id]);
 
   if (loading || !isAuthenticated) {
     return (
@@ -325,6 +353,55 @@ export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex min-h-[100dvh] bg-background overflow-hidden">
       <DailyBriefingPopup />
+
+      <Dialog open={showEmailVerificationPopup} onOpenChange={setShowEmailVerificationPopup}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MailCheck className="h-4 w-4" />
+              Verifique seu email
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p className="text-muted-foreground">
+              Para aumentar a segurança da sua conta, confirme seu email.
+            </p>
+            <p className="font-medium break-all">{user?.email}</p>
+            <div className="pt-2 space-y-2">
+              <Button
+                className="w-full"
+                onClick={() => resendVerificationMutation.mutate()}
+                disabled={resendVerificationMutation.isPending}
+              >
+                {resendVerificationMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  "Reenviar email de verificação"
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  void utils.auth.me.invalidate();
+                }}
+              >
+                Já confirmei meu email
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() => setShowEmailVerificationPopup(false)}
+              >
+                Continuar sem verificar agora
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showCustomize} onOpenChange={setShowCustomize}>
         <DialogContent className="max-w-sm">

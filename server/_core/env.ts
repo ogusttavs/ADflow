@@ -1,10 +1,14 @@
 export const ENV = {
   appId: process.env.VITE_APP_ID ?? "orbita",
+  appBaseUrl: process.env.APP_BASE_URL ?? "",
   cookieSecret: process.env.JWT_SECRET ?? "",
   credentialEncryptionKey: process.env.CREDENTIAL_ENCRYPTION_KEY ?? "",
   databaseUrl: process.env.DATABASE_URL ?? "",
   ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
   isProduction: process.env.NODE_ENV === "production",
+  emailProvider: process.env.EMAIL_PROVIDER ?? "mock",
+  emailFrom: process.env.EMAIL_FROM ?? "",
+  resendApiKey: process.env.RESEND_API_KEY ?? "",
   // AI providers (configure at least one to enable AI features)
   openaiApiKey: process.env.OPENAI_API_KEY ?? "",
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",

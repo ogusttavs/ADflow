@@ -32,6 +32,9 @@ import IntakeForm from "./pages/IntakeForm";
 import Diary from "./pages/Diary";
 import Dreams from "./pages/Dreams";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 import { FEATURE_FLAGS } from "./const";
 
 function normalizeLocationPath(location: string) {
@@ -67,6 +70,9 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/login" component={Login} />
+        <Route path="/forgot-password" component={ForgotPassword} />
+        <Route path="/reset-password" component={ResetPassword} />
+        <Route path="/verify-email" component={VerifyEmail} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/clients" component={Clients} />
         <Route path="/clients/:id" component={ClientDetail} />

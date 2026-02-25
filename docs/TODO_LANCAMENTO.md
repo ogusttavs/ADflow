@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 15:05:00 -0300
+Atualizado em: 2026-02-25 16:13:30 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -10,7 +10,7 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase A: em andamento (Sprints 1 e 2 concluidas e em producao; branding concluido; Sprint 3 pendente).
+- Fase A: em andamento (Sprints 1 e 2 concluidas e em producao; Sprint 3 com itens 09/10/11 concluidos em codigo e validacao local verde).
 
 ---
 
@@ -49,9 +49,17 @@ Status atual: concluido. Adicionado rate limit global de API (`200 req/min` em `
 
 ### Sprint 3 - Auth e Email
 
-- [ ] 09. Confirmacao de email no cadastro
-- [ ] 10. "Esqueci minha senha" no login
-- [ ] 11. Troca de senha dentro do app
+- [x] 09a. Plano tecnico da Sprint 3 aprovado
+Status atual: concluido. Documento `docs/PLANO_EXECUCAO_FASE_3.md` criado com decisoes travadas (Resend, soft lock, popup para verificacao e tabela `auth_tokens`).
+
+- [x] 09. Confirmacao de email no cadastro
+Status atual: concluido em codigo. Cadastro agora gera token de verificacao e envia email; implementadas procedures `auth.verifyEmail` e `auth.resendVerification`; criada rota `/verify-email`; popup de verificacao (`soft lock`) ativo no app para usuarios nao verificados.
+
+- [x] 10. "Esqueci minha senha" no login
+Status atual: concluido em codigo. Implementadas procedures `auth.requestPasswordReset` e `auth.resetPassword`, paginas `/forgot-password` e `/reset-password`, storage seguro de hash de token em `auth_tokens` e rate limit especifico.
+
+- [x] 11. Troca de senha dentro do app
+Status atual: concluido. Procedure `auth.changePassword` implementada no backend (validacao de senha atual + hash bcrypt da nova senha) e aba "Segurança" adicionada em `Settings` para contas com login por email.
 
 ### Sprint 4 - Pagamentos e Planos
 
@@ -126,14 +134,19 @@ Status atual: concluido. `ThemeProvider` agora inicia em dark por padrao e a Hom
 - [x] A5. Definir dominio final da marca Orbita
 - [ ] A6. Criar conta Asaas e configurar webhook
 - [x] A7. Liberar acesso SSH de deploy (chave/usuario) para executar `quick-deploy` remoto
+- [ ] A8. Configurar Resend em producao (dominio/DNS + `RESEND_API_KEY` + `EMAIL_FROM` + `EMAIL_PROVIDER=resend`)
+Status atual: em execucao. Scripts operacionais adicionados (`scripts/vps/set-resend-env.sh` e `scripts/vps/smoke-auth-email.sh`) e runbook atualizado em `docs/DEPLOY_VPS.md`.
 
 ### Proximas tarefas do dono (ordem sugerida)
 
-1. A1 + A2 (Google OAuth em producao)
+1. A8 (Resend em producao)
+- Validar dominio no Resend, configurar DNS (SPF/DKIM), adicionar ENVs no servidor e testar envio real de verificacao/reset.
+
+2. A1 + A2 (Google OAuth em producao)
 - Adicionar redirect URIs de producao e publicar o app fora de `Testing`.
 
-2. A6 (Asaas)
+3. A6 (Asaas)
 - Criar conta, gerar chave/API e configurar webhook de producao.
 
-3. A3 (rotacao de segredos)
+4. A3 (rotacao de segredos)
 - Rotacionar credenciais sensiveis do servidor (`JWT_SECRET`, OAuth client secret e demais chaves operacionais).

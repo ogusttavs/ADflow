@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 15:05:00 -0300
+Atualizado em: 2026-02-25 16:13:30 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -31,6 +31,87 @@ Arquivos alterados:
 ```
 
 ## Historico ativo
+
+[2026-02-25 16:13:30 -0300] [Codex]
+Contexto:
+- Dono pediu implementacao do plano fechado de email transacional (`Resend`) + inbox Hostinger, com foco em seguranca operacional de producao.
+
+Feito:
+- Validacoes tecnicas executadas com sucesso no estado atual:
+  - `pnpm check`
+  - `pnpm test` (55 testes)
+  - `pnpm build`
+- Implementado toolkit operacional na VPS:
+  - `scripts/vps/set-resend-env.sh`: atualiza `APP_BASE_URL`, `EMAIL_PROVIDER`, `EMAIL_FROM` e `RESEND_API_KEY` no `.env` sem expor segredo no output;
+  - `scripts/vps/smoke-auth-email.sh`: valida ENV de email, reinicia PM2 com `--update-env`, checa health HTTPS, varre logs e imprime checklist manual de smoke.
+- Atualizado runbook de deploy com secao dedicada de Resend:
+  - requisitos de revogacao/rotacao de key;
+  - configuracao de dominio no Resend (SPF/DKIM);
+  - comandos oficiais para aplicar ENV e rodar smoke na VPS.
+- Backlog e centro operacional sincronizados para refletir A8 em execucao e novo fluxo operacional.
+
+Proximo:
+- Revogar API key exposta no onboarding e gerar nova key (`orbita-prod`).
+- Configurar DNS do dominio no Resend ate status `Verified`.
+- Aplicar ENV na VPS via `set-resend-env.sh` e executar `smoke-auth-email.sh`.
+
+Bloqueios/Riscos:
+- Sem acesso ao painel Resend/Hostinger por este agente; parte de painel e DNS depende do dono.
+- Sem `RESEND_API_KEY` nova na VPS, envio real de verificacao/reset nao ocorre.
+
+Arquivos alterados:
+- scripts/vps/set-resend-env.sh
+- scripts/vps/smoke-auth-email.sh
+- docs/DEPLOY_VPS.md
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 16:01:05 -0300] [Codex]
+Contexto:
+- Continuacao da Sprint 3 com foco em fechar os itens 10 e 09 no codigo (auth e email), mantendo o padrao de seguranca aprovado.
+
+Feito:
+- Corrigido teste quebrado de reset de senha (`token` abaixo do minimo de 20 chars) em `server/auth.password-reset.test.ts`.
+- Item 09 implementado ponta a ponta:
+  - backend: `auth.verifyEmail` + `auth.resendVerification` e envio de token de verificacao no `auth.register`;
+  - frontend: rota/pagina `/verify-email` e popup soft lock de verificacao no `AppLayout`;
+  - rate limit adicionado para `auth.resendVerification`.
+- Banco/modelo:
+  - `users.emailVerified` + `users.emailVerifiedAt`;
+  - `auth_tokens.tokenHash` com `unique`.
+- OAuth Google ajustado para marcar conta como verificada ao autenticar via Google.
+- Testes adicionados: `server/auth.email-verification.test.ts` (4 cenarios).
+- Validacoes executadas com sucesso:
+  - `pnpm check`
+  - `pnpm test` (55 testes passando)
+  - `pnpm build`
+
+Proximo:
+- Rodar migration da Sprint 3 no ambiente alvo com banco ativo.
+- Configurar Resend em producao (DNS + ENVs) e validar envio real.
+- Deploy e smoke test final dos fluxos de verificacao/reset.
+
+Bloqueios/Riscos:
+- Sem migration aplicada no banco remoto ainda; deploy sem `db:push` pode quebrar leitura da tabela `users`.
+- Sem configuracao Resend em producao, fluxo de email real nao entrega mensagens.
+
+Arquivos alterados:
+- drizzle/schema.ts
+- server/db.ts
+- server/routers.ts
+- server/_core/index.ts
+- server/_core/oauth.ts
+- client/src/components/AppLayout.tsx
+- client/src/pages/VerifyEmail.tsx
+- client/src/App.tsx
+- client/src/pages/Login.tsx
+- server/auth.password-reset.test.ts
+- server/auth.email-verification.test.ts
+- docs/PLANO_EXECUCAO_FASE_3.md
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
 
 [2026-02-24 21:08:52 -0300] [Codex]
 Contexto:
@@ -639,6 +720,75 @@ Bloqueios/Riscos:
 - Sem bloqueio tecnico imediato no ambiente de producao.
 
 Arquivos alterados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 15:23:00 -0300] [Codex]
+Contexto:
+- Dono aprovou iniciar Sprint 3 e pediu criacao do documento de implementacao da fase com foco em seguranca de dados e atualizacao do TODO a cada entrega.
+
+Feito:
+- Criado `docs/PLANO_EXECUCAO_FASE_3.md` com arquitetura e checklist executavel da Sprint 3.
+- Decisoes travadas no plano:
+  - email transacional via `Resend`;
+  - fluxo `soft lock`;
+  - popup de verificacao para usuarios novos e legados;
+  - tabela dedicada `auth_tokens` para tokens de verificacao/reset.
+- `TODO_LANCAMENTO` atualizado:
+  - Sprint 3 saiu de pendente para planejada/pronta para execucao;
+  - item `09a` marcado como concluido para registrar aprovacao do plano.
+- `CENTRO_DE_OPERACAO` sincronizado com a nova fonte de verdade da Sprint 3.
+
+Proximo:
+- Executar implementacao da Sprint 3 na ordem acordada: item 11 -> item 10 -> item 09.
+
+Bloqueios/Riscos:
+- Sem bloqueio tecnico imediato para iniciar o desenvolvimento.
+
+Arquivos alterados:
+- docs/PLANO_EXECUCAO_FASE_3.md
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 15:33:01 -0300] [Codex]
+Contexto:
+- Dono autorizou inicio da execucao da Sprint 3.
+- Primeira entrega planejada da fase: item 11 (troca de senha no app).
+
+Feito:
+- Backend:
+  - adicionada procedure protegida `auth.changePassword` em `server/routers.ts`;
+  - validacao de senha atual com `bcrypt.compare`;
+  - validacao de nova senha (minimo + diferente da atual);
+  - persistencia segura da nova senha com `bcrypt.hash`.
+- Frontend:
+  - adicionada aba "Segurança" em `client/src/pages/Settings.tsx`;
+  - formulario com `senha atual`, `nova senha` e `confirmacao`;
+  - exibicao da troca de senha apenas para contas com login por email;
+  - feedback de sucesso/erro via `toast`.
+- Testes:
+  - novo arquivo `server/auth.change-password.test.ts` com cenarios de sucesso, senha atual invalida e conta sem senha local.
+- Validacoes executadas:
+  - `pnpm check` OK;
+  - `pnpm test` OK (47 testes passando);
+  - `pnpm build` OK.
+- Documentacao sincronizada:
+  - item 11 marcado como concluido no backlog;
+  - checklist da Fase 3 atualizado com item 11 concluido.
+
+Proximo:
+- Implementar item 10 da Sprint 3: fluxo "esqueci minha senha" com token, expiracao e envio de email.
+
+Bloqueios/Riscos:
+- Sem bloqueio tecnico para avancar.
+
+Arquivos alterados:
+- server/routers.ts
+- client/src/pages/Settings.tsx
+- server/auth.change-password.test.ts
+- docs/PLANO_EXECUCAO_FASE_3.md
 - docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md

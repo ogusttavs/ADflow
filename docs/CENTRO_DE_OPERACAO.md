@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 15:05:00 -0300
+Atualizado em: 2026-02-25 16:13:30 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -48,6 +48,7 @@ Comandos operacionais:
 - `docs/DEPLOY_VPS.md`: operacao de producao/VPS.
 - `docs/DECISOES_PRODUTO.md`: decisoes de produto vigentes (priorizacao e escopo).
 - `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md`: base de pesquisa e criterios estrategicos.
+- `docs/PLANO_EXECUCAO_FASE_3.md`: plano de implementacao da Sprint 3 (Auth e Email).
 - `docs/LEIA_PRIMEIRO.md`: mapa rapido da documentacao.
 - `docs/ARQUIVO/*`: historico antigo (nao usar como regra operacional diaria).
 
@@ -90,17 +91,20 @@ Pendencias tecnicas objetivas:
 - Sprint 2 (Seguranca) concluida: `helmet`, rate limiting em auth, sessao JWT de 7 dias e criptografia AES-256-GCM em credenciais.
 - Deploy da Sprint 2 aplicado em producao na VPS com HEAD `6aa1b1d`, `.env` ajustado (`VITE_APP_ID=orbita` e `CREDENTIAL_ENCRYPTION_KEY`), `pm2` online e HTTPS `200 OK` em `getorbita.com.br` e `www.getorbita.com.br`.
 - Acesso SSH remoto local liberado e `quick-deploy` validado com sucesso em producao (A7 concluido).
-- Pendencias atuais do dono no backlog: A1, A2, A3 e A6.
-- Proxima prioridade tecnica: iniciar Sprint 3 (Auth e Email).
+- Pendencias atuais do dono no backlog: A1, A2, A3, A6 e A8.
+- Sprint 3 (Auth e Email) concluida em codigo: itens 09, 10 e 11 implementados e validados localmente.
+- Fluxo de verificacao ativo em soft lock com popup persistente no app, rota `/verify-email` e reenvio autenticado.
+- Fluxo de reset de senha ativo com token hash em `auth_tokens`, expiracao e rate limit dedicado.
+- Pendencia operacional imediata da Sprint 3: aplicar migration em ambiente alvo e configurar Resend real na VPS.
+- Toolkit operacional de email preparado:
+  - `scripts/vps/set-resend-env.sh` (atualizacao segura de ENV na VPS);
+  - `scripts/vps/smoke-auth-email.sh` (validacao operacional + checklist manual).
 
 ## 7) Prioridade recomendada (curto prazo)
 
-1. Iniciar Sprint 3 da Fase A (Auth e Email) pela ordem do backlog oficial (`TODO_LANCAMENTO`):
-- confirmacao de email no cadastro;
-- fluxo "esqueci minha senha";
-- troca de senha dentro do app.
-2. Manter disciplina de docs/guardrails a cada alteracao.
-3. Preparar revisao arquitetural pontual com o Claude para Sprint 3 (`Claude +`).
+1. Aplicar migration da Sprint 3 no ambiente alvo (`users.emailVerified*` + `auth_tokens`).
+2. Configurar Resend em producao (`EMAIL_PROVIDER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`, DNS do dominio).
+3. Executar deploy e smoke test dos fluxos de verificacao e reset em producao.
 
 ## 8) Marcos recentes
 
@@ -120,3 +124,7 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: commit `1f82a20` da Sprint 2 enviado para `origin/main`; tentativa de deploy remoto bloqueada por autenticacao SSH (`Permission denied (publickey,password)`).
 - 2026-02-25: deploy manual na VPS concluido para `origin/main` HEAD `6aa1b1d` com `bash scripts/vps/deploy-app.sh`; `db:push` sem migracoes pendentes, PM2 `adflow` online e `curl -I` em `https://getorbita.com.br` e `https://www.getorbita.com.br` retornando `200 OK` com headers de seguranca ativos.
 - 2026-02-25: apos reboot da VPS, incidente `502 Bad Gateway` resolvido com recuperacao do PM2 (`start/save/startup systemd`), validacao interna em `127.0.0.1:3000` e health externo `200 OK`; `quick-deploy` remoto executado com sucesso via `root@167.88.32.1` (fallback IPv4).
+- 2026-02-25: plano da Sprint 3 aprovado e documentado com decisoes travadas de seguranca: Resend para email transacional, soft lock com popup de verificacao, usuarios legados no fluxo de verificacao e tabela dedicada `auth_tokens`.
+- 2026-02-25: Sprint 3 item 11 concluido: `auth.changePassword` no backend + aba "Segurança" no `Settings` para contas com login por email, com validacoes executadas (`pnpm check`, `pnpm test`, `pnpm build`).
+- 2026-02-25: Sprint 3 itens 09 e 10 concluidos em codigo: confirmacao de email no cadastro (`verifyEmail` + `resendVerification` + popup soft lock + rota `/verify-email`) e recuperacao de senha (`requestPasswordReset` + `resetPassword` + telas dedicadas), com validacao `pnpm check`, `pnpm test` e `pnpm build` verdes.
+- 2026-02-25: plano operacional Resend+Hostinger implementado em repo com scripts de VPS (`set-resend-env.sh` e `smoke-auth-email.sh`) e runbook atualizado em `docs/DEPLOY_VPS.md`.
