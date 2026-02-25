@@ -3,6 +3,10 @@ export const ENV = {
   appBaseUrl: process.env.APP_BASE_URL ?? "",
   cookieSecret: process.env.JWT_SECRET ?? "",
   credentialEncryptionKey: process.env.CREDENTIAL_ENCRYPTION_KEY ?? "",
+  userPiiEncryptionKey:
+    process.env.USER_PII_ENCRYPTION_KEY ??
+    process.env.CREDENTIAL_ENCRYPTION_KEY ??
+    "",
   databaseUrl: process.env.DATABASE_URL ?? "",
   ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
   isProduction: process.env.NODE_ENV === "production",

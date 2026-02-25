@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 16:13:30 -0300
+Atualizado em: 2026-02-25 17:15:44 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -31,6 +31,58 @@ Arquivos alterados:
 ```
 
 ## Historico ativo
+
+[2026-02-25 17:15:44 -0300] [Codex]
+Contexto:
+- Dono pediu ajustes finais da Sprint 3 direto no app de producao: aba de seguranca com exigencia de email verificado, Conta em modo leitura com botao `Editar`, e cadastro novo com dados completos e persistencia segura.
+
+Feito:
+- Backend:
+  - `users` expandido com campos de perfil (`firstName`, `lastName`, `whatsapp`, `city`, `address`, `acquisitionSource`, `preferredLanguage`, `marketingOptIn`, `taxIdType`, `taxIdEncrypted`, `taxIdLast4`);
+  - migration gerada: `drizzle/0009_giant_blacklash.sql` (+ snapshot/journal);
+  - `auth.register` atualizado para receber novo payload de cadastro e salvar dados de perfil;
+  - CPF/CNPJ protegido com criptografia AES-256-GCM em `server/_core/profileCrypto.ts`;
+  - `auth.updateProfile` implementado para persistir edicoes da area Conta no banco;
+  - `auth.me` endurecido para retornar apenas payload publico (sem `passwordHash`/dados internos);
+  - `auth.changePassword` agora exige `emailVerified=true`.
+- Frontend:
+  - `Login` (cadastro) ampliado com os campos solicitados (nome, sobrenome, email, whatsapp, cidade, endereco, origem, idioma, CPF/CNPJ e opt-in);
+  - `Settings` refeito para abrir em modo leitura e liberar edicao apenas via `Editar`, com `Cancelar/Salvar`;
+  - aba `Segurança` ajustada para bloquear troca de senha sem email verificado e acionar reenvio de verificacao.
+- Seguranca adicional:
+  - removida escrita de `manus-runtime-user-info` em `localStorage` no `useAuth`.
+- Validacoes executadas com sucesso:
+  - `pnpm check`
+  - `pnpm test` (58 testes passando)
+  - `pnpm build`
+
+Proximo:
+- Deploy desta revisao para producao e execucao de `pnpm db:push` na VPS para aplicar migration `0009`.
+- Rodar smoke manual de cadastro/edicao de conta/troca de senha no ambiente publicado.
+
+Bloqueios/Riscos:
+- Mudancas ainda locais neste momento; sem deploy a producao continua no comportamento anterior.
+- Recomendado definir `USER_PII_ENCRYPTION_KEY` dedicado na VPS (fallback para `CREDENTIAL_ENCRYPTION_KEY` ja existe).
+
+Arquivos alterados:
+- .env.example
+- client/src/_core/hooks/useAuth.ts
+- client/src/pages/Login.tsx
+- client/src/pages/Settings.tsx
+- drizzle/schema.ts
+- drizzle/0009_giant_blacklash.sql
+- drizzle/meta/_journal.json
+- drizzle/meta/0009_snapshot.json
+- server/_core/env.ts
+- server/_core/oauth.ts
+- server/_core/profileCrypto.ts
+- server/auth.change-password.test.ts
+- server/auth.profile.test.ts
+- server/db.ts
+- server/routers.ts
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
 
 [2026-02-25 16:13:30 -0300] [Codex]
 Contexto:

@@ -4,6 +4,8 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Zap, Loader2, Chrome } from "lucide-react";
 import { getStartPageRoute } from "@/lib/user-settings";
@@ -16,7 +18,19 @@ export default function Login() {
   const utils = trpc.useUtils();
 
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
-  const [registerForm, setRegisterForm] = useState({ name: "", email: "", password: "" });
+  const [registerForm, setRegisterForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    whatsapp: "",
+    city: "",
+    address: "",
+    acquisitionSource: "",
+    preferredLanguage: "Português (Brasil)",
+    taxId: "",
+    marketingOptIn: true,
+    password: "",
+  });
 
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: () => {
@@ -50,7 +64,18 @@ export default function Login() {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!registerForm.name || !registerForm.email || !registerForm.password) {
+    if (
+      !registerForm.firstName ||
+      !registerForm.lastName ||
+      !registerForm.email ||
+      !registerForm.whatsapp ||
+      !registerForm.city ||
+      !registerForm.address ||
+      !registerForm.acquisitionSource ||
+      !registerForm.preferredLanguage ||
+      !registerForm.taxId ||
+      !registerForm.password
+    ) {
       toast.error("Preencha todos os campos");
       return;
     }
@@ -58,6 +83,13 @@ export default function Login() {
       toast.error("Senha deve ter pelo menos 6 caracteres");
       return;
     }
+
+    const taxIdDigits = registerForm.taxId.replace(/\D/g, "");
+    if (taxIdDigits.length !== 11 && taxIdDigits.length !== 14) {
+      toast.error("Informe um CPF (11 dígitos) ou CNPJ (14 dígitos)");
+      return;
+    }
+
     registerMutation.mutate(registerForm);
   };
 
@@ -91,7 +123,7 @@ export default function Login() {
   return (
     <div className="relative min-h-screen bg-background flex items-center justify-center p-4">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,_oklch(0.9_0.08_252_/_0.38),transparent_38%),radial-gradient(circle_at_85%_90%,_oklch(0.9_0.06_185_/_0.32),transparent_40%)]" />
-      <div className="relative w-full max-w-sm">
+      <div className="relative w-full max-w-2xl">
         {/* Logo */}
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center gap-2">
@@ -185,45 +217,164 @@ export default function Login() {
             </form>
           ) : (
             <form onSubmit={handleRegister} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="reg-name">Nome</Label>
-                <Input
-                  id="reg-name"
-                  name="reg-name"
-                  type="text"
-                  placeholder="Seu nome"
-                  value={registerForm.name}
-                  onChange={(e) => setRegisterForm(f => ({ ...f, name: e.target.value }))}
-                  disabled={isLoading}
-                  autoComplete="name"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[58vh] overflow-y-auto pr-1">
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-first-name">Nome</Label>
+                  <Input
+                    id="reg-first-name"
+                    name="reg-first-name"
+                    type="text"
+                    placeholder="Seu nome"
+                    value={registerForm.firstName}
+                    onChange={(e) => setRegisterForm((f) => ({ ...f, firstName: e.target.value }))}
+                    disabled={isLoading}
+                    autoComplete="given-name"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-last-name">Sobrenome</Label>
+                  <Input
+                    id="reg-last-name"
+                    name="reg-last-name"
+                    type="text"
+                    placeholder="Seu sobrenome"
+                    value={registerForm.lastName}
+                    onChange={(e) => setRegisterForm((f) => ({ ...f, lastName: e.target.value }))}
+                    disabled={isLoading}
+                    autoComplete="family-name"
+                  />
+                </div>
+
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="reg-email">Email</Label>
+                  <Input
+                    id="reg-email"
+                    name="reg-email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={registerForm.email}
+                    onChange={(e) => setRegisterForm((f) => ({ ...f, email: e.target.value }))}
+                    disabled={isLoading}
+                    autoComplete="email"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-whatsapp">WhatsApp</Label>
+                  <Input
+                    id="reg-whatsapp"
+                    name="reg-whatsapp"
+                    type="tel"
+                    placeholder="+55 11 99999-9999"
+                    value={registerForm.whatsapp}
+                    onChange={(e) => setRegisterForm((f) => ({ ...f, whatsapp: e.target.value }))}
+                    disabled={isLoading}
+                    autoComplete="tel"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-city">Cidade</Label>
+                  <Input
+                    id="reg-city"
+                    name="reg-city"
+                    type="text"
+                    placeholder="Cidade onde mora"
+                    value={registerForm.city}
+                    onChange={(e) => setRegisterForm((f) => ({ ...f, city: e.target.value }))}
+                    disabled={isLoading}
+                    autoComplete="address-level2"
+                  />
+                </div>
+
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="reg-address">Endereço</Label>
+                  <Textarea
+                    id="reg-address"
+                    name="reg-address"
+                    rows={2}
+                    placeholder="Rua, número, complemento e bairro"
+                    value={registerForm.address}
+                    onChange={(e) => setRegisterForm((f) => ({ ...f, address: e.target.value }))}
+                    disabled={isLoading}
+                    className="resize-none"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-acquisition-source">Onde conheceu a Orbita?</Label>
+                  <Input
+                    id="reg-acquisition-source"
+                    name="reg-acquisition-source"
+                    type="text"
+                    placeholder="Instagram, indicação, anúncio..."
+                    value={registerForm.acquisitionSource}
+                    onChange={(e) =>
+                      setRegisterForm((f) => ({ ...f, acquisitionSource: e.target.value }))
+                    }
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-language">Idioma de preferência</Label>
+                  <Input
+                    id="reg-language"
+                    name="reg-language"
+                    type="text"
+                    placeholder="Português (Brasil)"
+                    value={registerForm.preferredLanguage}
+                    onChange={(e) =>
+                      setRegisterForm((f) => ({ ...f, preferredLanguage: e.target.value }))
+                    }
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-tax-id">CPF ou CNPJ</Label>
+                  <Input
+                    id="reg-tax-id"
+                    name="reg-tax-id"
+                    type="text"
+                    placeholder="Somente números ou formatado"
+                    value={registerForm.taxId}
+                    onChange={(e) => setRegisterForm((f) => ({ ...f, taxId: e.target.value }))}
+                    disabled={isLoading}
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-password">Senha</Label>
+                  <Input
+                    id="reg-password"
+                    name="reg-password"
+                    type="password"
+                    placeholder="Mínimo 6 caracteres"
+                    value={registerForm.password}
+                    onChange={(e) => setRegisterForm((f) => ({ ...f, password: e.target.value }))}
+                    disabled={isLoading}
+                    autoComplete="new-password"
+                  />
+                </div>
+
+                <label className="sm:col-span-2 flex items-start gap-2 rounded-md border border-border/80 p-3">
+                  <Checkbox
+                    checked={registerForm.marketingOptIn}
+                    onCheckedChange={(checked) =>
+                      setRegisterForm((f) => ({ ...f, marketingOptIn: checked === true }))
+                    }
+                    disabled={isLoading}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Quero receber emails da Orbita com novidades, conteúdos e informações
+                    importantes.
+                  </span>
+                </label>
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="reg-email">Email</Label>
-                <Input
-                  id="reg-email"
-                  name="reg-email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={registerForm.email}
-                  onChange={(e) => setRegisterForm(f => ({ ...f, email: e.target.value }))}
-                  disabled={isLoading}
-                  autoComplete="email"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="reg-password">Senha</Label>
-                <Input
-                  id="reg-password"
-                  name="reg-password"
-                  type="password"
-                  placeholder="Mínimo 6 caracteres"
-                  value={registerForm.password}
-                  onChange={(e) => setRegisterForm(f => ({ ...f, password: e.target.value }))}
-                  disabled={isLoading}
-                  autoComplete="new-password"
-                />
-              </div>
+
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Criar conta"}
               </Button>

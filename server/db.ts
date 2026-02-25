@@ -35,7 +35,21 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     };
     const updateSet: Record<string, unknown> = {};
 
-    const textFields = ["name", "email", "loginMethod", "passwordHash"] as const;
+    const textFields = [
+      "name",
+      "firstName",
+      "lastName",
+      "email",
+      "whatsapp",
+      "city",
+      "address",
+      "acquisitionSource",
+      "preferredLanguage",
+      "taxIdEncrypted",
+      "taxIdLast4",
+      "loginMethod",
+      "passwordHash",
+    ] as const;
     type TextField = (typeof textFields)[number];
 
     const assignNullable = (field: TextField) => {
@@ -48,6 +62,11 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 
     textFields.forEach(assignNullable);
 
+    if (user.taxIdType !== undefined) {
+      values.taxIdType = user.taxIdType;
+      updateSet.taxIdType = user.taxIdType;
+    }
+
     if (user.emailVerified !== undefined) {
       values.emailVerified = user.emailVerified;
       updateSet.emailVerified = user.emailVerified;
@@ -55,6 +74,10 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     if (user.emailVerifiedAt !== undefined) {
       values.emailVerifiedAt = user.emailVerifiedAt;
       updateSet.emailVerifiedAt = user.emailVerifiedAt;
+    }
+    if (user.marketingOptIn !== undefined) {
+      values.marketingOptIn = user.marketingOptIn;
+      updateSet.marketingOptIn = user.marketingOptIn;
     }
 
     if (user.lastSignedIn !== undefined) {

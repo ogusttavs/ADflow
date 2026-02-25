@@ -52,6 +52,20 @@ function redirectToLogin(req: Request, res: Response, status: string) {
   redirectWithStatus(req, res, "/login", "google_login", status);
 }
 
+function splitNameParts(name: string | null | undefined): {
+  firstName: string | null;
+  lastName: string | null;
+} {
+  if (!name) return { firstName: null, lastName: null };
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: null, lastName: null };
+  if (parts.length === 1) return { firstName: parts[0], lastName: null };
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(" "),
+  };
+}
+
 export function registerOAuthRoutes(app: Express) {
   app.get("/api/oauth/google/login", (req, res) => {
     if (!ENV.googleClientId || !ENV.googleClientSecret) {
@@ -90,6 +104,8 @@ export function registerOAuthRoutes(app: Express) {
     try {
       const { profile } = await exchangeGoogleCodeForUserProfile(req, code);
       const googleOpenId = `google_${profile.sub}`;
+      const googleName = profile.name ?? null;
+      const googleNameParts = splitNameParts(googleName);
 
       let user = await db.getUserByOpenId(googleOpenId);
 
@@ -105,7 +121,9 @@ export function registerOAuthRoutes(app: Express) {
           const mergedLoginMethod = userByEmail.passwordHash ? "email_google" : "google";
           user = await db.updateUserById(userByEmail.id, {
             openId: googleOpenId,
-            name: profile.name ?? userByEmail.name ?? null,
+            name: googleName ?? userByEmail.name ?? null,
+            firstName: googleNameParts.firstName ?? userByEmail.firstName ?? null,
+            lastName: googleNameParts.lastName ?? userByEmail.lastName ?? null,
             email: profile.email ?? userByEmail.email ?? null,
             emailVerified: true,
             emailVerifiedAt: new Date(),
@@ -120,7 +138,9 @@ export function registerOAuthRoutes(app: Express) {
         const isFirstUser = userCount === 0;
         await db.upsertUser({
           openId: googleOpenId,
-          name: profile.name ?? profile.email ?? "Usuário Google",
+          name: googleName ?? profile.email ?? "Usuário Google",
+          firstName: googleNameParts.firstName,
+          lastName: googleNameParts.lastName,
           email: profile.email ?? null,
           emailVerified: true,
           emailVerifiedAt: new Date(),
@@ -132,7 +152,9 @@ export function registerOAuthRoutes(app: Express) {
       } else {
         await db.upsertUser({
           openId: googleOpenId,
-          name: profile.name ?? user.name ?? null,
+          name: googleName ?? user.name ?? null,
+          firstName: googleNameParts.firstName ?? user.firstName ?? null,
+          lastName: googleNameParts.lastName ?? user.lastName ?? null,
           email: profile.email ?? user.email ?? null,
           emailVerified: true,
           emailVerifiedAt: new Date(),

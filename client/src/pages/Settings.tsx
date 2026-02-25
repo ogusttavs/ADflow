@@ -1,6 +1,7 @@
 import AppLayout from "@/components/AppLayout";
 import { useTheme, type Theme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,8 @@ import {
   Target,
   Palette,
   Save,
+  Loader2,
+  ShieldCheck,
   MoonStar,
   Sun,
   Settings as SettingsIcon,
@@ -91,29 +94,23 @@ const THEME_OPTIONS: Array<{
 
 export default function Settings() {
   const { user } = useAuth();
+  const utils = trpc.useUtils();
   const { theme, setTheme, toggleTheme, switchable } = useTheme();
-
-  const [accountDisplayName, setAccountDisplayName] = useState(() =>
-    getSettingString(USER_SETTINGS_KEYS.accountDisplayName, "")
-  );
-  const [accountMainEmail, setAccountMainEmail] = useState(() =>
-    getSettingString(USER_SETTINGS_KEYS.accountMainEmail, "")
-  );
-  const [accountWhatsapp, setAccountWhatsapp] = useState(() =>
-    getSettingString(USER_SETTINGS_KEYS.accountWhatsapp, "+55 11 99999-9999")
-  );
-  const [accountCityState, setAccountCityState] = useState(() =>
-    getSettingString(USER_SETTINGS_KEYS.accountCityState, "São Paulo / SP")
-  );
-  const [accountContext, setAccountContext] = useState(() =>
-    getSettingString(
-      USER_SETTINGS_KEYS.accountContext,
-      "Uso o Orbita para organizar rotina pessoal, metas e operação comercial."
-    )
-  );
-  const [interfaceLanguage, setInterfaceLanguage] = useState(() =>
-    getSettingString(USER_SETTINGS_KEYS.interfaceLanguage, "Português Brasileiro (pt-BR)")
-  );
+  const userLoginMethod = (user?.loginMethod ?? "").toLowerCase();
+  const canChangePassword = userLoginMethod.includes("email");
+  const [isEditingAccount, setIsEditingAccount] = useState(false);
+  const [accountForm, setAccountForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    whatsapp: "",
+    city: "",
+    address: "",
+    acquisitionSource: "",
+    preferredLanguage: "Português (Brasil)",
+    taxId: "",
+    marketingOptIn: false,
+  });
   const [startPage, setStartPage] = useState(() =>
     normalizeStartPageRoute(getSettingString(USER_SETTINGS_KEYS.startPage, "/dashboard"))
   );
@@ -143,43 +140,155 @@ export default function Settings() {
   const [prospectingGoal, setProspectingGoal] = useState(() =>
     String(clampNumber(getSettingNumber(USER_SETTINGS_KEYS.dailyLeadProspectGoal, 10), 1, 50, 10))
   );
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+
+  const resendVerificationMutation = trpc.auth.resendVerification.useMutation({
+    onSuccess: (result) => {
+      if (result.alreadyVerified) {
+        toast.success("Seu email já está verificado.");
+      } else {
+        toast.success("Enviamos um novo link de verificação para seu email.");
+      }
+      void utils.auth.me.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const updateProfileMutation = trpc.auth.updateProfile.useMutation({
+    onSuccess: (result) => {
+      setIsEditingAccount(false);
+      setAccountForm((prev) => ({ ...prev, taxId: "" }));
+      void utils.auth.me.invalidate();
+
+      if (result.emailVerificationRequired) {
+        toast.success("Dados salvos. Confirmamos um novo email de verificação para o endereço atualizado.");
+        return;
+      }
+      toast.success("Dados da conta atualizados com sucesso!");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const changePasswordMutation = trpc.auth.changePassword.useMutation({
+    onSuccess: () => {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      toast.success("Senha alterada com sucesso!");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   useEffect(() => {
-    try {
-      const hasStoredDisplayName = localStorage.getItem(USER_SETTINGS_KEYS.accountDisplayName);
-      const hasStoredMainEmail = localStorage.getItem(USER_SETTINGS_KEYS.accountMainEmail);
-      if (!hasStoredDisplayName && user?.name) {
-        setAccountDisplayName(user.name);
-      }
-      if (!hasStoredMainEmail && user?.email) {
-        setAccountMainEmail(user.email);
-      }
-    } catch {
-      if (user?.name) setAccountDisplayName((prev) => prev || user.name || "");
-      if (user?.email) setAccountMainEmail((prev) => prev || user.email || "");
-    }
-  }, [user?.email, user?.name]);
+    if (!user || isEditingAccount) return;
+    setAccountForm({
+      firstName: user.firstName ?? "",
+      lastName: user.lastName ?? "",
+      email: user.email ?? "",
+      whatsapp: user.whatsapp ?? "",
+      city: user.city ?? "",
+      address: user.address ?? "",
+      acquisitionSource: user.acquisitionSource ?? "",
+      preferredLanguage:
+        user.preferredLanguage ??
+        getSettingString(USER_SETTINGS_KEYS.interfaceLanguage, "Português (Brasil)"),
+      taxId: "",
+      marketingOptIn: Boolean(user.marketingOptIn),
+    });
+  }, [
+    isEditingAccount,
+    user?.acquisitionSource,
+    user?.address,
+    user?.city,
+    user?.email,
+    user?.firstName,
+    user?.lastName,
+    user?.marketingOptIn,
+    user?.preferredLanguage,
+    user?.whatsapp,
+  ]);
+
+  const handleCancelAccountEdit = () => {
+    if (!user) return;
+    setIsEditingAccount(false);
+    setAccountForm({
+      firstName: user.firstName ?? "",
+      lastName: user.lastName ?? "",
+      email: user.email ?? "",
+      whatsapp: user.whatsapp ?? "",
+      city: user.city ?? "",
+      address: user.address ?? "",
+      acquisitionSource: user.acquisitionSource ?? "",
+      preferredLanguage:
+        user.preferredLanguage ??
+        getSettingString(USER_SETTINGS_KEYS.interfaceLanguage, "Português (Brasil)"),
+      taxId: "",
+      marketingOptIn: Boolean(user.marketingOptIn),
+    });
+  };
 
   const handleSaveGeneral = () => {
-    const safeDisplayName = accountDisplayName.trim() || user?.name || "Usuário";
-    const safeMainEmail = accountMainEmail.trim() || user?.email || "";
-    const safeLanguage = interfaceLanguage.trim() || "Português Brasileiro (pt-BR)";
+    if (!isEditingAccount) return;
+
+    const safeFirstName = accountForm.firstName.trim();
+    const safeLastName = accountForm.lastName.trim();
+    const safeEmail = accountForm.email.trim();
+    const safeWhatsapp = accountForm.whatsapp.trim();
+    const safeCity = accountForm.city.trim();
+    const safeAddress = accountForm.address.trim();
+    const safeAcquisitionSource = accountForm.acquisitionSource.trim();
+    const safeLanguage = accountForm.preferredLanguage.trim() || "Português (Brasil)";
     const safeStartPage = normalizeStartPageRoute(startPage);
+    const safeTaxId = accountForm.taxId.trim();
 
-    setAccountDisplayName(safeDisplayName);
-    setAccountMainEmail(safeMainEmail);
-    setInterfaceLanguage(safeLanguage);
+    if (
+      !safeFirstName ||
+      !safeLastName ||
+      !safeEmail ||
+      !safeWhatsapp ||
+      !safeCity ||
+      !safeAddress ||
+      !safeAcquisitionSource
+    ) {
+      toast.error("Preencha todos os campos obrigatórios da conta.");
+      return;
+    }
+    if (!safeTaxId && !user?.taxIdMasked) {
+      toast.error("Informe CPF/CNPJ para concluir o cadastro da conta.");
+      return;
+    }
+
+    if (safeTaxId) {
+      const digits = safeTaxId.replace(/\D/g, "");
+      if (digits.length !== 11 && digits.length !== 14) {
+        toast.error("CPF/CNPJ inválido. Informe 11 ou 14 dígitos.");
+        return;
+      }
+    }
+
     setStartPage(safeStartPage);
-
-    setSetting(USER_SETTINGS_KEYS.accountDisplayName, safeDisplayName);
-    setSetting(USER_SETTINGS_KEYS.accountMainEmail, safeMainEmail);
-    setSetting(USER_SETTINGS_KEYS.accountWhatsapp, accountWhatsapp.trim());
-    setSetting(USER_SETTINGS_KEYS.accountCityState, accountCityState.trim());
-    setSetting(USER_SETTINGS_KEYS.accountContext, accountContext.trim());
     setSetting(USER_SETTINGS_KEYS.interfaceLanguage, safeLanguage);
     setSetting(USER_SETTINGS_KEYS.startPage, safeStartPage);
-
-    toast.success("Configurações da conta salvas com sucesso!");
+    updateProfileMutation.mutate({
+      firstName: safeFirstName,
+      lastName: safeLastName,
+      email: safeEmail,
+      whatsapp: safeWhatsapp,
+      city: safeCity,
+      address: safeAddress,
+      acquisitionSource: safeAcquisitionSource,
+      preferredLanguage: safeLanguage,
+      marketingOptIn: accountForm.marketingOptIn,
+      taxId: safeTaxId || undefined,
+    });
   };
 
   const handleSaveNotifications = () => {
@@ -206,6 +315,40 @@ export default function Settings() {
     toast.success("Preferências de rotina salvas com sucesso!");
   };
 
+  const handleChangePassword = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!canChangePassword) {
+      toast.error("Esta conta não usa senha local para login.");
+      return;
+    }
+    if (!user?.emailVerified) {
+      toast.error("Confirme seu email antes de alterar a senha.");
+      return;
+    }
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      toast.error("Preencha os 3 campos de senha.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("A nova senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast.error("A confirmação da nova senha não confere.");
+      return;
+    }
+    if (currentPassword === newPassword) {
+      toast.error("A nova senha deve ser diferente da senha atual.");
+      return;
+    }
+
+    changePasswordMutation.mutate({
+      currentPassword,
+      newPassword,
+    });
+  };
+
   return (
     <AppLayout>
       <div className="page-content space-y-6">
@@ -222,6 +365,9 @@ export default function Settings() {
             <TabsTrigger value="general" className="flex items-center gap-2">
               <UserRound className="w-4 h-4" />Conta
             </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4" />Segurança
+            </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center gap-2">
               <Bell className="w-4 h-4" />Alertas
             </TabsTrigger>
@@ -237,31 +383,59 @@ export default function Settings() {
             <div className="space-y-4">
               <Card className="bg-card border-border">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                    Perfil da Conta
-                  </CardTitle>
+                  <div className="flex items-center justify-between gap-3">
+                    <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                      Perfil da Conta
+                    </CardTitle>
+                    {user?.emailVerified ? (
+                      <Badge className="text-[10px]">Email verificado</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px]">
+                        Email pendente
+                      </Badge>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="settings-account-display-name">Nome de exibição</Label>
+                      <Label htmlFor="settings-account-first-name">Nome</Label>
                       <Input
-                        id="settings-account-display-name"
-                        name="settings-account-display-name"
-                        value={accountDisplayName}
-                        onChange={(e) => setAccountDisplayName(e.target.value)}
+                        id="settings-account-first-name"
+                        name="settings-account-first-name"
+                        value={accountForm.firstName}
+                        onChange={(e) =>
+                          setAccountForm((prev) => ({ ...prev, firstName: e.target.value }))
+                        }
                         className="bg-input border-border"
+                        disabled={!isEditingAccount || updateProfileMutation.isPending}
                       />
                     </div>
                     <div className="space-y-1.5">
+                      <Label htmlFor="settings-account-last-name">Sobrenome</Label>
+                      <Input
+                        id="settings-account-last-name"
+                        name="settings-account-last-name"
+                        value={accountForm.lastName}
+                        onChange={(e) =>
+                          setAccountForm((prev) => ({ ...prev, lastName: e.target.value }))
+                        }
+                        className="bg-input border-border"
+                        disabled={!isEditingAccount || updateProfileMutation.isPending}
+                      />
+                    </div>
+                    <div className="space-y-1.5 sm:col-span-2">
                       <Label htmlFor="settings-account-main-email">E-mail principal</Label>
                       <Input
                         id="settings-account-main-email"
                         name="settings-account-main-email"
                         type="email"
-                        value={accountMainEmail}
-                        onChange={(e) => setAccountMainEmail(e.target.value)}
+                        value={accountForm.email}
+                        onChange={(e) =>
+                          setAccountForm((prev) => ({ ...prev, email: e.target.value }))
+                        }
                         className="bg-input border-border"
+                        disabled={!isEditingAccount || updateProfileMutation.isPending}
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -269,32 +443,75 @@ export default function Settings() {
                       <Input
                         id="settings-account-whatsapp"
                         name="settings-account-whatsapp"
-                        value={accountWhatsapp}
-                        onChange={(e) => setAccountWhatsapp(e.target.value)}
+                        value={accountForm.whatsapp}
+                        onChange={(e) =>
+                          setAccountForm((prev) => ({ ...prev, whatsapp: e.target.value }))
+                        }
                         className="bg-input border-border"
+                        disabled={!isEditingAccount || updateProfileMutation.isPending}
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="settings-account-city-state">Cidade / UF</Label>
+                      <Label htmlFor="settings-account-city">Cidade</Label>
                       <Input
-                        id="settings-account-city-state"
-                        name="settings-account-city-state"
-                        value={accountCityState}
-                        onChange={(e) => setAccountCityState(e.target.value)}
+                        id="settings-account-city"
+                        name="settings-account-city"
+                        value={accountForm.city}
+                        onChange={(e) =>
+                          setAccountForm((prev) => ({ ...prev, city: e.target.value }))
+                        }
                         className="bg-input border-border"
+                        disabled={!isEditingAccount || updateProfileMutation.isPending}
                       />
                     </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="settings-account-context">Como você usa o Orbita no dia a dia</Label>
-                    <Textarea
-                      id="settings-account-context"
-                      name="settings-account-context"
-                      rows={3}
-                      className="bg-input border-border resize-none"
-                      value={accountContext}
-                      onChange={(e) => setAccountContext(e.target.value)}
-                    />
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label htmlFor="settings-account-address">Endereço</Label>
+                      <Textarea
+                        id="settings-account-address"
+                        name="settings-account-address"
+                        rows={2}
+                        className="bg-input border-border resize-none"
+                        value={accountForm.address}
+                        onChange={(e) =>
+                          setAccountForm((prev) => ({ ...prev, address: e.target.value }))
+                        }
+                        disabled={!isEditingAccount || updateProfileMutation.isPending}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="settings-account-source">Onde conheceu a Orbita</Label>
+                      <Input
+                        id="settings-account-source"
+                        name="settings-account-source"
+                        value={accountForm.acquisitionSource}
+                        onChange={(e) =>
+                          setAccountForm((prev) => ({
+                            ...prev,
+                            acquisitionSource: e.target.value,
+                          }))
+                        }
+                        className="bg-input border-border"
+                        disabled={!isEditingAccount || updateProfileMutation.isPending}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="settings-account-tax-id">CPF ou CNPJ</Label>
+                      <Input
+                        id="settings-account-tax-id"
+                        name="settings-account-tax-id"
+                        value={
+                          isEditingAccount
+                            ? accountForm.taxId
+                            : user?.taxIdMasked ?? "Não informado"
+                        }
+                        onChange={(e) =>
+                          setAccountForm((prev) => ({ ...prev, taxId: e.target.value }))
+                        }
+                        placeholder={user?.taxIdMasked ?? "Informe CPF/CNPJ"}
+                        className="bg-input border-border"
+                        disabled={!isEditingAccount || updateProfileMutation.isPending}
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -311,15 +528,29 @@ export default function Settings() {
                     <Input
                       id="settings-general-language"
                       name="settings-general-language"
-                      value={interfaceLanguage}
-                      onChange={(e) => setInterfaceLanguage(e.target.value)}
+                      value={accountForm.preferredLanguage}
+                      onChange={(e) =>
+                        setAccountForm((prev) => ({
+                          ...prev,
+                          preferredLanguage: e.target.value,
+                        }))
+                      }
                       className="bg-input border-border"
+                      disabled={!isEditingAccount || updateProfileMutation.isPending}
                     />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="settings-general-start-page">Página inicial padrão</Label>
-                    <Select value={startPage} onValueChange={setStartPage}>
-                      <SelectTrigger id="settings-general-start-page" aria-label="Página inicial padrão" className="bg-input border-border">
+                    <Select
+                      value={startPage}
+                      onValueChange={setStartPage}
+                      disabled={!isEditingAccount || updateProfileMutation.isPending}
+                    >
+                      <SelectTrigger
+                        id="settings-general-start-page"
+                        aria-label="Página inicial padrão"
+                        className="bg-input border-border"
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -334,15 +565,161 @@ export default function Settings() {
                       Define a primeira tela ideal para abrir quando entrar no app.
                     </p>
                   </div>
+                  <div className="flex items-start justify-between gap-4 rounded-lg border border-border/80 bg-muted/25 p-3">
+                    <div>
+                      <p className="text-sm font-medium">Receber emails da Orbita</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Novidades, alertas e informações importantes da plataforma.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={accountForm.marketingOptIn}
+                      onCheckedChange={(checked) =>
+                        setAccountForm((prev) => ({ ...prev, marketingOptIn: checked }))
+                      }
+                      disabled={!isEditingAccount || updateProfileMutation.isPending}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
-              <div className="flex justify-end">
-                <Button onClick={handleSaveGeneral}>
-                  <Save className="w-4 h-4 mr-2" />Salvar
-                </Button>
+              <div className="flex justify-end gap-2">
+                {isEditingAccount ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={handleCancelAccountEdit}
+                      disabled={updateProfileMutation.isPending}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button onClick={handleSaveGeneral} disabled={updateProfileMutation.isPending}>
+                      {updateProfileMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Salvando...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Salvar
+                        </>
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  <Button onClick={() => setIsEditingAccount(true)}>Editar</Button>
+                )}
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="security">
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  Segurança da Conta
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {!user?.emailVerified ? (
+                  <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 space-y-3">
+                    <p className="text-sm font-medium">
+                      Confirme seu email antes de trocar a senha
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      A troca de senha só é liberada para contas com email verificado.
+                    </p>
+                    <Button
+                      onClick={() => resendVerificationMutation.mutate()}
+                      disabled={resendVerificationMutation.isPending}
+                    >
+                      {resendVerificationMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Enviando...
+                        </>
+                      ) : (
+                        "Reenviar email de verificação"
+                      )}
+                    </Button>
+                  </div>
+                ) : canChangePassword ? (
+                  <form onSubmit={handleChangePassword} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="settings-security-current-password">Senha atual</Label>
+                      <Input
+                        id="settings-security-current-password"
+                        name="settings-security-current-password"
+                        type="password"
+                        autoComplete="current-password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        className="bg-input border-border"
+                        disabled={changePasswordMutation.isPending}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="settings-security-new-password">Nova senha</Label>
+                      <Input
+                        id="settings-security-new-password"
+                        name="settings-security-new-password"
+                        type="password"
+                        autoComplete="new-password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="bg-input border-border"
+                        disabled={changePasswordMutation.isPending}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="settings-security-confirm-password">Confirmar nova senha</Label>
+                      <Input
+                        id="settings-security-confirm-password"
+                        name="settings-security-confirm-password"
+                        type="password"
+                        autoComplete="new-password"
+                        value={confirmNewPassword}
+                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        className="bg-input border-border"
+                        disabled={changePasswordMutation.isPending}
+                      />
+                    </div>
+
+                    <div className="rounded-lg border border-border/80 bg-muted/25 p-3">
+                      <p className="text-xs text-muted-foreground">
+                        Boa prática: use ao menos 8 caracteres com letras e números.
+                      </p>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={changePasswordMutation.isPending}>
+                        {changePasswordMutation.isPending ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Salvando...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Alterar senha
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="rounded-lg border border-border/80 bg-muted/25 p-3">
+                    <p className="text-sm font-medium">Conta com login social</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Esta conta não possui senha local para troca neste momento.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="notifications">

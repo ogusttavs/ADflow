@@ -20,6 +20,8 @@ function createAuthContext(): TrpcContext {
     openId: "local_test_user",
     email: "test@orbita.app",
     name: "Test User",
+    emailVerified: true,
+    emailVerifiedAt: new Date(),
     loginMethod: "email",
     role: "user",
     createdAt: new Date(),
@@ -118,5 +120,29 @@ describe("auth.changePassword", () => {
 
     expect(dbMock.updateUserById).not.toHaveBeenCalled();
   });
-});
 
+  it("rejects when email is not verified", async () => {
+    const ctx = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const oldHash = await bcrypt.hash("old-password", 10);
+
+    dbMock.getDb.mockResolvedValue({});
+    dbMock.getUserByOpenId.mockResolvedValue({
+      ...ctx.user,
+      emailVerified: false,
+      emailVerifiedAt: null,
+      passwordHash: oldHash,
+    });
+
+    await expect(
+      caller.auth.changePassword({
+        currentPassword: "old-password",
+        newPassword: "new-password-123",
+      }),
+    ).rejects.toMatchObject<Partial<TRPCError>>({
+      message: "Confirme seu email antes de alterar a senha.",
+    });
+
+    expect(dbMock.updateUserById).not.toHaveBeenCalled();
+  });
+});

@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 16:13:30 -0300
+Atualizado em: 2026-02-25 17:15:44 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -10,7 +10,7 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase A: em andamento (Sprints 1 e 2 concluidas e em producao; Sprint 3 com itens 09/10/11 concluidos em codigo e validacao local verde).
+- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida em codigo com hardening de conta/cadastro e validacao local verde).
 
 ---
 
@@ -55,11 +55,20 @@ Status atual: concluido. Documento `docs/PLANO_EXECUCAO_FASE_3.md` criado com de
 - [x] 09. Confirmacao de email no cadastro
 Status atual: concluido em codigo. Cadastro agora gera token de verificacao e envia email; implementadas procedures `auth.verifyEmail` e `auth.resendVerification`; criada rota `/verify-email`; popup de verificacao (`soft lock`) ativo no app para usuarios nao verificados.
 
+- [x] 09b. Cadastro ampliado com dados de perfil e consentimento
+Status atual: concluido em codigo. Cadastro agora coleta nome, sobrenome, email, WhatsApp, cidade, endereco, origem, idioma, CPF/CNPJ e opt-in de comunicacoes, persistindo no banco com dados sensiveis protegidos.
+
 - [x] 10. "Esqueci minha senha" no login
 Status atual: concluido em codigo. Implementadas procedures `auth.requestPasswordReset` e `auth.resetPassword`, paginas `/forgot-password` e `/reset-password`, storage seguro de hash de token em `auth_tokens` e rate limit especifico.
 
 - [x] 11. Troca de senha dentro do app
-Status atual: concluido. Procedure `auth.changePassword` implementada no backend (validacao de senha atual + hash bcrypt da nova senha) e aba "Segurança" adicionada em `Settings` para contas com login por email.
+Status atual: concluido em codigo. Procedure `auth.changePassword` implementada no backend (validacao de senha atual + hash bcrypt da nova senha) e aba "Segurança" adicionada em `Settings` para contas com login por email.
+
+- [x] 11b. Troca de senha exige email verificado
+Status atual: concluido em codigo. Backend bloqueia `auth.changePassword` para contas sem verificacao de email e frontend exibe acao de reenvio de verificacao antes da troca.
+
+- [x] 11c. Area Conta em modo leitura por padrao
+Status atual: concluido em codigo. Tela de Conta agora abre persistida em modo somente leitura; campos so liberam edicao ao clicar em `Editar`, com `Cancelar`/`Salvar` e persistencia real no banco.
 
 ### Sprint 4 - Pagamentos e Planos
 
@@ -136,6 +145,8 @@ Status atual: concluido. `ThemeProvider` agora inicia em dark por padrao e a Hom
 - [x] A7. Liberar acesso SSH de deploy (chave/usuario) para executar `quick-deploy` remoto
 - [ ] A8. Configurar Resend em producao (dominio/DNS + `RESEND_API_KEY` + `EMAIL_FROM` + `EMAIL_PROVIDER=resend`)
 Status atual: em execucao. Scripts operacionais adicionados (`scripts/vps/set-resend-env.sh` e `scripts/vps/smoke-auth-email.sh`) e runbook atualizado em `docs/DEPLOY_VPS.md`.
+- [ ] A9. Definir `USER_PII_ENCRYPTION_KEY` dedicado na VPS (recomendado)
+Status atual: pendente. Sistema ja funciona com fallback em `CREDENTIAL_ENCRYPTION_KEY`, mas para isolamento de segredo a recomendacao e usar chave dedicada de 32 bytes para dados sensiveis de perfil.
 
 ### Proximas tarefas do dono (ordem sugerida)
 

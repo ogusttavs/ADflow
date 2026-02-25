@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 16:13:30 -0300
+Atualizado em: 2026-02-25 17:15:44 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -93,9 +93,13 @@ Pendencias tecnicas objetivas:
 - Acesso SSH remoto local liberado e `quick-deploy` validado com sucesso em producao (A7 concluido).
 - Pendencias atuais do dono no backlog: A1, A2, A3, A6 e A8.
 - Sprint 3 (Auth e Email) concluida em codigo: itens 09, 10 e 11 implementados e validados localmente.
+- Refinamentos de seguranca/conta adicionados na Sprint 3:
+  - cadastro ampliado com dados completos de perfil e consentimento;
+  - area Conta em modo somente leitura por padrao (edicao explicita por botao `Editar`);
+  - troca de senha condicionada a email verificado (frontend + backend).
 - Fluxo de verificacao ativo em soft lock com popup persistente no app, rota `/verify-email` e reenvio autenticado.
 - Fluxo de reset de senha ativo com token hash em `auth_tokens`, expiracao e rate limit dedicado.
-- Pendencia operacional imediata da Sprint 3: aplicar migration em ambiente alvo e configurar Resend real na VPS.
+- Pendencia operacional imediata da Sprint 3: aplicar migration `0009_giant_blacklash.sql` em ambiente alvo e fazer deploy desta revisao.
 - Toolkit operacional de email preparado:
   - `scripts/vps/set-resend-env.sh` (atualizacao segura de ENV na VPS);
   - `scripts/vps/smoke-auth-email.sh` (validacao operacional + checklist manual).
@@ -128,3 +132,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: Sprint 3 item 11 concluido: `auth.changePassword` no backend + aba "Segurança" no `Settings` para contas com login por email, com validacoes executadas (`pnpm check`, `pnpm test`, `pnpm build`).
 - 2026-02-25: Sprint 3 itens 09 e 10 concluidos em codigo: confirmacao de email no cadastro (`verifyEmail` + `resendVerification` + popup soft lock + rota `/verify-email`) e recuperacao de senha (`requestPasswordReset` + `resetPassword` + telas dedicadas), com validacao `pnpm check`, `pnpm test` e `pnpm build` verdes.
 - 2026-02-25: plano operacional Resend+Hostinger implementado em repo com scripts de VPS (`set-resend-env.sh` e `smoke-auth-email.sh`) e runbook atualizado em `docs/DEPLOY_VPS.md`.
+- 2026-02-25: Sprint 3 refinada para producao com cadastro ampliado de perfil, criptografia de CPF/CNPJ no backend, `auth.updateProfile`, Conta em modo leitura por padrao e bloqueio de troca de senha sem email verificado; validado com `pnpm check`, `pnpm test` (58 testes) e `pnpm build`.
