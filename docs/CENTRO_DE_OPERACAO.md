@@ -88,7 +88,6 @@ Estado atual de desenvolvimento:
 Pendencias tecnicas objetivas:
 - Validacao de baseline verde confirmada: `pnpm check`, `pnpm test` e `pnpm build` executados com sucesso.
 - Sprint 2 (Seguranca) ainda nao iniciada: rate-limit, `helmet`, expiracao JWT e encrypt de credenciais.
-- SSL em `getorbita.com.br`: possivel mismatch com `www.` — reemitir cert na VPS via `sudo certbot --nginx -d getorbita.com.br -d www.getorbita.com.br`.
 
 ## 7) Prioridade recomendada (curto prazo)
 
@@ -112,3 +111,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: tema padrao alterado para dark e LP refinada para refletir somente funcionalidades ativas do Orbita.
 - 2026-02-25: cutover concluido para `https://getorbita.com.br` com SSL ativo, `pm2` online, HTTPS `200 OK` e HTTP `301` para HTTPS.
 - 2026-02-25: branding Orbita completo — logo SVG + favicon criados, rename AdFlow→Orbita em todo o codigo, metadata HTML reescrita, codigo morto removido.
+- 2026-02-25: SSL expandido para cobrir `www.getorbita.com.br` (certbot + Nginx). Ambos `https://getorbita.com.br` e `https://www.getorbita.com.br` retornando `200 OK`. HTTP `301` para HTTPS ativo. Cert valido ate 2026-05-26.

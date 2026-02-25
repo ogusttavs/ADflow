@@ -423,3 +423,27 @@ Arquivos alterados:
 - docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
+
+[2026-02-25 15:31:00 -0300] [Claude]
+Contexto:
+- SSL mismatch em `www.getorbita.com.br` reportado pelo dono (visitante recebendo "conexao nao e privada").
+
+Feito:
+- Diagnosticado: cert Certbot cobria somente `getorbita.com.br`, sem `www.`.
+- Executado na VPS: `certbot --nginx -d getorbita.com.br -d www.getorbita.com.br` (expand do cert existente).
+- Adicionado `www.getorbita.com.br` ao `server_name` no Nginx via sed.
+- Executado `certbot install --cert-name getorbita.com.br` para instalar cert nos dois server blocks.
+- Executado `nginx -s reload`.
+- Validacao: `https://getorbita.com.br` e `https://www.getorbita.com.br` retornando `200 OK`. HTTP `301` ativo nos dois.
+- Cert valido ate 2026-05-26, renovacao automatica configurada.
+
+Proximo:
+- Iniciar Sprint 2 (Seguranca) conforme backlog oficial.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio operacional.
+
+Arquivos alterados:
+- /etc/nginx/sites-enabled/adflow (VPS — fora do git)
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
