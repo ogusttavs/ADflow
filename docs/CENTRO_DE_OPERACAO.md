@@ -1,6 +1,6 @@
 # Centro de Operacao - AdFlow/Orbita
 
-Atualizado em: 2026-02-25 00:30:15 -0300
+Atualizado em: 2026-02-25 00:39:52 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -95,3 +95,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-24: deploy publico concluido em `https://metrizy.com.br`.
 - 2026-02-24: guardrails de documentacao implantados (hooks + CI).
 - 2026-02-25: documentacao consolidada para modelo definitivo (Codex principal, Claude consultor, Gemini fora).
+- 2026-02-25: deploy em producao da versao `f83d346` validado pelo dono (`pm2 online` + `curl -I https://metrizy.com.br` retornando `200 OK`).

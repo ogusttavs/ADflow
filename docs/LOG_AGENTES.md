@@ -117,3 +117,24 @@ Arquivos alterados:
 - docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
+
+[2026-02-25 00:39:52 -0300] [Codex]
+Contexto:
+- Dono confirmou execucao manual do deploy na VPS e pediu registro final para iniciar o proximo dia com documentacao zerada.
+
+Feito:
+- Evidencia de producao validada pelo dono:
+  - `pm2 status adflow` com processo `online`.
+  - `curl -I https://metrizy.com.br` retornando `200 OK`.
+  - `Last-Modified` atualizado para `Wed, 25 Feb 2026 03:37:27 GMT` (build novo ativo).
+- `CENTRO_DE_OPERACAO` atualizado com marco de deploy da versao `f83d346`.
+
+Proximo:
+- Iniciar proximo ciclo pela Sprint 1 (item 02) conforme `docs/TODO_LANCAMENTO.md`.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio operacional aberto para iniciar o proximo dia.
+
+Arquivos alterados:
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
