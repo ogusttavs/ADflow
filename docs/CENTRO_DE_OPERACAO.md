@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 19:37:36 -0300
+Atualizado em: 2026-02-25 19:41:11 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -49,6 +49,7 @@ Comandos operacionais:
 - `docs/DECISOES_PRODUTO.md`: decisoes de produto vigentes (priorizacao e escopo).
 - `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md`: base de pesquisa e criterios estrategicos.
 - `docs/PLANO_EXECUCAO_FASE_3.md`: plano de implementacao da Sprint 3 (Auth e Email).
+- `docs/IDEIAS_PRODUTO.md`: banco de ideias de produto (nao substitui o backlog oficial).
 - `docs/LEIA_PRIMEIRO.md`: mapa rapido da documentacao.
 - `docs/ARQUIVO/*`: historico antigo (nao usar como regra operacional diaria).
 

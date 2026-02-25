@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 19:37:36 -0300
+Atualizado em: 2026-02-25 19:41:11 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -31,6 +31,25 @@ Arquivos alterados:
 ```
 
 ## Historico ativo
+
+[2026-02-25 19:41:11 -0300] [Codex]
+Contexto:
+- Dono pediu para rastrear o arquivo `docs/IDEIAS_PRODUTO.md`.
+
+Feito:
+- Arquivo de ideias incluído no versionamento do repositório.
+- Centro de operacao atualizado para listar `docs/IDEIAS_PRODUTO.md` como banco de ideias (sem substituir o backlog oficial).
+
+Proximo:
+- Seguir backlog oficial em `docs/TODO_LANCAMENTO.md`.
+
+Bloqueios/Riscos:
+- Nenhum.
+
+Arquivos alterados:
+- docs/IDEIAS_PRODUTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
 
 [2026-02-25 19:37:36 -0300] [Codex]
 Contexto:
