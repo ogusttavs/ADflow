@@ -1,4 +1,8 @@
-import { COOKIE_NAME, SESSION_DURATION_MS } from "@shared/const";
+import {
+  COOKIE_NAME,
+  SESSION_DURATION_MS,
+  UNVERIFIED_ACCOUNT_MAX_AGE_MS,
+} from "@shared/const";
 import { ForbiddenError } from "@shared/_core/errors";
 import { parse as parseCookieHeader } from "cookie";
 import type { Request } from "express";
@@ -108,6 +112,14 @@ class SDKServer {
 
     if (!user) {
       throw ForbiddenError("User not found");
+    }
+
+    if (!user.emailVerified) {
+      const accountAgeMs = Date.now() - user.createdAt.getTime();
+      if (accountAgeMs >= UNVERIFIED_ACCOUNT_MAX_AGE_MS) {
+        await db.deleteUserAndAuthTokensById(user.id);
+        throw ForbiddenError("User not verified and account expired");
+      }
     }
 
     // Update lastSignedIn in background (don't block the request)

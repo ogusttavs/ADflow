@@ -33,6 +33,7 @@ import Diary from "./pages/Diary";
 import Dreams from "./pages/Dreams";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
+import ForgotEmail from "./pages/ForgotEmail";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import { FEATURE_FLAGS } from "./const";
@@ -71,6 +72,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/login" component={Login} />
         <Route path="/forgot-password" component={ForgotPassword} />
+        <Route path="/forgot-email" component={ForgotEmail} />
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/verify-email" component={VerifyEmail} />
         <Route path="/dashboard" component={Dashboard} />

@@ -122,14 +122,14 @@ describe("auth.updateProfile", () => {
       acquisitionSource: "Instagram",
       preferredLanguage: "Português (Brasil)",
       marketingOptIn: false,
-      taxId: "123.456.789-01",
+      taxId: "529.982.247-25",
     });
 
     expect(result).toEqual({
       success: true,
       emailVerificationRequired: true,
     });
-    expect(profileCryptoMock.encryptProfileSensitiveValue).toHaveBeenCalledWith("12345678901");
+    expect(profileCryptoMock.encryptProfileSensitiveValue).toHaveBeenCalledWith("52998224725");
     expect(dbMock.updateUserById).toHaveBeenCalledWith(
       7,
       expect.objectContaining({
@@ -137,11 +137,10 @@ describe("auth.updateProfile", () => {
         emailVerified: false,
         emailVerifiedAt: null,
         taxIdType: "cpf",
-        taxIdLast4: "8901",
+        taxIdLast4: "4725",
       }),
     );
     expect(dbMock.createAuthToken).toHaveBeenCalledTimes(1);
     expect(emailMock.sendTransactionalEmail).toHaveBeenCalledTimes(1);
   });
 });
-

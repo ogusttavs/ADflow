@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gt, isNull } from "drizzle-orm";
+import { and, count, desc, eq, gt, inArray, isNotNull, isNull, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertAuthToken, InsertUser, authTokens, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -133,6 +133,33 @@ export async function getUserByEmail(email: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getUsersByTaxIdTail(input: {
+  taxIdType: "cpf" | "cnpj";
+  taxIdLast4: string;
+  limit?: number;
+}) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get users by taxId: database not available");
+    return [];
+  }
+
+  const limit = Math.max(1, Math.min(input.limit ?? 25, 100));
+  return db
+    .select()
+    .from(users)
+    .where(
+      and(
+        eq(users.taxIdType, input.taxIdType),
+        eq(users.taxIdLast4, input.taxIdLast4),
+        isNotNull(users.taxIdEncrypted),
+        isNotNull(users.email),
+      ),
+    )
+    .orderBy(desc(users.createdAt))
+    .limit(limit);
+}
+
 export async function getUserById(id: number) {
   const db = await getDb();
   if (!db) {
@@ -174,6 +201,45 @@ export async function updateUserById(
   await db.update(users).set(cleanUpdates).where(eq(users.id, id));
   const [updated] = await db.select().from(users).where(eq(users.id, id)).limit(1);
   return updated;
+}
+
+export async function deleteUserAndAuthTokensById(id: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot delete user: database not available");
+    return false;
+  }
+
+  await db.delete(authTokens).where(eq(authTokens.userId, id));
+  await db.delete(users).where(eq(users.id, id));
+  return true;
+}
+
+export async function deleteExpiredUnverifiedUsers(cutoffDate: Date): Promise<number> {
+  const db = await getDb();
+  if (!db) {
+    return 0;
+  }
+
+  const staleUsers = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(
+      and(
+        eq(users.emailVerified, false),
+        lt(users.createdAt, cutoffDate),
+      ),
+    )
+    .limit(500);
+
+  if (staleUsers.length === 0) {
+    return 0;
+  }
+
+  const ids = staleUsers.map(row => row.id);
+  await db.delete(authTokens).where(inArray(authTokens.userId, ids));
+  await db.delete(users).where(inArray(users.id, ids));
+  return ids.length;
 }
 
 type CreateAuthTokenInput = Pick<

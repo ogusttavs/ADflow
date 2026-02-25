@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 17:15:44 -0300
+Atualizado em: 2026-02-25 18:33:45 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -10,7 +10,7 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida em codigo com hardening de conta/cadastro e validacao local verde).
+- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida em codigo com hardening de conta/cadastro e validacao local verde; operacao de email em producao em validacao manual final).
 
 ---
 
@@ -69,6 +69,21 @@ Status atual: concluido em codigo. Backend bloqueia `auth.changePassword` para c
 
 - [x] 11c. Area Conta em modo leitura por padrao
 Status atual: concluido em codigo. Tela de Conta agora abre persistida em modo somente leitura; campos so liberam edicao ao clicar em `Editar`, com `Cancelar`/`Salvar` e persistencia real no banco.
+
+- [x] 11d. Validacao real de CPF/CNPJ no cadastro e na conta
+Status atual: concluido em codigo. Backend e frontend agora validam CPF/CNPJ por algoritmo (digitos verificadores), nao apenas por tamanho.
+
+- [x] 11e. Politica de senha forte obrigatoria
+Status atual: concluido em codigo. Cadastro, reset e troca de senha exigem 8+ caracteres, sem espacos, com maiuscula, minuscula, numero e caractere especial.
+
+- [x] 11f. Bloqueio de login para email nao verificado + expiração de conta
+Status atual: concluido em codigo. Usuario nao verificado nao consegue novo login; contas sem verificacao por 7 dias sao expurgadas (cleanup em login/sessao e rotina periodica no servidor).
+
+- [x] 11g. Fluxo "Esqueci meu email" no login
+Status atual: concluido em codigo. Nova rota `/forgot-email` e procedure `auth.recoverEmailByTaxId` para recuperar email por CPF/CNPJ validado, com rate limit dedicado.
+
+- [x] 11h. Cadastro mais rapido apos criar conta
+Status atual: concluido em codigo. Envio de email de verificacao no cadastro foi movido para fluxo assincrono (nao bloqueia resposta de criacao de conta).
 
 ### Sprint 4 - Pagamentos e Planos
 
@@ -144,9 +159,9 @@ Status atual: concluido. `ThemeProvider` agora inicia em dark por padrao e a Hom
 - [ ] A6. Criar conta Asaas e configurar webhook
 - [x] A7. Liberar acesso SSH de deploy (chave/usuario) para executar `quick-deploy` remoto
 - [ ] A8. Configurar Resend em producao (dominio/DNS + `RESEND_API_KEY` + `EMAIL_FROM` + `EMAIL_PROVIDER=resend`)
-Status atual: em execucao. Scripts operacionais adicionados (`scripts/vps/set-resend-env.sh` e `scripts/vps/smoke-auth-email.sh`) e runbook atualizado em `docs/DEPLOY_VPS.md`.
-- [ ] A9. Definir `USER_PII_ENCRYPTION_KEY` dedicado na VPS (recomendado)
-Status atual: pendente. Sistema ja funciona com fallback em `CREDENTIAL_ENCRYPTION_KEY`, mas para isolamento de segredo a recomendacao e usar chave dedicada de 32 bytes para dados sensiveis de perfil.
+Status atual: em validacao final. ENV operacional aplicado na VPS (`APP_BASE_URL`, `EMAIL_PROVIDER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`), `smoke-auth-email.sh` executado e app online; falta concluir checklist manual de browser (envio/confirmacao/reset/reenvio/rate limit).
+- [x] A9. Definir `USER_PII_ENCRYPTION_KEY` dedicado na VPS (recomendado)
+Status atual: concluido. Chave dedicada configurada na VPS com tamanho valido (32 bytes/64 hex), app online e sem erro de runtime relacionado.
 
 ### Proximas tarefas do dono (ordem sugerida)
 

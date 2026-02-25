@@ -6,9 +6,11 @@ import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { UNVERIFIED_ACCOUNT_MAX_AGE_MS } from "@shared/const";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import * as db from "../db";
 import { serveStatic, setupVite } from "./vite";
 
 function getTrpcProcedures(req: Request): Set<string> {
@@ -60,6 +62,20 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
   app.set("trust proxy", 1);
+
+  const runExpiredUnverifiedCleanup = async () => {
+    const cutoffDate = new Date(Date.now() - UNVERIFIED_ACCOUNT_MAX_AGE_MS);
+    const deletedUsers = await db.deleteExpiredUnverifiedUsers(cutoffDate);
+    if (deletedUsers > 0) {
+      console.log(`[Auth] Deleted ${deletedUsers} expired unverified account(s)`);
+    }
+  };
+
+  void runExpiredUnverifiedCleanup();
+  const cleanupInterval = setInterval(() => {
+    void runExpiredUnverifiedCleanup();
+  }, 6 * 60 * 60 * 1000);
+  cleanupInterval.unref();
 
   app.use(
     helmet({
@@ -119,6 +135,27 @@ async function startServer() {
     message: { error: "Muitas tentativas de reenvio. Tente novamente em 1 hora." },
   });
 
+  const requestVerificationRateLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: req =>
+      process.env.NODE_ENV !== "production" ||
+      !hasTrpcProcedure(req, "auth.requestEmailVerification"),
+    message: { error: "Muitas tentativas de verificação. Tente novamente em 1 hora." },
+  });
+
+  const recoverEmailRateLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 3,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: req =>
+      process.env.NODE_ENV !== "production" || !hasTrpcProcedure(req, "auth.recoverEmailByTaxId"),
+    message: { error: "Muitas tentativas de recuperação. Tente novamente em 1 hora." },
+  });
+
   const globalApiRateLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: 200,
@@ -141,6 +178,8 @@ async function startServer() {
     forgotPasswordRateLimiter,
     resetPasswordRateLimiter,
     resendVerificationRateLimiter,
+    requestVerificationRateLimiter,
+    recoverEmailRateLimiter,
   );
   // tRPC API
   app.use(

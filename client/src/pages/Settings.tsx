@@ -35,6 +35,8 @@ import {
   normalizeStartPageRoute,
   setSetting,
 } from "@/lib/user-settings";
+import { getPasswordPolicyError } from "@shared/passwordPolicy";
+import { isValidTaxId } from "@shared/taxId";
 
 const THEME_OPTIONS: Array<{
   id: Theme;
@@ -187,6 +189,15 @@ export default function Settings() {
     },
   });
 
+  const requestPasswordResetMutation = trpc.auth.requestPasswordReset.useMutation({
+    onSuccess: () => {
+      toast.success("Se o email existir, enviaremos um link de recuperação.");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   useEffect(() => {
     if (!user || isEditingAccount) return;
     setAccountForm({
@@ -267,9 +278,8 @@ export default function Settings() {
     }
 
     if (safeTaxId) {
-      const digits = safeTaxId.replace(/\D/g, "");
-      if (digits.length !== 11 && digits.length !== 14) {
-        toast.error("CPF/CNPJ inválido. Informe 11 ou 14 dígitos.");
+      if (!isValidTaxId(safeTaxId)) {
+        toast.error("CPF/CNPJ inválido. Verifique os dígitos informados.");
         return;
       }
     }
@@ -330,8 +340,9 @@ export default function Settings() {
       toast.error("Preencha os 3 campos de senha.");
       return;
     }
-    if (newPassword.length < 6) {
-      toast.error("A nova senha deve ter pelo menos 6 caracteres.");
+    const passwordError = getPasswordPolicyError(newPassword);
+    if (passwordError) {
+      toast.error(passwordError);
       return;
     }
     if (newPassword !== confirmNewPassword) {
@@ -658,6 +669,25 @@ export default function Settings() {
                         className="bg-input border-border"
                         disabled={changePasswordMutation.isPending}
                       />
+                      <div className="pt-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+                          disabled={requestPasswordResetMutation.isPending || !user?.email}
+                          onClick={() => {
+                            if (!user?.email) {
+                              toast.error("Não encontramos um email cadastrado para recuperação.");
+                              return;
+                            }
+                            requestPasswordResetMutation.mutate({ email: user.email });
+                          }}
+                        >
+                          {requestPasswordResetMutation.isPending
+                            ? "Enviando link de recuperação..."
+                            : "Esqueci a senha atual (enviar recuperação por email)"}
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="space-y-1.5">
@@ -690,7 +720,8 @@ export default function Settings() {
 
                     <div className="rounded-lg border border-border/80 bg-muted/25 p-3">
                       <p className="text-xs text-muted-foreground">
-                        Boa prática: use ao menos 8 caracteres com letras e números.
+                        Exigimos senha forte: 8+ caracteres, sem espaços, com maiúscula,
+                        minúscula, número e especial.
                       </p>
                     </div>
 

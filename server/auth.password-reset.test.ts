@@ -125,7 +125,7 @@ describe("auth.resetPassword", () => {
     const caller = appRouter.createCaller(createPublicContext());
     const result = await caller.auth.resetPassword({
       token: RAW_RESET_TOKEN,
-      newPassword: "new-password-123",
+      newPassword: "New-password@123",
     });
 
     expect(result).toEqual({ success: true });
@@ -140,8 +140,19 @@ describe("auth.resetPassword", () => {
     await expect(
       caller.auth.resetPassword({
         token: "invalid_token_value_123456789",
-        newPassword: "new-password-123",
+        newPassword: "New-password@123",
       }),
     ).rejects.toThrow("Link de recuperação inválido ou expirado.");
+  });
+
+  it("rejects weak password", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+
+    await expect(
+      caller.auth.resetPassword({
+        token: RAW_RESET_TOKEN,
+        newPassword: "fraca123",
+      }),
+    ).rejects.toThrow("A senha precisa de pelo menos uma letra maiúscula.");
   });
 });

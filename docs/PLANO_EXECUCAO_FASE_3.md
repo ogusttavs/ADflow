@@ -1,6 +1,6 @@
 # PLANO EXECUCAO FASE 3 - Auth e Email
 
-Atualizado em: 2026-02-25 16:01:05 -0300
+Atualizado em: 2026-02-25 18:33:45 -0300
 
 ## Objetivo da fase
 
@@ -8,6 +8,16 @@ Fechar o ciclo de seguranca da conta do usuario com tres entregas:
 - confirmacao de email no cadastro;
 - recuperacao de senha (esqueci minha senha);
 - troca de senha para usuario autenticado.
+
+## Status consolidado da fase
+
+- Implementacao de Sprint 3 concluida em codigo (itens 09, 10 e 11).
+- Hardening adicional de conta/cadastro concluido em codigo para seguranca de dados pessoais.
+- Validacao local consolidada verde:
+  - `pnpm check`
+  - `pnpm test` (66 testes)
+  - `pnpm build`
+- Operacao de email em producao preparada com Resend + scripts de automacao (`set-resend-env.sh` e `smoke-auth-email.sh`).
 
 ## Decisoes aprovadas (travadas)
 
@@ -43,7 +53,7 @@ Campos minimos:
 - `usedAt` (timestamp nullable).
 - `createdAt` (timestamp default now).
 
-## Fluxo funcional por item
+## Entregas por item base
 
 ### Item 11 - Troca de senha dentro do app
 
@@ -56,6 +66,7 @@ Backend:
 Frontend:
 - Formulario de seguranca em `Settings` para alterar senha.
 - Exibir apenas para contas com login por email (`loginMethod` com email).
+- Se email nao verificado, troca de senha e bloqueada e o usuario recebe orientacao de verificacao.
 
 ### Item 10 - Esqueci minha senha
 
@@ -87,8 +98,39 @@ Frontend:
 - Pagina `/verify-email?token=...`.
 - Popup persistente no app para email nao verificado:
   - texto claro;
-  - botao de reenviar link;
-  - opcao para atualizar email se necessario.
+  - botao de reenviar link.
+
+## Hardening adicional entregue nesta fase
+
+1. Cadastro ampliado com dados de perfil:
+- nome, sobrenome, whatsapp, cidade, endereco, origem, idioma preferido, CPF/CNPJ e opt-in de comunicacao.
+
+2. Protecao de PII:
+- CPF/CNPJ protegido no backend com criptografia AES-256-GCM;
+- suporte a chave dedicada `USER_PII_ENCRYPTION_KEY` (fallback seguro para `CREDENTIAL_ENCRYPTION_KEY`).
+
+3. Conta em modo leitura por padrao:
+- dados carregam persistidos e so entram em modo edicao ao clicar `Editar`.
+
+4. Validacao real de CPF/CNPJ:
+- validacao por digitos verificadores (nao apenas tamanho), no cadastro, conta e fluxo de recuperacao de email.
+
+5. Politica de senha forte obrigatoria:
+- minimo 8 caracteres;
+- sem espacos;
+- exige maiuscula, minuscula, numero e caractere especial;
+- aplicada em cadastro, reset e troca.
+
+6. Regras de login para email nao verificado:
+- bloqueio de novo login sem verificacao de email;
+- expurgo de conta nao verificada apos 7 dias.
+
+7. Fluxo "Esqueci meu email":
+- nova rota `/forgot-email`;
+- recuperacao por CPF/CNPJ validado com rate limit dedicado.
+
+8. Performance no cadastro:
+- envio de verificacao movido para fluxo assincrono para reduzir tempo de resposta pos-cadastro.
 
 ## Seguranca obrigatoria
 
@@ -113,13 +155,23 @@ Variaveis esperadas:
 - `EMAIL_PROVIDER` (`resend` | `mock`)
 - `EMAIL_FROM`
 - `RESEND_API_KEY`
+- `USER_PII_ENCRYPTION_KEY` (recomendado para isolamento de segredo PII)
 
-## Checklist de execucao (marcar [x] durante desenvolvimento)
+## Operacao de producao (runbook aplicado)
 
-- [ ] Migration do banco (`users` + `auth_tokens`).
+- Script de ENV de email na VPS: `scripts/vps/set-resend-env.sh`
+- Script de smoke operacional: `scripts/vps/smoke-auth-email.sh`
+- Deploy rapido remoto: `scripts/vps/quick-deploy.sh`
+- Runbook detalhado: `docs/DEPLOY_VPS.md`
+
+## Checklist de fechamento da Sprint 3
+
+- [x] Migration do banco (`users` + `auth_tokens` + extensoes de perfil).
 - [x] Adaptador de email (Resend + mock local).
 - [x] Item 11 completo (backend + frontend).
 - [x] Item 10 completo (backend + frontend + rate limit).
 - [x] Item 09 completo (backend + frontend + popup + reenvio).
-- [x] Validacoes finais: `pnpm check`, `pnpm test`, `pnpm build`.
-- [ ] Atualizar docs operacionais (`TODO`, `CENTRO`, `LOG`) e registrar deploy.
+- [x] Hardening adicional de conta/cadastro/PII (CPF-CNPJ, senha forte, login gate, forgot email).
+- [x] Validacoes finais locais: `pnpm check`, `pnpm test`, `pnpm build`.
+- [x] Documentacao operacional sincronizada (`TODO`, `CENTRO`, `LOG`).
+- [ ] Validacao manual final em producao (checklist de browser + rate limit com 429).

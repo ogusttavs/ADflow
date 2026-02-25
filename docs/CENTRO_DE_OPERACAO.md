@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 17:15:44 -0300
+Atualizado em: 2026-02-25 18:33:45 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -92,23 +92,32 @@ Pendencias tecnicas objetivas:
 - Deploy da Sprint 2 aplicado em producao na VPS com HEAD `6aa1b1d`, `.env` ajustado (`VITE_APP_ID=orbita` e `CREDENTIAL_ENCRYPTION_KEY`), `pm2` online e HTTPS `200 OK` em `getorbita.com.br` e `www.getorbita.com.br`.
 - Acesso SSH remoto local liberado e `quick-deploy` validado com sucesso em producao (A7 concluido).
 - Pendencias atuais do dono no backlog: A1, A2, A3, A6 e A8.
+- A9 concluido operacionalmente: `USER_PII_ENCRYPTION_KEY` dedicada configurada na VPS com tamanho valido e sem erro de runtime.
 - Sprint 3 (Auth e Email) concluida em codigo: itens 09, 10 e 11 implementados e validados localmente.
 - Refinamentos de seguranca/conta adicionados na Sprint 3:
   - cadastro ampliado com dados completos de perfil e consentimento;
   - area Conta em modo somente leitura por padrao (edicao explicita por botao `Editar`);
   - troca de senha condicionada a email verificado (frontend + backend).
+- Hardening adicional de auth/conta implementado em codigo:
+  - validacao real de CPF/CNPJ (digitos verificadores) em cadastro/conta e recuperacao de email;
+  - politica de senha forte obrigatoria (8+, sem espacos, maiuscula, minuscula, numero e especial) em cadastro, reset e troca;
+  - bloqueio de novo login para nao verificados e expurgo de conta pendente apos 7 dias;
+  - novo fluxo "Esqueci meu email" na tela de login (`/forgot-email`) com rate limit dedicado;
+  - envio de verificacao no cadastro movido para async para reduzir latencia.
 - Fluxo de verificacao ativo em soft lock com popup persistente no app, rota `/verify-email` e reenvio autenticado.
 - Fluxo de reset de senha ativo com token hash em `auth_tokens`, expiracao e rate limit dedicado.
-- Pendencia operacional imediata da Sprint 3: aplicar migration `0009_giant_blacklash.sql` em ambiente alvo e fazer deploy desta revisao.
+- Validacao local apos hardening adicional: `pnpm check`, `pnpm test` (66 testes) e `pnpm build` verdes.
+- Pendencia operacional imediata da Sprint 3: deploy da revisao final de hardening e fechamento do checklist manual de browser do A8 (verificacao, reset, reenvio e 429).
 - Toolkit operacional de email preparado:
   - `scripts/vps/set-resend-env.sh` (atualizacao segura de ENV na VPS);
   - `scripts/vps/smoke-auth-email.sh` (validacao operacional + checklist manual).
 
 ## 7) Prioridade recomendada (curto prazo)
 
-1. Aplicar migration da Sprint 3 no ambiente alvo (`users.emailVerified*` + `auth_tokens`).
-2. Configurar Resend em producao (`EMAIL_PROVIDER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`, DNS do dominio).
-3. Executar deploy e smoke test dos fluxos de verificacao e reset em producao.
+1. Executar deploy da revisao final da Sprint 3 e validar checklist manual do A8 no browser.
+2. A1 + A2 (Google OAuth em producao).
+3. A6 (Asaas + webhook).
+4. A3 (rotacao de segredos operacionais).
 
 ## 8) Marcos recentes
 
@@ -133,3 +142,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: Sprint 3 itens 09 e 10 concluidos em codigo: confirmacao de email no cadastro (`verifyEmail` + `resendVerification` + popup soft lock + rota `/verify-email`) e recuperacao de senha (`requestPasswordReset` + `resetPassword` + telas dedicadas), com validacao `pnpm check`, `pnpm test` e `pnpm build` verdes.
 - 2026-02-25: plano operacional Resend+Hostinger implementado em repo com scripts de VPS (`set-resend-env.sh` e `smoke-auth-email.sh`) e runbook atualizado em `docs/DEPLOY_VPS.md`.
 - 2026-02-25: Sprint 3 refinada para producao com cadastro ampliado de perfil, criptografia de CPF/CNPJ no backend, `auth.updateProfile`, Conta em modo leitura por padrao e bloqueio de troca de senha sem email verificado; validado com `pnpm check`, `pnpm test` (58 testes) e `pnpm build`.
+- 2026-02-25: hardening adicional de auth com validacao algoritimica de CPF/CNPJ, senha forte obrigatoria, bloqueio de login para nao verificados, expiracao de conta em 7 dias, fluxo "esqueci meu email" e cadastro com envio de verificacao assincrono; validado com `pnpm check`, `pnpm test` (66 testes) e `pnpm build`.

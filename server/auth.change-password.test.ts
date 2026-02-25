@@ -61,7 +61,7 @@ describe("auth.changePassword", () => {
 
     const result = await caller.auth.changePassword({
       currentPassword: "old-password",
-      newPassword: "new-password-123",
+      newPassword: "New-password@123",
     });
 
     expect(result).toEqual({ success: true });
@@ -72,7 +72,7 @@ describe("auth.changePassword", () => {
       { passwordHash: string },
     ];
 
-    expect(await bcrypt.compare("new-password-123", updates.passwordHash)).toBe(true);
+    expect(await bcrypt.compare("New-password@123", updates.passwordHash)).toBe(true);
   });
 
   it("rejects when current password is invalid", async () => {
@@ -89,7 +89,7 @@ describe("auth.changePassword", () => {
     await expect(
       caller.auth.changePassword({
         currentPassword: "wrong-password",
-        newPassword: "new-password-123",
+        newPassword: "New-password@123",
       })
     ).rejects.toMatchObject<Partial<TRPCError>>({
       message: "Senha atual incorreta",
@@ -112,7 +112,7 @@ describe("auth.changePassword", () => {
     await expect(
       caller.auth.changePassword({
         currentPassword: "any-password",
-        newPassword: "new-password-123",
+        newPassword: "New-password@123",
       })
     ).rejects.toMatchObject<Partial<TRPCError>>({
       message: "Sua conta não usa senha local para login.",
@@ -137,10 +137,33 @@ describe("auth.changePassword", () => {
     await expect(
       caller.auth.changePassword({
         currentPassword: "old-password",
-        newPassword: "new-password-123",
+        newPassword: "New-password@123",
       }),
     ).rejects.toMatchObject<Partial<TRPCError>>({
       message: "Confirme seu email antes de alterar a senha.",
+    });
+
+    expect(dbMock.updateUserById).not.toHaveBeenCalled();
+  });
+
+  it("rejects weak new password", async () => {
+    const ctx = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const oldHash = await bcrypt.hash("old-password", 10);
+
+    dbMock.getDb.mockResolvedValue({});
+    dbMock.getUserByOpenId.mockResolvedValue({
+      ...ctx.user,
+      passwordHash: oldHash,
+    });
+
+    await expect(
+      caller.auth.changePassword({
+        currentPassword: "old-password",
+        newPassword: "fraca123",
+      }),
+    ).rejects.toMatchObject<Partial<TRPCError>>({
+      message: "A senha precisa de pelo menos uma letra maiúscula.",
     });
 
     expect(dbMock.updateUserById).not.toHaveBeenCalled();

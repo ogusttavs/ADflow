@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 17:15:44 -0300
+Atualizado em: 2026-02-25 18:37:44 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -31,6 +31,87 @@ Arquivos alterados:
 ```
 
 ## Historico ativo
+
+[2026-02-25 18:37:44 -0300] [Codex]
+Contexto:
+- Dono pediu fechamento documental completo da Sprint 3 e preparacao para commit/deploy da revisao final.
+
+Feito:
+- Consolidacao documental da Sprint 3 em `docs/PLANO_EXECUCAO_FASE_3.md` com:
+  - entregas base (09/10/11);
+  - hardening adicional (PII, senha forte, CPF/CNPJ valido, login gate, expiracao 7 dias, forgot email, otimização de cadastro);
+  - status de validacao local e checklist final.
+- Backlog atualizado em `docs/TODO_LANCAMENTO.md`:
+  - A9 marcado como concluido (chave `USER_PII_ENCRYPTION_KEY` dedicada ativa na VPS);
+  - A8 mantido em validacao final manual de browser.
+- Centro operacional sincronizado com estado atual da fase e prioridades imediatas de release.
+
+Proximo:
+- Executar validacao final local (`check/test/build`), commitar, enviar para `origin/main` e aplicar deploy na VPS com smoke.
+
+Bloqueios/Riscos:
+- A8 depende de validacao manual final no browser para fechamento oficial de operacao de email.
+
+Arquivos alterados:
+- docs/PLANO_EXECUCAO_FASE_3.md
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 18:25:34 -0300] [Codex]
+Contexto:
+- Dono pediu hardening adicional da Sprint 3 com foco em seguranca de identidade: validacao real de CPF/CNPJ, regras fortes de senha, bloqueio de login para nao verificados, expiracao de conta pendente em 7 dias, melhoria de performance no cadastro e fluxo "esqueci meu email" no login.
+
+Feito:
+- Backend/auth:
+  - validacao de CPF/CNPJ migrada de checagem por tamanho para validacao por digitos verificadores (`shared/taxId.ts`);
+  - politica de senha forte centralizada em `shared/passwordPolicy.ts` e aplicada em `auth.register`, `auth.resetPassword` e `auth.changePassword`;
+  - `auth.login` agora bloqueia contas com email nao verificado e remove contas pendentes com mais de 7 dias;
+  - cleanup periodico de contas nao verificadas expiradas adicionado no bootstrap do servidor (`server/_core/index.ts`);
+  - nova procedure publica `auth.requestEmailVerification` para reenvio de verificacao sem sessao;
+  - nova procedure publica `auth.recoverEmailByTaxId` para recuperacao de email via CPF/CNPJ validado;
+  - suporte de banco adicionado para busca por `taxId` (via `type` + `last4` + decrypt) e expurgo de conta/tokens.
+- Frontend:
+  - login com acao de reenvio de verificacao por email e novo link "Esqueci meu email";
+  - nova pagina `/forgot-email`;
+  - validacao forte de senha em cadastro/reset/troca;
+  - validacao real de CPF/CNPJ em cadastro/conta;
+  - na aba Seguranca, opcao "Esqueci a senha atual" para disparar recuperacao por email.
+- Qualidade:
+  - novos testes adicionados para regras de login/verificacao/recuperacao de email;
+  - suite local validada: `pnpm check`, `pnpm test` (66 testes) e `pnpm build`.
+
+Proximo:
+- Deploy dessa revisao na VPS e smoke manual dos novos fluxos:
+  - login bloqueado para nao verificados;
+  - expiracao de conta apos 7 dias;
+  - esqueci email por CPF/CNPJ;
+  - senha forte em cadastro/reset/troca.
+
+Bloqueios/Riscos:
+- Fluxo "esqueci meu email" por CPF/CNPJ exige monitoramento de abuso em producao (mitigado com rate limit, mas deve ser acompanhado em logs).
+- Mudancas ainda locais neste momento (sem deploy desta rodada).
+
+Arquivos alterados:
+- shared/taxId.ts
+- shared/passwordPolicy.ts
+- shared/const.ts
+- server/db.ts
+- server/routers.ts
+- server/_core/index.ts
+- server/_core/sdk.ts
+- server/auth.login-recovery.test.ts
+- server/auth.change-password.test.ts
+- server/auth.password-reset.test.ts
+- server/auth.profile.test.ts
+- client/src/App.tsx
+- client/src/pages/Login.tsx
+- client/src/pages/ForgotEmail.tsx
+- client/src/pages/ResetPassword.tsx
+- client/src/pages/Settings.tsx
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
 
 [2026-02-25 17:15:44 -0300] [Codex]
 Contexto:

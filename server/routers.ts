@@ -2,12 +2,21 @@ import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { COOKIE_NAME, SESSION_DURATION_MS } from "@shared/const";
+import {
+  COOKIE_NAME,
+  SESSION_DURATION_MS,
+  UNVERIFIED_ACCOUNT_MAX_AGE_MS,
+} from "@shared/const";
+import { getPasswordPolicyError } from "@shared/passwordPolicy";
+import { normalizeTaxId } from "@shared/taxId";
 import { createRawAuthToken, hashAuthToken } from "./_core/authToken";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { sendTransactionalEmail } from "./_core/email";
 import { ENV } from "./_core/env";
-import { encryptProfileSensitiveValue } from "./_core/profileCrypto";
+import {
+  decryptProfileSensitiveValue,
+  encryptProfileSensitiveValue,
+} from "./_core/profileCrypto";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { sdk } from "./_core/sdk";
@@ -54,13 +63,12 @@ function resolveAppBaseUrl(req: {
 }
 
 const EMAIL_VERIFICATION_EXPIRY_MS = 24 * 60 * 60 * 1000;
-const TAX_ID_DIGIT_REGEX = /\D/g;
 
 const registerInputSchema = z.object({
   firstName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres").max(120),
   lastName: z.string().min(2, "Sobrenome deve ter pelo menos 2 caracteres").max(120),
   email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  password: z.string().min(1).max(128),
   whatsapp: z.string().min(8, "WhatsApp inválido").max(32),
   city: z.string().min(2, "Cidade inválida").max(120),
   address: z.string().min(5, "Endereço inválido").max(255),
@@ -84,18 +92,35 @@ const updateProfileInputSchema = z.object({
 });
 
 function normalizeTaxIdOrThrow(rawTaxId: string): { digits: string; type: "cpf" | "cnpj" } {
-  const digits = rawTaxId.replace(TAX_ID_DIGIT_REGEX, "");
-  if (digits.length === 11) {
-    return { digits, type: "cpf" };
-  }
-  if (digits.length === 14) {
-    return { digits, type: "cnpj" };
-  }
+  const normalized = normalizeTaxId(rawTaxId);
+  if (normalized) return normalized;
 
   throw new TRPCError({
     code: "BAD_REQUEST",
-    message: "CPF/CNPJ inválido. Informe um CPF (11 dígitos) ou CNPJ (14 dígitos).",
+    message: "CPF/CNPJ inválido. Verifique os dígitos informados.",
   });
+}
+
+function ensureStrongPasswordOrThrow(password: string) {
+  const policyError = getPasswordPolicyError(password);
+  if (policyError) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: policyError,
+    });
+  }
+}
+
+function isUnverifiedAccountExpired(user: Pick<User, "emailVerified" | "createdAt">) {
+  if (user.emailVerified) return false;
+  const ageMs = Date.now() - user.createdAt.getTime();
+  return ageMs >= UNVERIFIED_ACCOUNT_MAX_AGE_MS;
+}
+
+async function expireUnverifiedAccountIfNeeded(user: User): Promise<boolean> {
+  if (!isUnverifiedAccountExpired(user)) return false;
+  await db.deleteUserAndAuthTokensById(user.id);
+  return true;
 }
 
 function maskTaxId(
@@ -192,7 +217,8 @@ export const appRouter = router({
           });
         }
 
-        const user = await db.getUserByEmail(input.email);
+        const normalizedEmail = input.email.trim().toLowerCase();
+        const user = await db.getUserByEmail(normalizedEmail);
 
         if (!user || !user.passwordHash) {
           throw new TRPCError({
@@ -206,6 +232,22 @@ export const appRouter = router({
           throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "Email ou senha incorretos",
+          });
+        }
+
+        if (!user.emailVerified) {
+          const accountExpired = await expireUnverifiedAccountIfNeeded(user);
+          if (accountExpired) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message:
+                "Sua conta expirou por falta de verificação de email. Faça um novo cadastro.",
+            });
+          }
+
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Confirme seu email para entrar. Reenvie o link de verificação.",
           });
         }
 
@@ -239,6 +281,7 @@ export const appRouter = router({
         const lastName = input.lastName.trim();
         const fullName = `${firstName} ${lastName}`.trim();
         const normalizedTaxId = normalizeTaxIdOrThrow(input.taxId.trim());
+        ensureStrongPasswordOrThrow(input.password);
 
         let encryptedTaxId: string;
         try {
@@ -290,17 +333,16 @@ export const appRouter = router({
 
         const createdUser = await db.getUserByOpenId(openId);
         if (createdUser?.email) {
-          try {
-            await createAndSendEmailVerification({
-              userId: createdUser.id,
-              email: createdUser.email,
-              name: createdUser.name,
-              req: ctx.req,
-            });
-          } catch (error) {
+          // Do not block register response waiting for external email provider latency.
+          void createAndSendEmailVerification({
+            userId: createdUser.id,
+            email: createdUser.email,
+            name: createdUser.name,
+            req: ctx.req,
+          }).catch((error) => {
             // Soft lock flow: account can continue and user can re-request verification in-app.
             console.error("[Auth] Failed to send email verification during register", error);
-          }
+          });
         }
 
         const sessionToken = await sdk.createSessionToken(openId, {
@@ -360,6 +402,90 @@ export const appRouter = router({
         return { success: true } as const;
       }),
 
+    requestEmailVerification: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const database = await db.getDb();
+        if (!database) {
+          throw new TRPCError({
+            code: "SERVICE_UNAVAILABLE",
+            message: "Banco de dados indisponível",
+          });
+        }
+
+        const normalizedEmail = input.email.trim().toLowerCase();
+        const user = await db.getUserByEmail(normalizedEmail);
+        const genericResponse = { success: true } as const;
+
+        if (!user || !user.email) {
+          return genericResponse;
+        }
+
+        const accountExpired = await expireUnverifiedAccountIfNeeded(user);
+        if (accountExpired || user.emailVerified) {
+          return genericResponse;
+        }
+
+        try {
+          await createAndSendEmailVerification({
+            userId: user.id,
+            email: user.email,
+            name: user.name,
+            req: ctx.req,
+          });
+        } catch (error) {
+          console.error("[Auth] Failed to request email verification", error);
+        }
+
+        return genericResponse;
+      }),
+
+    recoverEmailByTaxId: publicProcedure
+      .input(z.object({
+        taxId: z.string().min(11).max(18),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) {
+          throw new TRPCError({
+            code: "SERVICE_UNAVAILABLE",
+            message: "Banco de dados indisponível",
+          });
+        }
+
+        const normalizedTaxId = normalizeTaxIdOrThrow(input.taxId.trim());
+        const candidates = await db.getUsersByTaxIdTail({
+          taxIdType: normalizedTaxId.type,
+          taxIdLast4: normalizedTaxId.digits.slice(-4),
+        });
+
+        for (const candidate of candidates) {
+          if (!candidate.taxIdEncrypted || !candidate.email) continue;
+
+          const accountExpired = await expireUnverifiedAccountIfNeeded(candidate);
+          if (accountExpired) continue;
+
+          try {
+            const decryptedTaxId = decryptProfileSensitiveValue(candidate.taxIdEncrypted);
+            if (decryptedTaxId === normalizedTaxId.digits) {
+              return {
+                success: true,
+                email: candidate.email,
+              } as const;
+            }
+          } catch (error) {
+            // Ignore records with invalid/legacy encrypted value.
+          }
+        }
+
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Não foi possível localizar uma conta com os dados informados.",
+        });
+      }),
+
     resendVerification: protectedProcedure
       .mutation(async ({ ctx }) => {
         const database = await db.getDb();
@@ -375,6 +501,14 @@ export const appRouter = router({
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Sua conta não possui email para verificação.",
+          });
+        }
+
+        if (await expireUnverifiedAccountIfNeeded(currentUser)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "Sua conta expirou por falta de verificação de email. Faça um novo cadastro.",
           });
         }
 
@@ -504,13 +638,17 @@ export const appRouter = router({
           });
         }
 
-        const normalizedEmail = input.email.trim();
+        const normalizedEmail = input.email.trim().toLowerCase();
         const user = await db.getUserByEmail(normalizedEmail);
 
         // Generic response to prevent account enumeration.
         const genericResponse = { success: true } as const;
 
         if (!user || !user.email || !user.passwordHash) {
+          return genericResponse;
+        }
+
+        if (await expireUnverifiedAccountIfNeeded(user)) {
           return genericResponse;
         }
 
@@ -550,7 +688,7 @@ export const appRouter = router({
     resetPassword: publicProcedure
       .input(z.object({
         token: z.string().min(20),
-        newPassword: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+        newPassword: z.string().min(1).max(128),
       }))
       .mutation(async ({ input }) => {
         const database = await db.getDb();
@@ -560,6 +698,8 @@ export const appRouter = router({
             message: "Banco de dados indisponível",
           });
         }
+
+        ensureStrongPasswordOrThrow(input.newPassword);
 
         const tokenHash = hashAuthToken(input.token);
         const tokenRecord = await db.getActiveAuthTokenByHash({
@@ -607,7 +747,7 @@ export const appRouter = router({
     changePassword: protectedProcedure
       .input(z.object({
         currentPassword: z.string().min(1),
-        newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres"),
+        newPassword: z.string().min(1).max(128),
       }))
       .mutation(async ({ input, ctx }) => {
         const database = await db.getDb();
@@ -618,11 +758,20 @@ export const appRouter = router({
           });
         }
 
+        ensureStrongPasswordOrThrow(input.newPassword);
+
         const currentUser = await db.getUserByOpenId(ctx.user.openId);
         if (!currentUser || !currentUser.passwordHash) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Sua conta não usa senha local para login.",
+          });
+        }
+        if (await expireUnverifiedAccountIfNeeded(currentUser)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "Sua conta expirou por falta de verificação de email. Faça um novo cadastro.",
           });
         }
         if (!currentUser.emailVerified) {

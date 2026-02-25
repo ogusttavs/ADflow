@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Zap, Loader2, Chrome } from "lucide-react";
 import { getStartPageRoute } from "@/lib/user-settings";
+import { getPasswordPolicyError } from "@shared/passwordPolicy";
+import { isValidTaxId } from "@shared/taxId";
 
 type Tab = "login" | "register";
 
@@ -53,6 +55,15 @@ export default function Login() {
     },
   });
 
+  const requestEmailVerificationMutation = trpc.auth.requestEmailVerification.useMutation({
+    onSuccess: () => {
+      toast.success("Se o email existir e estiver pendente, enviaremos um novo link.");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginForm.email || !loginForm.password) {
@@ -79,21 +90,48 @@ export default function Login() {
       toast.error("Preencha todos os campos");
       return;
     }
-    if (registerForm.password.length < 6) {
-      toast.error("Senha deve ter pelo menos 6 caracteres");
+    const passwordError = getPasswordPolicyError(registerForm.password);
+    if (passwordError) {
+      toast.error(passwordError);
       return;
     }
 
-    const taxIdDigits = registerForm.taxId.replace(/\D/g, "");
-    if (taxIdDigits.length !== 11 && taxIdDigits.length !== 14) {
-      toast.error("Informe um CPF (11 dígitos) ou CNPJ (14 dígitos)");
+    if (!isValidTaxId(registerForm.taxId)) {
+      toast.error("CPF/CNPJ inválido. Verifique os dígitos informados.");
       return;
     }
 
-    registerMutation.mutate(registerForm);
+    registerMutation.mutate({
+      firstName: registerForm.firstName.trim(),
+      lastName: registerForm.lastName.trim(),
+      email: registerForm.email.trim().toLowerCase(),
+      whatsapp: registerForm.whatsapp.trim(),
+      city: registerForm.city.trim(),
+      address: registerForm.address.trim(),
+      acquisitionSource: registerForm.acquisitionSource.trim(),
+      preferredLanguage: registerForm.preferredLanguage.trim(),
+      taxId: registerForm.taxId.trim(),
+      marketingOptIn: registerForm.marketingOptIn,
+      password: registerForm.password,
+    });
   };
 
-  const isLoading = loginMutation.isPending || registerMutation.isPending;
+  const handleRequestEmailVerification = () => {
+    const normalizedEmail = loginForm.email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      toast.error("Informe seu email para reenviar o link de verificação.");
+      return;
+    }
+
+    requestEmailVerificationMutation.mutate({
+      email: normalizedEmail,
+    });
+  };
+
+  const isLoading =
+    loginMutation.isPending ||
+    registerMutation.isPending ||
+    requestEmailVerificationMutation.isPending;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -203,12 +241,28 @@ export default function Login() {
                   autoComplete="current-password"
                 />
                 <div className="text-right pt-1">
-                  <Link
-                    href="/forgot-password"
-                    className="text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    Esqueci minha senha
-                  </Link>
+                  <div className="flex flex-col items-end gap-1">
+                    <Link
+                      href="/forgot-password"
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Esqueci minha senha
+                    </Link>
+                    <Link
+                      href="/forgot-email"
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Esqueci meu email
+                    </Link>
+                    <button
+                      type="button"
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                      onClick={handleRequestEmailVerification}
+                      disabled={requestEmailVerificationMutation.isPending}
+                    >
+                      Reenviar verificação de email
+                    </button>
+                  </div>
                 </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
@@ -352,12 +406,15 @@ export default function Login() {
                     id="reg-password"
                     name="reg-password"
                     type="password"
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Senha forte"
                     value={registerForm.password}
                     onChange={(e) => setRegisterForm((f) => ({ ...f, password: e.target.value }))}
                     disabled={isLoading}
                     autoComplete="new-password"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Use 8+ caracteres, sem espaços, com maiúscula, minúscula, número e especial.
+                  </p>
                 </div>
 
                 <label className="sm:col-span-2 flex items-start gap-2 rounded-md border border-border/80 p-3">
