@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 11:01:28 -0300
+Atualizado em: 2026-02-25 11:10:52 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -106,5 +106,5 @@ Status atual: concluido. `ThemeProvider` agora inicia em dark por padrao e a Hom
 - [ ] A2. Google Cloud: publicar app OAuth (sair de Testing)
 - [ ] A3. Rotacionar credenciais e atualizar `.env` no servidor
 - [ ] A4. Configurar `CREDENTIAL_ENCRYPTION_KEY` em producao
-- [ ] A5. Definir dominio final da marca Orbita
+- [x] A5. Definir dominio final da marca Orbita
 - [ ] A6. Criar conta Asaas e configurar webhook

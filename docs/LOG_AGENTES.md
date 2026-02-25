@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 11:01:28 -0300
+Atualizado em: 2026-02-25 11:10:52 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -353,3 +353,27 @@ Arquivos alterados:
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
 - docs/TODO_LANCAMENTO.md
+
+[2026-02-25 11:10:52 -0300] [Codex]
+Contexto:
+- Dono executou o cutover final do dominio em producao e enviou evidencias do estado da VPS.
+
+Feito:
+- Validado deployment de `getorbita.com.br` com SSL ativo (certbot emitido e instalado no Nginx).
+- Validado processo `adflow` online no PM2.
+- Validado cabeçalhos HTTP:
+  - `curl -I https://getorbita.com.br` retornando `200 OK`;
+  - `curl -I http://getorbita.com.br` retornando `301 Moved Permanently` para HTTPS.
+- Documentacao operacional atualizada para refletir dominio ativo novo.
+
+Proximo:
+- Iniciar Sprint 2 (Seguranca) conforme backlog oficial.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio operacional no deploy atual.
+
+Arquivos alterados:
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+- docs/TODO_LANCAMENTO.md
+- docs/DEPLOY_VPS.md

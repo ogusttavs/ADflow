@@ -1,11 +1,11 @@
 # Deploy VPS - Operacao Oficial
 
-Atualizado em: 2026-02-25 00:18:33 -0300
+Atualizado em: 2026-02-25 11:10:52 -0300
 
 Objetivo: publicar e manter o app em VPS com PM2 + Nginx + SSL.
 
 ## Producao atual
-- Dominio em uso: `https://metrizy.com.br`
+- Dominio em uso: `https://getorbita.com.br`
 - Processo: `pm2` app `adflow`
 
 ## 1) Setup inicial (uma vez)

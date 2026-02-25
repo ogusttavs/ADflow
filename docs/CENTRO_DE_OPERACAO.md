@@ -1,6 +1,6 @@
 # Centro de Operacao - AdFlow/Orbita
 
-Atualizado em: 2026-02-25 11:01:28 -0300
+Atualizado em: 2026-02-25 11:10:52 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -66,8 +66,8 @@ Comandos principais:
 - `pnpm db:push`
 
 Producao:
-- Dominio ativo: `https://metrizy.com.br`
-- Novo dominio em transicao: `https://getorbita.com.br` (DNS ja configurado; cutover da VPS pendente)
+- Dominio ativo: `https://getorbita.com.br`
+- Dominio anterior: `https://metrizy.com.br`
 - App em PM2 + Nginx + SSL
 
 ## 6) Situacao real (agora)
@@ -87,7 +87,6 @@ Estado atual de desenvolvimento:
 
 Pendencias tecnicas objetivas:
 - Validacao de baseline verde confirmada: `pnpm check`, `pnpm test` e `pnpm build` executados com sucesso.
-- Cutover para `getorbita.com.br` pendente de reconfiguracao de Nginx/SSL na VPS apos push do codigo.
 - Sprint 2 (Seguranca) ainda nao iniciada: rate-limit, `helmet`, expiração JWT e encrypt de credenciais.
 
 ## 7) Prioridade recomendada (curto prazo)
@@ -110,3 +109,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: `docs/DECISOES_PRODUTO.md` oficializado como documento de decisao de produto para todos os agentes.
 - 2026-02-25: baseline funcional do app visivel fechado para demo (persistencia em settings, datas locais, onboarding e LP coerentes), com `check/test/build` verdes.
 - 2026-02-25: tema padrao alterado para dark e LP refinada para refletir somente funcionalidades ativas do Orbita.
+- 2026-02-25: cutover concluido para `https://getorbita.com.br` com SSL ativo, `pm2` online, HTTPS `200 OK` e HTTP `301` para HTTPS.
