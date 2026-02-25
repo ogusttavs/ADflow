@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 14:13:36 -0300
+Atualizado em: 2026-02-25 14:23:54 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -125,3 +125,4 @@ Status atual: concluido. `ThemeProvider` agora inicia em dark por padrao e a Hom
 - [ ] A4. Configurar `CREDENTIAL_ENCRYPTION_KEY` em producao
 - [x] A5. Definir dominio final da marca Orbita
 - [ ] A6. Criar conta Asaas e configurar webhook
+- [ ] A7. Liberar acesso SSH de deploy (chave/usuario) para executar `quick-deploy` remoto

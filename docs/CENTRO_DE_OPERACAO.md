@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 14:13:36 -0300
+Atualizado em: 2026-02-25 14:23:54 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -88,6 +88,7 @@ Estado atual de desenvolvimento:
 Pendencias tecnicas objetivas:
 - Validacao de baseline verde confirmada: `pnpm check`, `pnpm test` e `pnpm build` executados com sucesso.
 - Sprint 2 (Seguranca) concluida: `helmet`, rate limiting em auth, sessao JWT de 7 dias e criptografia AES-256-GCM em credenciais.
+- Codigo da Sprint 2 ja publicado em `origin/main` (commit `1f82a20`), com deploy em producao pendente por credencial SSH.
 - Proxima prioridade tecnica: iniciar Sprint 3 (Auth e Email).
 
 ## 7) Prioridade recomendada (curto prazo)
@@ -114,3 +115,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: SSL expandido para cobrir `www.getorbita.com.br` (certbot + Nginx). Ambos `https://getorbita.com.br` e `https://www.getorbita.com.br` retornando `200 OK`. HTTP `301` para HTTPS ativo. Cert valido ate 2026-05-26.
 - 2026-02-25: Sprint 2 (Seguranca) concluida com `helmet`, rate limiting em auth com `trust proxy`, expiracao de sessao em 7 dias e criptografia de credenciais de cliente (AES-256-GCM), validada por `pnpm check`, `pnpm test` e `pnpm build`.
 - 2026-02-25: hardening pós-revisao da Sprint 2 concluido com rate limit global (`200 req/min` em `/api`) e ajuste do `.env.example` para `VITE_APP_ID=orbita`, removendo bloco AWS legado.
+- 2026-02-25: commit `1f82a20` da Sprint 2 enviado para `origin/main`; tentativa de deploy remoto bloqueada por autenticacao SSH (`Permission denied (publickey,password)`).

@@ -1,6 +1,6 @@
 # Deploy VPS - Operacao Oficial
 
-Atualizado em: 2026-02-25 11:10:52 -0300
+Atualizado em: 2026-02-25 14:23:54 -0300
 
 Objetivo: publicar e manter o app em VPS com PM2 + Nginx + SSL.
 
@@ -27,7 +27,8 @@ NODE_ENV=production
 PORT=3000
 DATABASE_URL=mysql://adflow:SENHA_FORTE_AQUI@localhost:3306/adflow
 JWT_SECRET=UM_SEGREDO_FORTE_E_UNICO
-VITE_APP_ID=adflow
+VITE_APP_ID=orbita
+CREDENTIAL_ENCRYPTION_KEY=CHAVE_32_BYTES_HEX_OU_BASE64
 ```
 
 Se usar Google OAuth:

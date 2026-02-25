@@ -529,3 +529,32 @@ Arquivos alterados:
 - docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
+
+[2026-02-25 14:23:54 -0300] [Codex]
+Contexto:
+- Dono solicitou commit + push + deploy em producao da Sprint 2 final.
+
+Feito:
+- Commit criado com as mudancas finais da Sprint 2:
+  - hash: `1f82a20`
+  - mensagem: `feat(security): complete sprint 2 hardening`
+- Push executado com sucesso para `origin/main`:
+  - `f8b4936..1f82a20  main -> main`
+- Tentativa de deploy remoto via `scripts/vps/quick-deploy.sh root@getorbita.com.br`:
+  - primeiro erro: `Host key verification failed`
+  - mitigacao aplicada: `ssh-keyscan` em `known_hosts`
+  - segunda tentativa: `Permission denied (publickey,password)`
+- Documento de deploy atualizado com variaveis obrigatorias atuais (`VITE_APP_ID=orbita` e `CREDENTIAL_ENCRYPTION_KEY`).
+
+Proximo:
+- Receber acesso SSH valido (usuario/chave) para executar o deploy remoto.
+- Rodar `bash scripts/vps/quick-deploy.sh <usuario@host>` e validar `pm2` + `curl`.
+
+Bloqueios/Riscos:
+- Bloqueio operacional atual: autenticacao SSH da VPS nao autorizada no ambiente local.
+
+Arquivos alterados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/DEPLOY_VPS.md
+- docs/LOG_AGENTES.md
