@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { parse as parseCookieHeader } from "cookie";
 import type { Express, Request, Response } from "express";
-import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import { COOKIE_NAME, SESSION_DURATION_MS } from "@shared/const";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import {
@@ -143,11 +143,11 @@ export function registerOAuthRoutes(app: Express) {
 
       const sessionToken = await sdk.createSessionToken(user.openId, {
         name: user.name ?? profile.name ?? "",
-        expiresInMs: ONE_YEAR_MS,
+        expiresInMs: SESSION_DURATION_MS,
       });
       res.cookie(COOKIE_NAME, sessionToken, {
         ...cookieOptions,
-        maxAge: ONE_YEAR_MS,
+        maxAge: SESSION_DURATION_MS,
       });
 
       redirectWithStatus(req, res, "/dashboard", "google_login", "success");

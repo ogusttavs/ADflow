@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 11:10:52 -0300
+Atualizado em: 2026-02-25 14:13:36 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -10,7 +10,7 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase A: em andamento (Sprints 1 e branding concluidas; Sprint 2 pendente).
+- Fase A: em andamento (Sprints 1 e 2 concluidas; branding concluido; Sprint 3 pendente).
 
 ---
 
@@ -32,10 +32,20 @@ Status atual: concluido. Onboarding agora usa `navigate()` em vez de alterar `wi
 
 ### Sprint 2 - Seguranca
 
-- [ ] 05. Rate limiting no auth (`express-rate-limit`)
-- [ ] 06. Security headers (`helmet`) em `server/_core/index.ts`
-- [ ] 07. JWT expiry: 1 ano -> 7 dias (`server/_core/sdk.ts`)
-- [ ] 08. Encrypt credenciais de cliente (AES-256) em `server/routers/credentials.ts`
+- [x] 05. Rate limiting no auth (`express-rate-limit`)
+Status atual: concluido. Limites aplicados em `auth.login` (10/15min) e `auth.register` (5/1h), com `trust proxy` ativo para ambiente com Nginx e suporte a path/batch do tRPC.
+
+- [x] 06. Security headers (`helmet`) em `server/_core/index.ts`
+Status atual: concluido. `helmet` aplicado antes das rotas com `contentSecurityPolicy: false` e `crossOriginEmbedderPolicy: false` para evitar regressao imediata.
+
+- [x] 07. JWT expiry: 1 ano -> 7 dias (`server/_core/sdk.ts`)
+Status atual: concluido. Sessao padrao migrada para `SESSION_DURATION_MS` (7 dias) em login, cadastro e callback Google OAuth (token + cookie `maxAge`).
+
+- [x] 08. Encrypt credenciais de cliente (AES-256) em `server/routers/credentials.ts`
+Status atual: concluido. Credenciais agora usam AES-256-GCM com chave `CREDENTIAL_ENCRYPTION_KEY`, fallback para legado plaintext na leitura e erro explicito quando chave estiver ausente/invalida.
+
+- [x] 08b. Hardening pós-revisao da Sprint 2
+Status atual: concluido. Adicionado rate limit global de API (`200 req/min` em `/api`) e `.env.example` alinhado com `VITE_APP_ID=orbita` sem bloco AWS legado.
 
 ### Sprint 3 - Auth e Email
 

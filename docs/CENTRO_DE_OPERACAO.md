@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 11:10:52 -0300
+Atualizado em: 2026-02-25 14:13:36 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -73,7 +73,7 @@ Producao:
 ## 6) Situacao real (agora)
 
 Estado atual de desenvolvimento:
-- A transicao para o plano `Orbita - Fase A` segue ativa com Sprint 1 concluida.
+- A transicao para o plano `Orbita - Fase A` segue ativa com Sprint 1 e Sprint 2 concluidas.
 - Modulo Familia & Equipe esta oculto na interface por decisao de produto, com backend preservado para reativacao futura.
 - Modulo Campanhas/IA de campanhas esta oculto no frontend (rotas, CTAs, onboarding e atalhos), mantendo backend para reativacao futura.
 - Itens de menu marcados como "Em breve" foram ocultados da barra lateral (desktop/mobile), mantendo declaracao no codigo para liberar depois.
@@ -87,17 +87,17 @@ Estado atual de desenvolvimento:
 
 Pendencias tecnicas objetivas:
 - Validacao de baseline verde confirmada: `pnpm check`, `pnpm test` e `pnpm build` executados com sucesso.
-- Sprint 2 (Seguranca) ainda nao iniciada: rate-limit, `helmet`, expiracao JWT e encrypt de credenciais.
+- Sprint 2 (Seguranca) concluida: `helmet`, rate limiting em auth, sessao JWT de 7 dias e criptografia AES-256-GCM em credenciais.
+- Proxima prioridade tecnica: iniciar Sprint 3 (Auth e Email).
 
 ## 7) Prioridade recomendada (curto prazo)
 
-1. Iniciar Sprint 2 da Fase A (Seguranca) pela ordem do backlog oficial (`TODO_LANCAMENTO`):
-- rate limiting no auth;
-- `helmet` com headers de seguranca;
-- reduzir expiry de JWT;
-- encrypt de credenciais de cliente.
+1. Iniciar Sprint 3 da Fase A (Auth e Email) pela ordem do backlog oficial (`TODO_LANCAMENTO`):
+- confirmacao de email no cadastro;
+- fluxo "esqueci minha senha";
+- troca de senha dentro do app.
 2. Manter disciplina de docs/guardrails a cada alteracao.
-3. Preparar revisao arquitetural pontual com o Claude para Sprint 2 (`Claude +`).
+3. Preparar revisao arquitetural pontual com o Claude para Sprint 3 (`Claude +`).
 
 ## 8) Marcos recentes
 
@@ -112,3 +112,5 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: cutover concluido para `https://getorbita.com.br` com SSL ativo, `pm2` online, HTTPS `200 OK` e HTTP `301` para HTTPS.
 - 2026-02-25: branding Orbita completo — logo SVG + favicon criados, rename AdFlow→Orbita em todo o codigo, metadata HTML reescrita, codigo morto removido.
 - 2026-02-25: SSL expandido para cobrir `www.getorbita.com.br` (certbot + Nginx). Ambos `https://getorbita.com.br` e `https://www.getorbita.com.br` retornando `200 OK`. HTTP `301` para HTTPS ativo. Cert valido ate 2026-05-26.
+- 2026-02-25: Sprint 2 (Seguranca) concluida com `helmet`, rate limiting em auth com `trust proxy`, expiracao de sessao em 7 dias e criptografia de credenciais de cliente (AES-256-GCM), validada por `pnpm check`, `pnpm test` e `pnpm build`.
+- 2026-02-25: hardening pós-revisao da Sprint 2 concluido com rate limit global (`200 req/min` em `/api`) e ajuste do `.env.example` para `VITE_APP_ID=orbita`, removendo bloco AWS legado.

@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import { COOKIE_NAME, SESSION_DURATION_MS } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
@@ -77,13 +77,13 @@ export const appRouter = router({
 
         const sessionToken = await sdk.createSessionToken(user.openId, {
           name: user.name ?? "",
-          expiresInMs: ONE_YEAR_MS,
+          expiresInMs: SESSION_DURATION_MS,
         });
 
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, sessionToken, {
           ...cookieOptions,
-          maxAge: ONE_YEAR_MS,
+          maxAge: SESSION_DURATION_MS,
         });
 
         return { success: true } as const;
@@ -130,13 +130,13 @@ export const appRouter = router({
 
         const sessionToken = await sdk.createSessionToken(openId, {
           name: input.name,
-          expiresInMs: ONE_YEAR_MS,
+          expiresInMs: SESSION_DURATION_MS,
         });
 
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, sessionToken, {
           ...cookieOptions,
-          maxAge: ONE_YEAR_MS,
+          maxAge: SESSION_DURATION_MS,
         });
 
         return { success: true } as const;

@@ -447,3 +447,85 @@ Arquivos alterados:
 - /etc/nginx/sites-enabled/adflow (VPS — fora do git)
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
+
+[2026-02-25 13:55:46 -0300] [Codex]
+Contexto:
+- Dono autorizou inicio imediato da Sprint 2 (Seguranca) com execucao completa em codigo.
+
+Feito:
+- Dependencias de seguranca instaladas: `helmet` e `express-rate-limit`.
+- Hardening HTTP aplicado em `server/_core/index.ts`:
+  - `app.set("trust proxy", 1)` para ambiente com Nginx;
+  - `helmet` com `contentSecurityPolicy: false` e `crossOriginEmbedderPolicy: false`;
+  - rate limiting no auth com suporte ao path/batch do tRPC:
+    - `auth.login`: 10 req / 15 min
+    - `auth.register`: 5 req / 1 h
+- Sessao/JWT reduzida para 7 dias:
+  - nova constante `SESSION_DURATION_MS`;
+  - aplicada em login, cadastro, SDK e callback de login Google OAuth (token + cookie `maxAge`).
+- Criptografia de credenciais de clientes implementada:
+  - novo helper `server/_core/credentialsCrypto.ts` com AES-256-GCM;
+  - `create`/`update` criptografam senha;
+  - `list` descriptografa valores versionados e preserva legado plaintext.
+- Nova ENV documentada em `.env.example`: `CREDENTIAL_ENCRYPTION_KEY`.
+- Validacao tecnica executada com sucesso:
+  - `pnpm check`
+  - `pnpm test` (44 testes passando)
+  - `pnpm build`
+
+Proximo:
+- Iniciar Sprint 3 (Auth e Email) conforme backlog oficial.
+- Antes do deploy em producao, garantir `CREDENTIAL_ENCRYPTION_KEY` configurada na VPS.
+
+Bloqueios/Riscos:
+- Sem bloqueio de build/teste.
+- Risco operacional conhecido: perda da `CREDENTIAL_ENCRYPTION_KEY` impede descriptografia das credenciais.
+
+Arquivos alterados:
+- package.json
+- pnpm-lock.yaml
+- .env.example
+- shared/const.ts
+- server/_core/index.ts
+- server/_core/sdk.ts
+- server/_core/oauth.ts
+- server/_core/env.ts
+- server/_core/credentialsCrypto.ts (novo)
+- server/routers.ts
+- server/routers/credentials.ts
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 14:13:36 -0300] [Codex]
+Contexto:
+- Dono solicitou aplicar os apontamentos finais de revisao externa (Gemini/Claude) antes de seguir para commit/deploy.
+
+Feito:
+- Implementado rate limit global da API em `server/_core/index.ts`:
+  - `200 req/min` para `/api` em producao.
+- Mantidos os limitadores especificos de auth:
+  - `auth.login`: 10/15min
+  - `auth.register`: 5/1h
+- `.env.example` alinhado:
+  - `VITE_APP_ID=orbita`
+  - removido bloco AWS legado e substituido por bloco opcional de `BUILT_IN_FORGE_API_URL/KEY`.
+- Validacao executada novamente com sucesso:
+  - `pnpm check`
+  - `pnpm test` (44 testes passando)
+  - `pnpm build`
+
+Proximo:
+- Definir `CREDENTIAL_ENCRYPTION_KEY` na VPS.
+- Commitar e seguir para deploy da Sprint 2 final.
+
+Bloqueios/Riscos:
+- Sem bloqueio tecnico.
+- Dependencia operacional: chave `CREDENTIAL_ENCRYPTION_KEY` obrigatoria no ambiente de producao para operacoes de credenciais.
+
+Arquivos alterados:
+- server/_core/index.ts
+- .env.example
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
