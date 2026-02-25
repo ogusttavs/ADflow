@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 18:33:45 -0300
+Atualizado em: 2026-02-25 18:41:07 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -93,7 +93,7 @@ Pendencias tecnicas objetivas:
 - Acesso SSH remoto local liberado e `quick-deploy` validado com sucesso em producao (A7 concluido).
 - Pendencias atuais do dono no backlog: A1, A2, A3, A6 e A8.
 - A9 concluido operacionalmente: `USER_PII_ENCRYPTION_KEY` dedicada configurada na VPS com tamanho valido e sem erro de runtime.
-- Sprint 3 (Auth e Email) concluida em codigo: itens 09, 10 e 11 implementados e validados localmente.
+- Sprint 3 (Auth e Email) concluida e deployada em producao (`5efe746`): itens 09, 10 e 11 ativos.
 - Refinamentos de seguranca/conta adicionados na Sprint 3:
   - cadastro ampliado com dados completos de perfil e consentimento;
   - area Conta em modo somente leitura por padrao (edicao explicita por botao `Editar`);
@@ -107,14 +107,14 @@ Pendencias tecnicas objetivas:
 - Fluxo de verificacao ativo em soft lock com popup persistente no app, rota `/verify-email` e reenvio autenticado.
 - Fluxo de reset de senha ativo com token hash em `auth_tokens`, expiracao e rate limit dedicado.
 - Validacao local apos hardening adicional: `pnpm check`, `pnpm test` (66 testes) e `pnpm build` verdes.
-- Pendencia operacional imediata da Sprint 3: deploy da revisao final de hardening e fechamento do checklist manual de browser do A8 (verificacao, reset, reenvio e 429).
+- Pendencia operacional imediata da Sprint 3: fechamento do checklist manual de browser do A8 (verificacao, reset, reenvio e 429).
 - Toolkit operacional de email preparado:
   - `scripts/vps/set-resend-env.sh` (atualizacao segura de ENV na VPS);
   - `scripts/vps/smoke-auth-email.sh` (validacao operacional + checklist manual).
 
 ## 7) Prioridade recomendada (curto prazo)
 
-1. Executar deploy da revisao final da Sprint 3 e validar checklist manual do A8 no browser.
+1. Validar checklist manual do A8 no browser e fechar operacao de email transacional em producao.
 2. A1 + A2 (Google OAuth em producao).
 3. A6 (Asaas + webhook).
 4. A3 (rotacao de segredos operacionais).
@@ -143,3 +143,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: plano operacional Resend+Hostinger implementado em repo com scripts de VPS (`set-resend-env.sh` e `smoke-auth-email.sh`) e runbook atualizado em `docs/DEPLOY_VPS.md`.
 - 2026-02-25: Sprint 3 refinada para producao com cadastro ampliado de perfil, criptografia de CPF/CNPJ no backend, `auth.updateProfile`, Conta em modo leitura por padrao e bloqueio de troca de senha sem email verificado; validado com `pnpm check`, `pnpm test` (58 testes) e `pnpm build`.
 - 2026-02-25: hardening adicional de auth com validacao algoritimica de CPF/CNPJ, senha forte obrigatoria, bloqueio de login para nao verificados, expiracao de conta em 7 dias, fluxo "esqueci meu email" e cadastro com envio de verificacao assincrono; validado com `pnpm check`, `pnpm test` (66 testes) e `pnpm build`.
+- 2026-02-25: release `5efe746` (Sprint 3 final) deployado via `quick-deploy` em `root@167.88.32.1` com build+db:push+restart PM2, HEAD remoto confirmado em `5efe746`, `pm2 status adflow` online e `https://getorbita.com.br` retornando `200 OK`.

@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 18:33:45 -0300
+Atualizado em: 2026-02-25 18:41:07 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -10,7 +10,7 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida em codigo com hardening de conta/cadastro e validacao local verde; operacao de email em producao em validacao manual final).
+- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida e deployada em producao no release `5efe746`; operacao de email transacional em validacao manual final de browser).
 
 ---
 
@@ -53,16 +53,16 @@ Status atual: concluido. Adicionado rate limit global de API (`200 req/min` em `
 Status atual: concluido. Documento `docs/PLANO_EXECUCAO_FASE_3.md` criado com decisoes travadas (Resend, soft lock, popup para verificacao e tabela `auth_tokens`).
 
 - [x] 09. Confirmacao de email no cadastro
-Status atual: concluido em codigo. Cadastro agora gera token de verificacao e envia email; implementadas procedures `auth.verifyEmail` e `auth.resendVerification`; criada rota `/verify-email`; popup de verificacao (`soft lock`) ativo no app para usuarios nao verificados.
+Status atual: concluido e em producao. Cadastro gera token de verificacao e dispara email; procedures `auth.verifyEmail` e `auth.resendVerification` ativas; rota `/verify-email` e popup de verificacao (`soft lock`) ativos.
 
 - [x] 09b. Cadastro ampliado com dados de perfil e consentimento
 Status atual: concluido em codigo. Cadastro agora coleta nome, sobrenome, email, WhatsApp, cidade, endereco, origem, idioma, CPF/CNPJ e opt-in de comunicacoes, persistindo no banco com dados sensiveis protegidos.
 
 - [x] 10. "Esqueci minha senha" no login
-Status atual: concluido em codigo. Implementadas procedures `auth.requestPasswordReset` e `auth.resetPassword`, paginas `/forgot-password` e `/reset-password`, storage seguro de hash de token em `auth_tokens` e rate limit especifico.
+Status atual: concluido e em producao. Procedures `auth.requestPasswordReset` e `auth.resetPassword` ativas, paginas `/forgot-password` e `/reset-password` publicadas, hash de token em `auth_tokens` e rate limit especifico.
 
 - [x] 11. Troca de senha dentro do app
-Status atual: concluido em codigo. Procedure `auth.changePassword` implementada no backend (validacao de senha atual + hash bcrypt da nova senha) e aba "Segurança" adicionada em `Settings` para contas com login por email.
+Status atual: concluido e em producao. `auth.changePassword` ativo no backend (senha atual + hash bcrypt da nova senha) e aba "Segurança" publicada em `Settings` para contas com login por email.
 
 - [x] 11b. Troca de senha exige email verificado
 Status atual: concluido em codigo. Backend bloqueia `auth.changePassword` para contas sem verificacao de email e frontend exibe acao de reenvio de verificacao antes da troca.
@@ -159,7 +159,7 @@ Status atual: concluido. `ThemeProvider` agora inicia em dark por padrao e a Hom
 - [ ] A6. Criar conta Asaas e configurar webhook
 - [x] A7. Liberar acesso SSH de deploy (chave/usuario) para executar `quick-deploy` remoto
 - [ ] A8. Configurar Resend em producao (dominio/DNS + `RESEND_API_KEY` + `EMAIL_FROM` + `EMAIL_PROVIDER=resend`)
-Status atual: em validacao final. ENV operacional aplicado na VPS (`APP_BASE_URL`, `EMAIL_PROVIDER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`), `smoke-auth-email.sh` executado e app online; falta concluir checklist manual de browser (envio/confirmacao/reset/reenvio/rate limit).
+Status atual: em validacao final. ENV operacional aplicado na VPS (`APP_BASE_URL`, `EMAIL_PROVIDER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`), `smoke-auth-email.sh` executado, release `5efe746` em producao e app online; falta concluir checklist manual de browser (envio/confirmacao/reset/reenvio/rate limit).
 - [x] A9. Definir `USER_PII_ENCRYPTION_KEY` dedicado na VPS (recomendado)
 Status atual: concluido. Chave dedicada configurada na VPS com tamanho valido (32 bytes/64 hex), app online e sem erro de runtime relacionado.
 

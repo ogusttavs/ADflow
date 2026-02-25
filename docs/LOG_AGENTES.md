@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 18:37:44 -0300
+Atualizado em: 2026-02-25 18:41:07 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -31,6 +31,36 @@ Arquivos alterados:
 ```
 
 ## Historico ativo
+
+[2026-02-25 18:41:07 -0300] [Codex]
+Contexto:
+- Dono pediu fechamento completo da Sprint 3 com documentacao, commit e deploy em producao.
+
+Feito:
+- Validacao final local executada com sucesso:
+  - `pnpm check`
+  - `pnpm test` (66/66)
+  - `pnpm build`
+- Commit criado: `5efe746` (`feat(auth): finalize sprint 3 hardening and docs closure`).
+- Push concluido em `origin/main`.
+- Deploy remoto executado com `bash scripts/vps/quick-deploy.sh root@167.88.32.1`.
+- Evidencias pos-deploy:
+  - HEAD remoto `/var/www/adflow`: `5efe746`;
+  - `pm2 status adflow`: online;
+  - `curl -I https://getorbita.com.br`: `HTTP/1.1 200 OK`.
+- Backlog/centro sincronizados para refletir Sprint 3 em producao e A8 em validacao manual final.
+
+Proximo:
+- Executar checklist manual de browser do A8 (verificacao de email, reset, reenvio e validacao de 429) e marcar fechamento operacional.
+
+Bloqueios/Riscos:
+- Sem bloqueio tecnico no deploy.
+- Fechamento oficial do A8 ainda depende de validacao manual funcional fim-a-fim.
+
+Arquivos alterados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
 
 [2026-02-25 18:37:44 -0300] [Codex]
 Contexto:
