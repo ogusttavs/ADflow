@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { localDateKey } from "@/lib/date";
 import {
   Timer, Plus, CheckCircle2, Circle, Trash2, Play, Pause, RotateCcw,
   Target, Flame, AlertTriangle, Bell,
@@ -131,18 +132,18 @@ function HabitsTracker() {
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("🎯");
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
-  const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const today = useMemo(() => localDateKey(), []);
   const dayOfWeek = new Date().getDay();
 
   const startOfWeek = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() - d.getDay());
-    return d.toISOString().slice(0, 10);
+    return localDateKey(d);
   }, []);
   const endOfWeek = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() + (6 - d.getDay()));
-    return d.toISOString().slice(0, 10);
+    return localDateKey(d);
   }, []);
 
   const { data: habits } = trpc.productivity.listHabits.useQuery();
@@ -210,7 +211,7 @@ function HabitsTracker() {
               const done = isCompleted(habit.id);
               return (
                 <div key={`${shared ? "s" : ""}${habit.id}`}
-                  className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${shared ? "opacity-75 cursor-default" : "cursor-pointer hover:bg-muted/30"} ${done ? "opacity-60" : ""}`}
+                  className={`group flex items-center gap-3 p-2.5 rounded-lg transition-colors ${shared ? "opacity-75 cursor-default" : "cursor-pointer hover:bg-muted/30"} ${done ? "opacity-60" : ""}`}
                   onClick={() => !shared && toggleMut.mutate({ habitId: habit.id, date: today }, { onSuccess: () => { utils.productivity.getHabitLogs.invalidate(); } })}>
                   <span className="text-lg">{habit.icon}</span>
                   {done ? <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" /> : <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />}
@@ -236,7 +237,7 @@ function HabitsTracker() {
 function TasksList() {
   const [newOpen, setNewOpen] = useState(false);
   const [title, setTitle] = useState("");
-  const [dueDate, setDueDate] = useState(new Date().toISOString().slice(0, 10));
+  const [dueDate, setDueDate] = useState(localDateKey());
   const [dueTime, setDueTime] = useState("");
   const [priority, setPriority] = useState("MEDIUM");
   const [category, setCategory] = useState("WORK");
@@ -316,7 +317,7 @@ function TasksList() {
               const shared = (task as { isShared?: boolean }).isShared;
               const ownerName = (task as { ownerName?: string }).ownerName;
               const CatIcon = CATEGORY_ICONS[task.category] || ListTodo;
-              const isOverdue = task.status === "PENDING" && task.dueDate && task.dueDate < new Date().toISOString().slice(0, 10);
+              const isOverdue = task.status === "PENDING" && task.dueDate && task.dueDate < localDateKey();
               return (
                 <div key={`${shared ? "s" : ""}${task.id}`} className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${isOverdue ? "border border-red-500/30" : ""} ${shared ? "" : "hover:bg-muted/30"}`}>
                   <button disabled={!!shared}
@@ -404,7 +405,7 @@ function DayHeader() {
     return () => clearInterval(interval);
   }, []);
 
-  const todayStr = now.toISOString().slice(0, 10);
+  const todayStr = localDateKey(now);
   const dayOfWeek = now.getDay();
 
   const { data: allTasks } = trpc.productivity.listTasks.useQuery({ status: "ALL" });

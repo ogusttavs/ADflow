@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { BookOpen, ChevronLeft, ChevronRight, Plus, Trash2, Pencil } from "lucide-react";
+import { localDateKey, localMonthKey } from "@/lib/date";
 
 const MOODS = [
   { emoji: "😊", label: "Feliz" },
@@ -30,7 +31,7 @@ function dayLabel(date: string) {
 }
 
 export default function Diary() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
   const [currentMonth, setCurrentMonth] = useState(today.slice(0, 7));
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editEntry, setEditEntry] = useState<{ id?: number; date: string; content: string; mood: string } | null>(null);
@@ -48,12 +49,12 @@ export default function Diary() {
   const prevMonth = () => {
     const d = new Date(currentMonth + "-01");
     d.setMonth(d.getMonth() - 1);
-    setCurrentMonth(d.toISOString().slice(0, 7));
+    setCurrentMonth(localMonthKey(d));
   };
   const nextMonth = () => {
     const d = new Date(currentMonth + "-01");
     d.setMonth(d.getMonth() + 1);
-    const next = d.toISOString().slice(0, 7);
+    const next = localMonthKey(d);
     if (next <= today.slice(0, 7)) setCurrentMonth(next);
   };
   const isCurrentMonth = currentMonth === today.slice(0, 7);

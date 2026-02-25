@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 import {
-  Users, MessageSquare, BarChart3, Settings, Sparkles,
+  Users, BarChart3, Settings, Sparkles, Target, Wallet,
   ChevronRight, X, CheckCircle2, Rocket,
 } from "lucide-react";
 import { useLocation } from "wouter";
@@ -17,37 +17,37 @@ const STEPS = [
   {
     icon: Users,
     title: "1. Adicione seu primeiro cliente",
-    description: "Vá em Clientes e cadastre os dados do seu cliente: nome, empresa, tom de voz, público-alvo e produtos. Esses dados pré-definidos serão usados pela IA para gerar conteúdo personalizado.",
+    description: "Cadastre os dados básicos do cliente para centralizar relacionamento e histórico comercial em um lugar só.",
     action: "Ir para Clientes",
     path: "/clients",
   },
   {
-    icon: MessageSquare,
-    title: "2. Configure o WhatsApp Bot",
-    description: "Na página WhatsApp Bot, copie o URL do webhook e configure no Meta Business Manager. Assim você centraliza atendimento e notificações de forma prática.",
-    action: "Ir para WhatsApp",
-    path: "/whatsapp",
+    icon: Target,
+    title: "2. Monte sua rotina diária",
+    description: "Crie tarefas, hábitos e use o pomodoro para transformar planejamento em execução.",
+    action: "Ir para Rotina",
+    path: "/routine",
   },
   {
     icon: BarChart3,
-    title: "3. Acompanhe a Performance",
-    description: "Use o Dashboard de Performance para monitorar os indicadores principais do seu negócio.",
-    action: "Ir para Performance",
-    path: "/performance",
-  },
-  {
-    icon: Sparkles,
-    title: "4. Use o CRM com IA",
-    description: "No CRM, gerencie seu funil de vendas e use recursos de IA para acelerar o trabalho comercial.",
+    title: "3. Organize seu funil no CRM",
+    description: "Gerencie leads por estágio e mantenha follow-ups em dia para não perder oportunidades.",
     action: "Ir para CRM",
     path: "/crm",
   },
   {
+    icon: Wallet,
+    title: "4. Configure o financeiro",
+    description: "Registre lançamentos de CPF/CNPJ e acompanhe recorrências para ter visão real de saldo e fluxo.",
+    action: "Ir para Financeiro",
+    path: "/financeiro",
+  },
+  {
     icon: Settings,
-    title: "5. Configure as Integrações",
-    description: "Conecte suas contas de redes sociais e APIs (Freepik, Meta Ads, Google Ads) para activar publicação automática e importação de métricas reais.",
-    action: "Ir para Integrações",
-    path: "/integrations",
+    title: "5. Ajuste o app para seu ritmo",
+    description: "Defina metas e preferências em Configurações para deixar o Orbita com a sua rotina.",
+    action: "Ir para Configurações",
+    path: "/settings",
   },
 ];
 
@@ -73,13 +73,13 @@ export default function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Rocket className="h-5 w-5 text-primary" />
-            <h3 className="font-bold">Bem-vindo ao AdFlow AI!</h3>
+            <h3 className="font-bold">Bem-vindo ao Orbita!</h3>
           </div>
           <Button variant="ghost" size="icon" onClick={onDismiss}><X className="h-4 w-4" /></Button>
         </div>
 
         <p className="text-sm text-muted-foreground mb-4">
-          Siga estes passos para configurar sua agência de marketing automatizada com IA.
+          Siga estes passos para deixar seu app pronto para uso diário.
         </p>
 
         <div className="flex items-center gap-2 mb-6">

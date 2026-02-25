@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Zap, Loader2, Chrome } from "lucide-react";
+import { getStartPageRoute } from "@/lib/user-settings";
 
 type Tab = "login" | "register";
 
@@ -20,7 +21,7 @@ export default function Login() {
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: () => {
       void utils.auth.me.invalidate();
-      navigate("/dashboard");
+      navigate(getStartPageRoute());
     },
     onError: (err) => {
       toast.error(err.message);
@@ -30,7 +31,7 @@ export default function Login() {
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: () => {
       void utils.auth.me.invalidate();
-      navigate("/dashboard");
+      navigate(getStartPageRoute());
     },
     onError: (err) => {
       toast.error(err.message);
@@ -96,7 +97,7 @@ export default function Login() {
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-sm shadow-primary/30">
             <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold font-['Space_Grotesk']">AdFlow</span>
+            <span className="text-xl font-bold font-['Space_Grotesk']">Orbita</span>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">Entrar na sua central de operação</p>
         </div>

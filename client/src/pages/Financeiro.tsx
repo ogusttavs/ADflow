@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "sonner";
+import { localDateKey, localMonthKey } from "@/lib/date";
 import {
   Wallet, Plus, TrendingUp, TrendingDown, DollarSign,
   Trash2, User, Building2, RefreshCw, Paperclip, Download,
@@ -450,7 +451,7 @@ function NewCategoryDialog({ personType, type, viewAsUserId, onCreated }: { pers
 // ─── Transactions Tab ─────────────────────────────────────────────────────────
 function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personType: PersonType; viewAsUserId?: number; canEdit?: boolean }) {
   const today = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(today.toISOString().slice(0, 7));
+  const [selectedMonth, setSelectedMonth] = useState(localMonthKey(today));
   const [showNew, setShowNew] = useState(false);
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({
@@ -458,7 +459,7 @@ function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personTy
     category: "",
     description: "",
     amount: "",
-    date: today.toISOString().slice(0, 10),
+    date: localDateKey(today),
     receiptFileId: "" as string,
   });
 
@@ -497,7 +498,7 @@ function LancamentosTab({ personType, viewAsUserId, canEdit = true }: { personTy
 
   const monthOptions = useMemo(() => Array.from({ length: 12 }, (_, i) => {
     const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    return d.toISOString().slice(0, 7);
+    return localMonthKey(d);
   }), []);
 
   const handleCreate = () => {

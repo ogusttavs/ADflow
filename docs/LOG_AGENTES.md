@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 09:56:07 -0300
+Atualizado em: 2026-02-25 10:25:07 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -222,6 +222,107 @@ Arquivos alterados:
 - client/src/components/AppLayout.tsx
 - AGENTS.md
 - docs/LEIA_PRIMEIRO.md
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 10:00:04 -0300] [Codex]
+Contexto:
+- Dono pediu para ocultar todos os itens com selo "Em breve" antes de iniciar o proximo ciclo.
+
+Feito:
+- Sidebar ajustada para nao renderizar itens marcados como `disabled` (os que exibiam "Em breve").
+- Ocultacao aplicada para desktop e mobile, mantendo os itens definidos no codigo para reativacao futura sem retrabalho.
+- Documentacao de operacao e backlog atualizada com conclusao do item (33).
+
+Proximo:
+- Iniciar Sprint 2 (Seguranca) conforme backlog oficial.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico.
+
+Arquivos alterados:
+- client/src/components/AppLayout.tsx
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 10:04:53 -0300] [Codex]
+Contexto:
+- Dono solicitou ajuste de nomenclatura das subdivisoes da sidebar e revisao da tela de Configuracoes para refletir o Orbita atual.
+
+Feito:
+- Sidebar renomeada para a realidade atual:
+  - `Principal` -> `Visão Geral`
+  - `Produtividade` -> `Vida & Rotina`
+  - `CRM & Vendas` -> `Comercial`
+  - `Análise & IA` -> `Financeiro`
+  - `Sistema` -> `Conta`
+- Branding do cabeçalho lateral ajustado para `Orbita` com tagline.
+- Tela `Settings` atualizada com foco real do produto:
+  - removidos textos/fluxos obsoletos de campanhas/publicação automática;
+  - novas abas e conteúdos de Conta, Alertas, Rotina e Aparência.
+- Validação técnica executada: `pnpm check` OK.
+
+Proximo:
+- Iniciar Sprint 2 (Seguranca) conforme backlog oficial.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico.
+
+Arquivos alterados:
+- client/src/components/AppLayout.tsx
+- client/src/pages/Settings.tsx
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 10:25:07 -0300] [Codex]
+Contexto:
+- Dono solicitou revisao e fechamento para deixar 100% funcional tudo que esta visivel no app antes de mostrar para amigos.
+
+Feito:
+- Configuracoes com persistencia real em `localStorage`:
+  - conta, alertas, rotina, metas e pagina inicial padrao.
+  - metas de prospeccao integradas ao Dashboard/Prospecção pelas chaves oficiais.
+- Preferencias aplicadas no runtime:
+  - `DailyBriefingPopup` respeita toggle de exibicao no login;
+  - Agenda respeita inicio da semana (segunda/domingo) definido em Configuracoes.
+- Onboarding alinhado aos modulos ativos/visiveis (Clientes, Rotina, CRM, Financeiro, Configuracoes), removendo navegacao para areas ocultas.
+- Correcao de datas locais em fluxos visiveis:
+  - substituicao de `toISOString().slice(...)` por utilitario local para reduzir erros de "hoje" por UTC.
+- LP/Home + Login alinhados com branding Orbita e proposta atual do produto (sem promessas de modulos ocultos).
+- Ajustes de consistencia:
+  - texto de estado vazio de Notificacoes atualizado;
+  - acao de remover habito em Rotina voltou a ficar visivel no hover.
+- Validacoes executadas com sucesso:
+  - `pnpm check`
+  - `pnpm test` (44 testes passando)
+  - `pnpm build`
+
+Proximo:
+- Se aprovado pelo dono: commit unico desta rodada e deploy para producao.
+- Em seguida iniciar Sprint 2 (Seguranca) conforme backlog oficial.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico imediato.
+- Arquivo local nao rastreado `docs/IDEIAS_PRODUTO.md` continua fora desta rodada.
+
+Arquivos alterados:
+- client/src/components/DailyBriefingPopup.tsx
+- client/src/components/Onboarding.tsx
+- client/src/lib/date.ts
+- client/src/lib/user-settings.ts
+- client/src/pages/Agenda.tsx
+- client/src/pages/Dashboard.tsx
+- client/src/pages/Diary.tsx
+- client/src/pages/Financeiro.tsx
+- client/src/pages/Home.tsx
+- client/src/pages/Login.tsx
+- client/src/pages/Notifications.tsx
+- client/src/pages/Prospecting.tsx
+- client/src/pages/Routine.tsx
+- client/src/pages/Settings.tsx
 - docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md

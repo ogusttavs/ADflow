@@ -52,7 +52,7 @@ export default function Notifications() {
           <div className="text-center py-20 text-muted-foreground">
             <Bell className="w-12 h-12 mx-auto mb-4 opacity-30" />
             <p className="font-medium">Nenhuma notificação</p>
-            <p className="text-sm mt-1">As notificações de campanhas e publicações aparecerão aqui</p>
+            <p className="text-sm mt-1">Avisos de rotina, CRM e financeiro aparecerão aqui</p>
           </div>
         ) : (
           <div className="space-y-2">

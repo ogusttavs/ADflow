@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "wouter";
+import { localDateKey, localMonthKey, toLocalDateKey } from "@/lib/date";
 import {
   Users, TrendingUp, Plus, ArrowRight, Zap, Clock,
   BarChart3, Target, Timer, ListTodo, Contact, Wallet, Settings2,
@@ -41,17 +42,10 @@ const PRIORITY_COLORS: Record<string, string> = {
   LOW: "border-emerald-500/30 bg-emerald-500/14 text-emerald-700 dark:text-emerald-300",
 };
 
-function toIsoDate(value: unknown) {
-  if (!value) return null;
-  const date = new Date(value as string | number | Date);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toISOString().slice(0, 10);
-}
-
 // ─── Individual Widgets ───────────────────────────────────────────────────────
 function StatsWidget() {
-  const today = new Date().toISOString().slice(0, 10);
-  const month = new Date().toISOString().slice(0, 7);
+  const today = localDateKey();
+  const month = localMonthKey();
   const { data: clients } = trpc.clients.list.useQuery();
   const { data: leads } = trpc.crm.listLeads.useQuery(undefined);
   const { data: tasks } = trpc.productivity.listTasks.useQuery({ date: today });
@@ -115,7 +109,7 @@ function QuickActionsWidget() {
 }
 
 function TasksTodayWidget() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
   const { data: tasks } = trpc.productivity.listTasks.useQuery({ date: today });
   const updateMut = trpc.productivity.updateTask.useMutation();
   const utils = trpc.useUtils();
@@ -157,7 +151,7 @@ function TasksTodayWidget() {
 }
 
 function HabitsTodayWidget() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
   const dayOfWeek = new Date().getDay();
 
   const { data: habits } = trpc.productivity.listHabits.useQuery();
@@ -281,7 +275,7 @@ function CrmStatsWidget() {
 }
 
 function ProspectingWidget() {
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = localDateKey();
   const storageKey = `prospected_${todayStr}`;
   const addGoal = Number(localStorage.getItem("daily_lead_add_goal") || "3");
   const prospectGoal = Number(localStorage.getItem("daily_lead_prospect_goal") || "10");
@@ -289,7 +283,7 @@ function ProspectingWidget() {
 
   const { data: leads } = trpc.crm.listLeads.useQuery(undefined);
   const leadsToday = useMemo(
-    () => (leads ?? []).filter(l => toIsoDate(l.createdAt) === todayStr).length,
+    () => (leads ?? []).filter(l => toLocalDateKey(l.createdAt) === todayStr).length,
     [leads, todayStr]
   );
 
@@ -335,7 +329,7 @@ function ProspectingWidget() {
 }
 
 function FinanceiroSummaryWidget() {
-  const month = new Date().toISOString().slice(0, 7);
+  const month = localMonthKey();
   const { data: cpf } = trpc.financeiro.summary.useQuery({ personType: "cpf", month });
   const { data: cnpj } = trpc.financeiro.summary.useQuery({ personType: "cnpj", month });
 

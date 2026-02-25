@@ -1,5 +1,6 @@
 import AppLayout from "@/components/AppLayout";
 import { useTheme, type Theme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +9,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings as SettingsIcon, Bell, Shield, Palette, Save, MoonStar, Sun } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  UserRound,
+  Bell,
+  Target,
+  Palette,
+  Save,
+  MoonStar,
+  Sun,
+  Settings as SettingsIcon,
+} from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  USER_SETTINGS_KEYS,
+  START_PAGE_OPTIONS,
+  clampNumber,
+  getSettingBoolean,
+  getSettingNumber,
+  getSettingString,
+  normalizeStartPageRoute,
+  setSetting,
+} from "@/lib/user-settings";
 
 const THEME_OPTIONS: Array<{
   id: Theme;
@@ -69,15 +90,120 @@ const THEME_OPTIONS: Array<{
 ];
 
 export default function Settings() {
+  const { user } = useAuth();
   const { theme, setTheme, toggleTheme, switchable } = useTheme();
-  const [notifNewCampaign, setNotifNewCampaign] = useState(true);
-  const [notifPublished, setNotifPublished] = useState(true);
-  const [notifFailed, setNotifFailed] = useState(true);
-  const [autoApprove, setAutoApprove] = useState(false);
-  const [autoPublish, setAutoPublish] = useState(false);
 
-  const handleSave = () => {
-    toast.success("Configurações salvas com sucesso!");
+  const [accountDisplayName, setAccountDisplayName] = useState(() =>
+    getSettingString(USER_SETTINGS_KEYS.accountDisplayName, "")
+  );
+  const [accountMainEmail, setAccountMainEmail] = useState(() =>
+    getSettingString(USER_SETTINGS_KEYS.accountMainEmail, "")
+  );
+  const [accountWhatsapp, setAccountWhatsapp] = useState(() =>
+    getSettingString(USER_SETTINGS_KEYS.accountWhatsapp, "+55 11 99999-9999")
+  );
+  const [accountCityState, setAccountCityState] = useState(() =>
+    getSettingString(USER_SETTINGS_KEYS.accountCityState, "São Paulo / SP")
+  );
+  const [accountContext, setAccountContext] = useState(() =>
+    getSettingString(
+      USER_SETTINGS_KEYS.accountContext,
+      "Uso o Orbita para organizar rotina pessoal, metas e operação comercial."
+    )
+  );
+  const [interfaceLanguage, setInterfaceLanguage] = useState(() =>
+    getSettingString(USER_SETTINGS_KEYS.interfaceLanguage, "Português Brasileiro (pt-BR)")
+  );
+  const [startPage, setStartPage] = useState(() =>
+    normalizeStartPageRoute(getSettingString(USER_SETTINGS_KEYS.startPage, "/dashboard"))
+  );
+
+  const [notifTaskReminders, setNotifTaskReminders] = useState(() =>
+    getSettingBoolean(USER_SETTINGS_KEYS.notifTaskReminders, true)
+  );
+  const [notifDailyBriefing, setNotifDailyBriefing] = useState(() =>
+    getSettingBoolean(USER_SETTINGS_KEYS.notifDailyBriefing, true)
+  );
+  const [notifFinanceAlerts, setNotifFinanceAlerts] = useState(() =>
+    getSettingBoolean(USER_SETTINGS_KEYS.notifFinanceAlerts, true)
+  );
+  const [notifCrmAlerts, setNotifCrmAlerts] = useState(() =>
+    getSettingBoolean(USER_SETTINGS_KEYS.notifCrmAlerts, true)
+  );
+
+  const [weekStartsOnMonday, setWeekStartsOnMonday] = useState(() =>
+    getSettingBoolean(USER_SETTINGS_KEYS.weekStartsOnMonday, true)
+  );
+  const [showDailyBriefingOnLogin, setShowDailyBriefingOnLogin] = useState(() =>
+    getSettingBoolean(USER_SETTINGS_KEYS.showDailyBriefingOnLogin, true)
+  );
+  const [taskGoal, setTaskGoal] = useState(() =>
+    String(clampNumber(getSettingNumber(USER_SETTINGS_KEYS.dailyTaskGoal, 5), 1, 50, 5))
+  );
+  const [prospectingGoal, setProspectingGoal] = useState(() =>
+    String(clampNumber(getSettingNumber(USER_SETTINGS_KEYS.dailyLeadProspectGoal, 10), 1, 50, 10))
+  );
+
+  useEffect(() => {
+    try {
+      const hasStoredDisplayName = localStorage.getItem(USER_SETTINGS_KEYS.accountDisplayName);
+      const hasStoredMainEmail = localStorage.getItem(USER_SETTINGS_KEYS.accountMainEmail);
+      if (!hasStoredDisplayName && user?.name) {
+        setAccountDisplayName(user.name);
+      }
+      if (!hasStoredMainEmail && user?.email) {
+        setAccountMainEmail(user.email);
+      }
+    } catch {
+      if (user?.name) setAccountDisplayName((prev) => prev || user.name || "");
+      if (user?.email) setAccountMainEmail((prev) => prev || user.email || "");
+    }
+  }, [user?.email, user?.name]);
+
+  const handleSaveGeneral = () => {
+    const safeDisplayName = accountDisplayName.trim() || user?.name || "Usuário";
+    const safeMainEmail = accountMainEmail.trim() || user?.email || "";
+    const safeLanguage = interfaceLanguage.trim() || "Português Brasileiro (pt-BR)";
+    const safeStartPage = normalizeStartPageRoute(startPage);
+
+    setAccountDisplayName(safeDisplayName);
+    setAccountMainEmail(safeMainEmail);
+    setInterfaceLanguage(safeLanguage);
+    setStartPage(safeStartPage);
+
+    setSetting(USER_SETTINGS_KEYS.accountDisplayName, safeDisplayName);
+    setSetting(USER_SETTINGS_KEYS.accountMainEmail, safeMainEmail);
+    setSetting(USER_SETTINGS_KEYS.accountWhatsapp, accountWhatsapp.trim());
+    setSetting(USER_SETTINGS_KEYS.accountCityState, accountCityState.trim());
+    setSetting(USER_SETTINGS_KEYS.accountContext, accountContext.trim());
+    setSetting(USER_SETTINGS_KEYS.interfaceLanguage, safeLanguage);
+    setSetting(USER_SETTINGS_KEYS.startPage, safeStartPage);
+
+    toast.success("Configurações da conta salvas com sucesso!");
+  };
+
+  const handleSaveNotifications = () => {
+    setSetting(USER_SETTINGS_KEYS.notifTaskReminders, notifTaskReminders);
+    setSetting(USER_SETTINGS_KEYS.notifDailyBriefing, notifDailyBriefing);
+    setSetting(USER_SETTINGS_KEYS.notifFinanceAlerts, notifFinanceAlerts);
+    setSetting(USER_SETTINGS_KEYS.notifCrmAlerts, notifCrmAlerts);
+    toast.success("Alertas salvos com sucesso!");
+  };
+
+  const handleSaveProductivity = () => {
+    const normalizedTaskGoal = clampNumber(Number(taskGoal), 1, 50, 5);
+    const normalizedProspectingGoal = clampNumber(Number(prospectingGoal), 1, 50, 10);
+
+    setTaskGoal(String(normalizedTaskGoal));
+    setProspectingGoal(String(normalizedProspectingGoal));
+
+    setSetting(USER_SETTINGS_KEYS.weekStartsOnMonday, weekStartsOnMonday);
+    setSetting(USER_SETTINGS_KEYS.showDailyBriefingOnLogin, showDailyBriefingOnLogin);
+    setSetting(USER_SETTINGS_KEYS.dailyTaskGoal, normalizedTaskGoal);
+    setSetting(USER_SETTINGS_KEYS.dailyLeadAddGoal, normalizedTaskGoal);
+    setSetting(USER_SETTINGS_KEYS.dailyLeadProspectGoal, normalizedProspectingGoal);
+
+    toast.success("Preferências de rotina salvas com sucesso!");
   };
 
   return (
@@ -85,60 +211,89 @@ export default function Settings() {
       <div className="page-content space-y-6">
         <div className="page-header">
           <div className="page-title-block">
-            <p className="page-kicker">Sistema</p>
+            <p className="page-kicker">Conta</p>
             <h1 className="page-title">Configurações</h1>
-            <p className="page-subtitle">Gerencie as configurações da sua plataforma</p>
+            <p className="page-subtitle">Ajuste o Orbita para a sua rotina e o seu negócio</p>
           </div>
         </div>
 
         <Tabs defaultValue="general">
           <TabsList className="w-full justify-start overflow-x-auto [&>button]:flex-none [&>button]:shrink-0">
             <TabsTrigger value="general" className="flex items-center gap-2">
-              <SettingsIcon className="w-4 h-4" />Geral
+              <UserRound className="w-4 h-4" />Conta
             </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center gap-2">
-              <Bell className="w-4 h-4" />Notificações
+              <Bell className="w-4 h-4" />Alertas
             </TabsTrigger>
-            <TabsTrigger value="automation" className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />Automação
+            <TabsTrigger value="productivity" className="flex items-center gap-2">
+              <Target className="w-4 h-4" />Rotina
             </TabsTrigger>
             <TabsTrigger value="appearance" className="flex items-center gap-2">
               <Palette className="w-4 h-4" />Aparência
             </TabsTrigger>
           </TabsList>
 
-          {/* General */}
           <TabsContent value="general">
             <div className="space-y-4">
               <Card className="bg-card border-border">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Informações da Agência</CardTitle>
+                  <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Perfil da Conta
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="pages-settings-nome-da-agencia">Nome da Agência</Label>
-                      <Input name="pages-settings-nome-da-agencia" id="pages-settings-nome-da-agencia" defaultValue="AdFlow Agency" className="bg-input border-border" />
+                      <Label htmlFor="settings-account-display-name">Nome de exibição</Label>
+                      <Input
+                        id="settings-account-display-name"
+                        name="settings-account-display-name"
+                        value={accountDisplayName}
+                        onChange={(e) => setAccountDisplayName(e.target.value)}
+                        className="bg-input border-border"
+                      />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="pages-settings-website">Website</Label>
-                      <Input name="pages-settings-website" id="pages-settings-website" defaultValue="https://adflow.com.br" className="bg-input border-border" />
+                      <Label htmlFor="settings-account-main-email">E-mail principal</Label>
+                      <Input
+                        id="settings-account-main-email"
+                        name="settings-account-main-email"
+                        type="email"
+                        value={accountMainEmail}
+                        onChange={(e) => setAccountMainEmail(e.target.value)}
+                        className="bg-input border-border"
+                      />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="pages-settings-e-mail-de-contato">E-mail de Contato</Label>
-                      <Input name="pages-settings-e-mail-de-contato" id="pages-settings-e-mail-de-contato" type="email" defaultValue="contato@adflow.com.br" className="bg-input border-border" />
+                      <Label htmlFor="settings-account-whatsapp">WhatsApp</Label>
+                      <Input
+                        id="settings-account-whatsapp"
+                        name="settings-account-whatsapp"
+                        value={accountWhatsapp}
+                        onChange={(e) => setAccountWhatsapp(e.target.value)}
+                        className="bg-input border-border"
+                      />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="pages-settings-telefone-whatsapp">Telefone / WhatsApp</Label>
-                      <Input name="pages-settings-telefone-whatsapp" id="pages-settings-telefone-whatsapp" defaultValue="+55 11 99999-9999" className="bg-input border-border" />
+                      <Label htmlFor="settings-account-city-state">Cidade / UF</Label>
+                      <Input
+                        id="settings-account-city-state"
+                        name="settings-account-city-state"
+                        value={accountCityState}
+                        onChange={(e) => setAccountCityState(e.target.value)}
+                        className="bg-input border-border"
+                      />
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="pages-settings-descricao-da-agencia">Descrição da Agência</Label>
-                    <Textarea name="pages-settings-descricao-da-agencia" id="pages-settings-descricao-da-agencia"
-                      defaultValue="Agência de marketing digital especializada em automação e IA."
-                      className="bg-input border-border resize-none"
+                    <Label htmlFor="settings-account-context">Como você usa o Orbita no dia a dia</Label>
+                    <Textarea
+                      id="settings-account-context"
+                      name="settings-account-context"
                       rows={3}
+                      className="bg-input border-border resize-none"
+                      value={accountContext}
+                      onChange={(e) => setAccountContext(e.target.value)}
                     />
                   </div>
                 </CardContent>
@@ -146,85 +301,100 @@ export default function Settings() {
 
               <Card className="bg-card border-border">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Configurações de IA</CardTitle>
+                  <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Preferências Gerais
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="pages-settings-idioma-padrao-para-geracao">Idioma Padrão para Geração</Label>
-                    <Input name="pages-settings-idioma-padrao-para-geracao" id="pages-settings-idioma-padrao-para-geracao" defaultValue="Português Brasileiro (pt-BR)" className="bg-input border-border" />
+                    <Label htmlFor="settings-general-language">Idioma da interface</Label>
+                    <Input
+                      id="settings-general-language"
+                      name="settings-general-language"
+                      value={interfaceLanguage}
+                      onChange={(e) => setInterfaceLanguage(e.target.value)}
+                      className="bg-input border-border"
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="pages-settings-instrucao-global-para-ia">Instrução Global para IA</Label>
-                    <Textarea name="pages-settings-instrucao-global-para-ia" id="pages-settings-instrucao-global-para-ia"
-                      defaultValue="Sempre crie conteúdo em português brasileiro, com linguagem adequada ao público-alvo. Evite clichês e seja criativo."
-                      className="bg-input border-border resize-none"
-                      rows={4}
-                    />
-                    <p className="text-xs text-muted-foreground">Esta instrução é adicionada a todos os prompts de geração de conteúdo.</p>
+                    <Label htmlFor="settings-general-start-page">Página inicial padrão</Label>
+                    <Select value={startPage} onValueChange={setStartPage}>
+                      <SelectTrigger id="settings-general-start-page" aria-label="Página inicial padrão" className="bg-input border-border">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {START_PAGE_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Define a primeira tela ideal para abrir quando entrar no app.
+                    </p>
                   </div>
                 </CardContent>
               </Card>
 
               <div className="flex justify-end">
-                <Button onClick={handleSave}>
-                  <Save className="w-4 h-4 mr-2" />Salvar Configurações
+                <Button onClick={handleSaveGeneral}>
+                  <Save className="w-4 h-4 mr-2" />Salvar
                 </Button>
               </div>
             </div>
           </TabsContent>
 
-          {/* Notifications */}
           <TabsContent value="notifications">
             <Card className="bg-card border-border">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Notificações do Proprietário</CardTitle>
+                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  Alertas e Notificações
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {[
-                  { label: "Nova solicitação de campanha via WhatsApp", desc: "Notificar quando um cliente enviar uma solicitação", value: notifNewCampaign, onChange: setNotifNewCampaign },
-                  { label: "Campanha publicada com sucesso", desc: "Notificar quando uma publicação for enviada às redes sociais", value: notifPublished, onChange: setNotifPublished },
-                  { label: "Falha na publicação", desc: "Notificar quando uma publicação falhar", value: notifFailed, onChange: setNotifFailed },
-                ].map(({ label, desc, value, onChange }) => (
-                  <div key={label} className="flex items-start justify-between gap-4 py-3 border-b border-border last:border-0">
+                  {
+                    id: "settings-notif-task-reminders",
+                    label: "Lembretes de tarefas",
+                    desc: "Avisar sobre tarefas próximas do prazo ou em atraso.",
+                    value: notifTaskReminders,
+                    onChange: setNotifTaskReminders,
+                  },
+                  {
+                    id: "settings-notif-daily-briefing",
+                    label: "Resumo diário",
+                    desc: "Receber o Daily Briefing com foco do dia.",
+                    value: notifDailyBriefing,
+                    onChange: setNotifDailyBriefing,
+                  },
+                  {
+                    id: "settings-notif-finance-alerts",
+                    label: "Alertas financeiros",
+                    desc: "Notificar contas vencidas e movimentações importantes.",
+                    value: notifFinanceAlerts,
+                    onChange: setNotifFinanceAlerts,
+                  },
+                  {
+                    id: "settings-notif-crm-alerts",
+                    label: "Alertas de CRM",
+                    desc: "Avisar sobre leads sem follow-up e mudanças de estágio.",
+                    value: notifCrmAlerts,
+                    onChange: setNotifCrmAlerts,
+                  },
+                ].map(({ id, label, desc, value, onChange }) => (
+                  <div key={id} className="flex items-start justify-between gap-4 py-3 border-b border-border last:border-0">
                     <div>
-                      <p className="text-sm font-medium">{label}</p>
+                      <Label htmlFor={id} className="text-sm font-medium cursor-pointer">
+                        {label}
+                      </Label>
                       <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
                     </div>
-                    <Switch checked={value} onCheckedChange={onChange} />
+                    <Switch id={id} checked={value} onCheckedChange={onChange} />
                   </div>
                 ))}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Automation */}
-          <TabsContent value="automation">
-            <Card className="bg-card border-border">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Fluxo de Automação</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start justify-between gap-4 py-3 border-b border-border">
-                  <div>
-                    <p className="text-sm font-medium">Aprovação Automática de Cópias</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Aprovar automaticamente as cópias geradas pela IA sem revisão manual</p>
-                  </div>
-                  <Switch checked={autoApprove} onCheckedChange={setAutoApprove} />
-                </div>
-                <div className="flex items-start justify-between gap-4 py-3 border-b border-border">
-                  <div>
-                    <p className="text-sm font-medium">Publicação Automática</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Publicar automaticamente nas redes sociais após aprovação da campanha</p>
-                  </div>
-                  <Switch checked={autoPublish} onCheckedChange={setAutoPublish} />
-                </div>
-                {(autoApprove || autoPublish) && (
-                  <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                    <p className="text-xs text-yellow-700 dark:text-yellow-300">⚠️ Atenção: Com automação total ativa, as campanhas serão publicadas sem revisão humana. Certifique-se de que os dados dos clientes estão corretos.</p>
-                  </div>
-                )}
                 <div className="flex justify-end">
-                  <Button onClick={handleSave}>
+                  <Button onClick={handleSaveNotifications}>
                     <Save className="w-4 h-4 mr-2" />Salvar
                   </Button>
                 </div>
@@ -232,11 +402,97 @@ export default function Settings() {
             </Card>
           </TabsContent>
 
-          {/* Appearance */}
+          <TabsContent value="productivity">
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  Rotina e Metas
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start justify-between gap-4 py-3 border-b border-border">
+                  <div>
+                    <Label htmlFor="settings-routine-week-start" className="text-sm font-medium cursor-pointer">
+                      Semana começa na segunda-feira
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Organiza calendário e agenda com segunda como primeiro dia.
+                    </p>
+                  </div>
+                  <Switch
+                    id="settings-routine-week-start"
+                    checked={weekStartsOnMonday}
+                    onCheckedChange={setWeekStartsOnMonday}
+                  />
+                </div>
+
+                <div className="flex items-start justify-between gap-4 py-3 border-b border-border">
+                  <div>
+                    <Label htmlFor="settings-routine-briefing-login" className="text-sm font-medium cursor-pointer">
+                      Mostrar Daily Briefing ao entrar
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Exibe o resumo do dia na abertura do app.
+                    </p>
+                  </div>
+                  <Switch
+                    id="settings-routine-briefing-login"
+                    checked={showDailyBriefingOnLogin}
+                    onCheckedChange={setShowDailyBriefingOnLogin}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="settings-routine-task-goal">Meta diária de leads no CRM</Label>
+                    <Input
+                      id="settings-routine-task-goal"
+                      name="settings-routine-task-goal"
+                      type="number"
+                      min={1}
+                      max={50}
+                      value={taskGoal}
+                      onChange={(e) => setTaskGoal(e.target.value)}
+                      className="bg-input border-border"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="settings-routine-prospecting-goal">Meta diária de prospecção</Label>
+                    <Input
+                      id="settings-routine-prospecting-goal"
+                      name="settings-routine-prospecting-goal"
+                      type="number"
+                      min={1}
+                      max={50}
+                      value={prospectingGoal}
+                      onChange={(e) => setProspectingGoal(e.target.value)}
+                      className="bg-input border-border"
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-border/80 bg-muted/25 p-3">
+                  <p className="text-xs text-muted-foreground">
+                    Essas metas são usadas nos widgets de Dashboard e Prospecção para acompanhar evolução diária.
+                  </p>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button onClick={handleSaveProductivity}>
+                    <Save className="w-4 h-4 mr-2" />Salvar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="appearance">
             <Card className="bg-card border-border">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Aparência</CardTitle>
+                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                  <SettingsIcon className="w-4 h-4" />
+                  Aparência do Orbita
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 p-4">
@@ -289,11 +545,11 @@ export default function Settings() {
 
                 <div className="rounded-lg border border-border/80 bg-muted/25 p-3">
                   <p className="text-xs text-muted-foreground">
-                    Dica: a prévia do tema claro agora é fixa e aparece corretamente mesmo quando você está usando um tema escuro.
+                    Dica: escolha o tema que deixe sua rotina mais confortável para uso diário prolongado.
                   </p>
                 </div>
                 <div className="flex justify-end">
-                  <Button onClick={handleSave}>
+                  <Button onClick={() => toast.success("Tema salvo com sucesso!")}>
                     <Save className="w-4 h-4 mr-2" />Salvar
                   </Button>
                 </div>

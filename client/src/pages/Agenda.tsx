@@ -10,12 +10,15 @@ import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { localDateKey } from "@/lib/date";
+import { USER_SETTINGS_KEYS, getSettingBoolean } from "@/lib/user-settings";
 import {
   ChevronLeft, ChevronRight, Plus, CheckCircle2, Circle, Trash2,
   Calendar, ListTodo, Target, Clock, Link2, Unplug, RefreshCw, ExternalLink,
 } from "lucide-react";
 
-const WEEKDAY_HEADERS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const WEEKDAY_HEADERS_SUNDAY_FIRST = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const WEEKDAY_HEADERS_MONDAY_FIRST = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 const WEEKDAY_FULL = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 const MONTH_NAMES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const PRIORITY_COLORS: Record<string, string> = {
@@ -43,11 +46,14 @@ function formatGoogleEventDate(value: string | null, isAllDay: boolean) {
 
 export default function Agenda() {
   const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
+  const todayStr = localDateKey(today);
 
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState(todayStr);
+  const [weekStartsOnMonday, setWeekStartsOnMonday] = useState(() =>
+    getSettingBoolean(USER_SETTINGS_KEYS.weekStartsOnMonday, true)
+  );
   const [showNewTask, setShowNewTask] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newTime, setNewTime] = useState("");
@@ -113,6 +119,18 @@ export default function Agenda() {
   });
 
   useEffect(() => {
+    const syncWeekStart = () => {
+      setWeekStartsOnMonday(getSettingBoolean(USER_SETTINGS_KEYS.weekStartsOnMonday, true));
+    };
+    window.addEventListener("storage", syncWeekStart);
+    window.addEventListener("focus", syncWeekStart);
+    return () => {
+      window.removeEventListener("storage", syncWeekStart);
+      window.removeEventListener("focus", syncWeekStart);
+    };
+  }, []);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const status = params.get("google_calendar");
     if (!status) return;
@@ -138,7 +156,8 @@ export default function Agenda() {
 
   // Build calendar grid
   const calendarDays = useMemo(() => {
-    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+    const firstWeekday = new Date(viewYear, viewMonth, 1).getDay();
+    const firstDay = weekStartsOnMonday ? (firstWeekday + 6) % 7 : firstWeekday;
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     const cells: Array<{ dateStr: string | null; day: number | null }> = [];
     for (let i = 0; i < firstDay; i++) cells.push({ dateStr: null, day: null });
@@ -146,7 +165,7 @@ export default function Agenda() {
     // Pad to full 6-week grid
     while (cells.length % 7 !== 0) cells.push({ dateStr: null, day: null });
     return cells;
-  }, [viewYear, viewMonth]);
+  }, [viewYear, viewMonth, weekStartsOnMonday]);
 
   // Task count per day (for calendar dots)
   const tasksByDate = useMemo(() => {
@@ -239,6 +258,7 @@ export default function Agenda() {
   const isSelected = (dateStr: string) => dateStr === selectedDate;
   const googleConfigured = Boolean(googleStatusQuery.data?.configured);
   const googleConnected = Boolean(googleStatusQuery.data?.connected);
+  const weekdayHeaders = weekStartsOnMonday ? WEEKDAY_HEADERS_MONDAY_FIRST : WEEKDAY_HEADERS_SUNDAY_FIRST;
 
   return (
     <AppLayout>
@@ -380,7 +400,7 @@ export default function Agenda() {
               <CardContent>
                 {/* Weekday headers */}
                 <div className="grid grid-cols-7 mb-2">
-                  {WEEKDAY_HEADERS.map(h => (
+                  {weekdayHeaders.map(h => (
                     <div key={h} className="text-center text-[11px] font-semibold text-muted-foreground py-1">{h}</div>
                   ))}
                 </div>

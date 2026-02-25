@@ -2,53 +2,54 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
-import { Zap, Bot, Image, Share2, BarChart3, MessageSquare, ArrowRight, CheckCircle } from "lucide-react";
+import { Zap, Calendar, Wallet, BarChart3, MessageSquare, ArrowRight, CheckCircle, Users, Target } from "lucide-react";
+import { getStartPageRoute } from "@/lib/user-settings";
 
 const features = [
   {
-    icon: Bot,
-    title: "IA Generativa",
-    desc: "Claude e ChatGPT criam estratégias completas e cópias para cada canal automaticamente.",
+    icon: Calendar,
+    title: "Rotina Integrada",
+    desc: "Gerencie tarefas, hábitos, pomodoro e agenda em uma visão diária clara e prática.",
     color: "text-primary bg-primary/15",
   },
   {
     icon: MessageSquare,
-    title: "Chatbot WhatsApp",
-    desc: "Clientes solicitam campanhas diretamente pelo WhatsApp. O bot entende e cria tudo.",
+    title: "CRM e Prospecção",
+    desc: "Organize leads por estágio e acompanhe metas diárias de prospecção em tempo real.",
     color: "text-emerald-700 dark:text-emerald-300 bg-emerald-500/15",
   },
   {
-    icon: Image,
-    title: "Criativos Automáticos",
-    desc: "Integração com Freepik para gerar imagens e criativos visuais baseados na estratégia.",
+    icon: Wallet,
+    title: "Financeiro CPF e CNPJ",
+    desc: "Controle lançamentos, recorrências e comprovantes com visão completa de saldo e categorias.",
     color: "text-indigo-700 dark:text-indigo-300 bg-indigo-500/15",
   },
   {
-    icon: Share2,
-    title: "Publicação Automática",
-    desc: "Publique em Instagram, Facebook, TikTok e LinkedIn com um clique ou automaticamente.",
+    icon: Users,
+    title: "Gestão de Clientes",
+    desc: "Cadastre clientes, mantenha dados centralizados e acompanhe o relacionamento sem planilhas.",
     color: "text-sky-700 dark:text-sky-300 bg-sky-500/15",
   },
   {
     icon: BarChart3,
-    title: "Dashboard Completo",
-    desc: "Acompanhe todas as campanhas, métricas e status em tempo real.",
+    title: "Dashboard Personalizável",
+    desc: "Monte o painel com os widgets que importam para sua operação e seu foco do dia.",
     color: "text-amber-700 dark:text-amber-300 bg-amber-500/15",
   },
   {
-    icon: Zap,
-    title: "Dados Pré-definidos",
-    desc: "Configure tom de voz, público-alvo e identidade visual por cliente. A IA usa tudo.",
+    icon: Target,
+    title: "Configuração por Perfil",
+    desc: "Ajuste metas, preferências e aparência para deixar o Orbita adaptado ao seu ritmo.",
     color: "text-orange-700 dark:text-orange-300 bg-orange-500/15",
   },
 ];
 
 const workflow = [
-  { step: "01", title: "Cliente solicita via WhatsApp", desc: "Mensagem simples como 'Quero uma campanha de lançamento'" },
-  { step: "02", title: "IA busca dados do cliente", desc: "Tom de voz, público-alvo, produtos e identidade visual pré-configurados" },
-  { step: "03", title: "Estratégia gerada em segundos", desc: "Claude cria estratégia completa, cópias para cada canal e sugestão de criativo" },
-  { step: "04", title: "Revisão e aprovação", desc: "Você revisa, aprova e agenda a publicação com um clique" },
-  { step: "05", title: "Publicação automática", desc: "Posts publicados automaticamente no Instagram, Facebook, TikTok e LinkedIn" },
+  { step: "01", title: "Cadastre seus clientes", desc: "Centralize informações de contato e contexto comercial." },
+  { step: "02", title: "Estruture sua rotina", desc: "Defina tarefas, hábitos e prioridades para o dia." },
+  { step: "03", title: "Acompanhe o CRM", desc: "Mova leads no funil e execute follow-up no momento certo." },
+  { step: "04", title: "Controle o financeiro", desc: "Registre entradas e saídas de CPF/CNPJ em um só fluxo." },
+  { step: "05", title: "Ajuste e repita", desc: "Personalize o painel e as metas para manter constância de execução." },
 ];
 
 export default function Home() {
@@ -57,7 +58,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      navigate("/dashboard");
+      navigate(getStartPageRoute());
     }
   }, [loading, isAuthenticated, navigate]);
 
@@ -80,7 +81,7 @@ export default function Home() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg font-['Space_Grotesk']">AdFlow</span>
+            <span className="font-bold text-lg font-['Space_Grotesk']">Orbita</span>
           </div>
           <Button onClick={() => navigate("/login")}>
             Entrar na Plataforma <ArrowRight className="w-4 h-4 ml-2" />
@@ -94,15 +95,15 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6">
             <Zap className="w-3.5 h-3.5" />
-            Agência de Marketing com IA Completa
+            Sistema de Gestão Pessoal + Comercial
           </div>
           <h1 className="text-5xl md:text-6xl font-bold font-['Space_Grotesk'] leading-tight mb-6">
-            Campanhas completas
+            Rotina, clientes e financeiro
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-500">geradas por IA</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-500">no mesmo painel</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Solicite campanhas via WhatsApp e receba estratégia, cópias e criativos prontos para publicação em todos os canais — automaticamente.
+            O Orbita organiza o que você precisa executar no dia e simplifica a operação com clientes, CRM e financeiro.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button size="lg" className="text-base px-8" onClick={() => navigate("/login")}>
@@ -125,8 +126,8 @@ export default function Home() {
       <section className="px-4 py-16 sm:px-6 sm:py-20 bg-muted/20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold font-['Space_Grotesk'] mb-3">Tudo automatizado, nada manual</h2>
-            <p className="text-muted-foreground">Do pedido do cliente à publicação nas redes sociais, sem intervenção humana.</p>
+            <h2 className="text-3xl font-bold font-['Space_Grotesk'] mb-3">Tudo em uma única operação</h2>
+            <p className="text-muted-foreground">Menos troca de ferramenta e mais clareza para executar.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map(({ icon: Icon, title, desc, color }) => (
@@ -147,7 +148,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold font-['Space_Grotesk'] mb-3">Como funciona</h2>
-            <p className="text-muted-foreground">5 passos do pedido à publicação</p>
+            <p className="text-muted-foreground">5 passos para operar com constância</p>
           </div>
           <div className="space-y-4">
             {workflow.map(({ step, title, desc }, i) => (
@@ -171,8 +172,8 @@ export default function Home() {
       {/* CTA */}
       <section className="px-4 py-16 sm:px-6 sm:py-20 bg-muted/20">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-bold font-['Space_Grotesk'] mb-4">Pronto para automatizar sua agência?</h2>
-          <p className="text-muted-foreground mb-8">Configure seus clientes, conecte as APIs e comece a gerar campanhas em minutos.</p>
+          <h2 className="text-3xl font-bold font-['Space_Grotesk'] mb-4">Pronto para organizar sua operação?</h2>
+          <p className="text-muted-foreground mb-8">Crie sua conta e comece a centralizar rotina, CRM e financeiro hoje.</p>
           <Button size="lg" className="text-base px-10" onClick={() => navigate("/login")}>
             <Zap className="w-5 h-5 mr-2" />
             Acessar Plataforma
@@ -187,9 +188,9 @@ export default function Home() {
             <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
               <Zap className="w-3.5 h-3.5 text-primary-foreground" />
             </div>
-            <span>AdFlow — Marketing Automation SaaS</span>
+            <span>Orbita — Sistema Operacional da Rotina</span>
           </div>
-          <p>Powered by Claude AI + Freepik + WhatsApp API</p>
+          <p>Planejamento, execução e acompanhamento no mesmo lugar.</p>
         </div>
       </footer>
     </div>

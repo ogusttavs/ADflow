@@ -4,7 +4,6 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   LayoutDashboard,
@@ -58,7 +57,7 @@ type NavSection = {
 
 const ALL_NAV_SECTIONS: NavSection[] = [
   {
-    title: "Principal",
+    title: "Visão Geral",
     items: [
       { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
       { href: "/clients", icon: Users, label: "Clientes" },
@@ -66,7 +65,7 @@ const ALL_NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: "Produtividade",
+    title: "Vida & Rotina",
     items: [
       { href: "/routine", icon: Clock, label: "Minha Rotina" },
       { href: "/agenda", icon: Calendar, label: "Agenda" },
@@ -75,7 +74,7 @@ const ALL_NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: "CRM & Vendas",
+    title: "Comercial",
     items: [
       { href: "/crm", icon: Contact, label: "CRM / Leads" },
       { href: "/prospecting", icon: TrendingUp, label: "Prospecção" },
@@ -83,7 +82,7 @@ const ALL_NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: "Análise & IA",
+    title: "Financeiro",
     items: [
       { href: "/financeiro", icon: Wallet, label: "Financeiro" },
       { href: "/performance", icon: BarChart3, label: "Performance", disabled: true },
@@ -94,7 +93,7 @@ const ALL_NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: "Sistema",
+    title: "Conta",
     items: [
       { href: "/whatsapp", icon: MessageSquare, label: "WhatsApp Bot", disabled: true },
       { href: "/integrations", icon: Plug, label: "Integrações", disabled: true },
@@ -160,7 +159,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   const visibleSections = ALL_NAV_SECTIONS.map((section) => ({
     ...section,
-    items: section.items.filter((item) => !hiddenItems.has(item.href)),
+    items: section.items.filter((item) => !item.disabled && !hiddenItems.has(item.href)),
   })).filter((section) => section.items.length > 0);
 
   const customizableItems = ALL_NAV_SECTIONS.flatMap((section) =>
@@ -178,7 +177,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       section.items.some(
         (item) => location === item.href || (item.href !== "/dashboard" && location.startsWith(item.href))
       )
-    )?.title ?? "Principal";
+    )?.title ?? "Visão Geral";
 
   const todayLabel = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
 
@@ -212,8 +211,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </div>
         {(!collapsed || mobile) && (
           <div className="min-w-0">
-            <p className="truncate font-['Space_Grotesk'] text-lg font-bold leading-none text-sidebar-foreground">AdFlow AI</p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-sidebar-foreground/55">Painel operacional</p>
+            <p className="truncate font-['Space_Grotesk'] text-lg font-bold leading-none text-sidebar-foreground">Orbita</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-sidebar-foreground/55">Tudo na sua órbita</p>
           </div>
         )}
       </div>
@@ -227,35 +226,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </p>
             )}
             <div className="space-y-1">
-              {section.items.map(({ href, icon: Icon, label, disabled }) => {
-                const isActive = !disabled && (location === href || (href !== "/dashboard" && location.startsWith(href)));
-
-                if (disabled) {
-                  return (
-                    <div
-                      key={href}
-                      title={`${label} - Em breve`}
-                      className={`flex select-none items-center gap-3 rounded-xl border border-border/85 bg-muted/45 px-3 py-2.5 cursor-not-allowed ${
-                        collapsed && !mobile ? "justify-center" : ""
-                      }`}
-                    >
-                      <span className="h-7 w-7 rounded-lg bg-muted text-muted-foreground flex items-center justify-center shrink-0">
-                        <Icon className="h-4 w-4" />
-                      </span>
-                      {(!collapsed || mobile) && (
-                        <>
-                          <span className="text-sm font-medium text-sidebar-foreground/90">{label}</span>
-                          <Badge
-                            variant="outline"
-                            className="ml-auto border-border/85 bg-muted/65 px-1.5 py-0 text-[10px] text-muted-foreground"
-                          >
-                            Em breve
-                          </Badge>
-                        </>
-                      )}
-                    </div>
-                  );
-                }
+              {section.items.map(({ href, icon: Icon, label }) => {
+                const isActive = location === href || (href !== "/dashboard" && location.startsWith(href));
 
                 return (
                   <Link
@@ -390,7 +362,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             })}
           </div>
           <p className="pt-1 text-[10px] text-muted-foreground">
-            Clique em um item para mostrar ou ocultar na barra lateral. Itens "Em breve" não podem ser personalizados.
+            Clique em um item para mostrar ou ocultar na barra lateral.
           </p>
         </DialogContent>
       </Dialog>

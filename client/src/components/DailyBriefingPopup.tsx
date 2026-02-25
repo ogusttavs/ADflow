@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, AlertTriangle, Target, Sun, ArrowRight, Wallet, Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { localDateKey } from "@/lib/date";
+import { USER_SETTINGS_KEYS, getSettingBoolean } from "@/lib/user-settings";
 
 const STORAGE_KEY = "adflow_briefing_date";
 
@@ -16,12 +18,14 @@ function getGreeting() {
 }
 
 export function DailyBriefingPopup() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
   const [open, setOpen] = useState(false);
   const [postponed, setPostponed] = useState(false);
 
   // Only show once per day
   useEffect(() => {
+    const showOnLogin = getSettingBoolean(USER_SETTINGS_KEYS.showDailyBriefingOnLogin, true);
+    if (!showOnLogin) return;
     const lastShown = localStorage.getItem(STORAGE_KEY);
     if (lastShown !== today) {
       // Small delay so the page loads first

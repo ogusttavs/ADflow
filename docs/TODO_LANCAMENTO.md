@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 09:56:07 -0300
+Atualizado em: 2026-02-25 10:25:07 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -85,6 +85,15 @@ Status atual: concluido. Onboarding agora usa `navigate()` em vez de alterar `wi
 
 - [x] 32. Oficializar `docs/DECISOES_PRODUTO.md` como referencia para decisoes de produto
 Status atual: concluido. Documento integrado na hierarquia oficial (`AGENTS`, `LEIA_PRIMEIRO` e `CENTRO`).
+
+- [x] 33. Ocultar no menu lateral todos os itens marcados como "Em breve"
+Status atual: concluido. Itens desabilitados nao sao mais renderizados na UI (desktop/mobile), mantendo estrutura para reativacao futura.
+
+- [x] 34. Alinhar nomenclaturas da sidebar e da tela de Configuracoes com o Orbita atual
+Status atual: concluido. Subdivisoes do menu renomeadas e configuracoes revisadas para rotina/negocio (sem fluxos de campanhas obsoletos).
+
+- [x] 35. Fechar baseline funcional do que esta visivel no app para demo publica
+Status atual: concluido. Configuracoes com persistencia real (incluindo metas), onboarding alinhado aos modulos ativos, datas em timezone local, LP/login com branding Orbita e textos ajustados para escopo atual.
 
 ---
 
