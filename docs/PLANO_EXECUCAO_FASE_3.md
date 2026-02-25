@@ -1,6 +1,6 @@
 # PLANO EXECUCAO FASE 3 - Auth e Email
 
-Atualizado em: 2026-02-25 18:33:45 -0300
+Atualizado em: 2026-02-25 19:12:28 -0300
 
 ## Objetivo da fase
 
@@ -18,6 +18,7 @@ Fechar o ciclo de seguranca da conta do usuario com tres entregas:
   - `pnpm test` (66 testes)
   - `pnpm build`
 - Operacao de email em producao preparada com Resend + scripts de automacao (`set-resend-env.sh` e `smoke-auth-email.sh`).
+- Validacao manual de producao concluida (verificacao, reset, reenvio e teste de rate limit), fechando a Sprint 3 operacionalmente.
 
 ## Decisoes aprovadas (travadas)
 
@@ -174,4 +175,4 @@ Variaveis esperadas:
 - [x] Hardening adicional de conta/cadastro/PII (CPF-CNPJ, senha forte, login gate, forgot email).
 - [x] Validacoes finais locais: `pnpm check`, `pnpm test`, `pnpm build`.
 - [x] Documentacao operacional sincronizada (`TODO`, `CENTRO`, `LOG`).
-- [ ] Validacao manual final em producao (checklist de browser + rate limit com 429).
+- [x] Validacao manual final em producao (checklist de browser + rate limit com 429).

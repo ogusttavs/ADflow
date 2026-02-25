@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 18:41:07 -0300
+Atualizado em: 2026-02-25 19:12:28 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -91,7 +91,7 @@ Pendencias tecnicas objetivas:
 - Sprint 2 (Seguranca) concluida: `helmet`, rate limiting em auth, sessao JWT de 7 dias e criptografia AES-256-GCM em credenciais.
 - Deploy da Sprint 2 aplicado em producao na VPS com HEAD `6aa1b1d`, `.env` ajustado (`VITE_APP_ID=orbita` e `CREDENTIAL_ENCRYPTION_KEY`), `pm2` online e HTTPS `200 OK` em `getorbita.com.br` e `www.getorbita.com.br`.
 - Acesso SSH remoto local liberado e `quick-deploy` validado com sucesso em producao (A7 concluido).
-- Pendencias atuais do dono no backlog: A1, A2, A3, A6 e A8.
+- Pendencias atuais do dono no backlog: A1, A2, A3 e A6.
 - A9 concluido operacionalmente: `USER_PII_ENCRYPTION_KEY` dedicada configurada na VPS com tamanho valido e sem erro de runtime.
 - Sprint 3 (Auth e Email) concluida e deployada em producao (`5efe746`): itens 09, 10 e 11 ativos.
 - Refinamentos de seguranca/conta adicionados na Sprint 3:
@@ -107,17 +107,16 @@ Pendencias tecnicas objetivas:
 - Fluxo de verificacao ativo em soft lock com popup persistente no app, rota `/verify-email` e reenvio autenticado.
 - Fluxo de reset de senha ativo com token hash em `auth_tokens`, expiracao e rate limit dedicado.
 - Validacao local apos hardening adicional: `pnpm check`, `pnpm test` (66 testes) e `pnpm build` verdes.
-- Pendencia operacional imediata da Sprint 3: fechamento do checklist manual de browser do A8 (verificacao, reset, reenvio e 429).
+- Sprint 3 encerrada operacionalmente: checklist manual de browser do A8 validado (verificacao, reset, reenvio e 429).
 - Toolkit operacional de email preparado:
   - `scripts/vps/set-resend-env.sh` (atualizacao segura de ENV na VPS);
   - `scripts/vps/smoke-auth-email.sh` (validacao operacional + checklist manual).
 
 ## 7) Prioridade recomendada (curto prazo)
 
-1. Validar checklist manual do A8 no browser e fechar operacao de email transacional em producao.
-2. A1 + A2 (Google OAuth em producao).
-3. A6 (Asaas + webhook).
-4. A3 (rotacao de segredos operacionais).
+1. A1 + A2 (Google OAuth em producao).
+2. A6 (Asaas + webhook).
+3. A3 (rotacao de segredos operacionais).
 
 ## 8) Marcos recentes
 
@@ -144,3 +143,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: Sprint 3 refinada para producao com cadastro ampliado de perfil, criptografia de CPF/CNPJ no backend, `auth.updateProfile`, Conta em modo leitura por padrao e bloqueio de troca de senha sem email verificado; validado com `pnpm check`, `pnpm test` (58 testes) e `pnpm build`.
 - 2026-02-25: hardening adicional de auth com validacao algoritimica de CPF/CNPJ, senha forte obrigatoria, bloqueio de login para nao verificados, expiracao de conta em 7 dias, fluxo "esqueci meu email" e cadastro com envio de verificacao assincrono; validado com `pnpm check`, `pnpm test` (66 testes) e `pnpm build`.
 - 2026-02-25: release `5efe746` (Sprint 3 final) deployado via `quick-deploy` em `root@167.88.32.1` com build+db:push+restart PM2, HEAD remoto confirmado em `5efe746`, `pm2 status adflow` online e `https://getorbita.com.br` retornando `200 OK`.
+- 2026-02-25: dono confirmou validacao manual fim-a-fim dos fluxos de email em producao; A8 marcado como concluido e Sprint 3 encerrada operacionalmente.

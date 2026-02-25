@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 18:41:07 -0300
+Atualizado em: 2026-02-25 19:12:28 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -10,7 +10,7 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida e deployada em producao no release `5efe746`; operacao de email transacional em validacao manual final de browser).
+- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida, deployada em producao no release `5efe746` e validada manualmente em fluxo real de email).
 
 ---
 
@@ -158,21 +158,18 @@ Status atual: concluido. `ThemeProvider` agora inicia em dark por padrao e a Hom
 - [x] A5. Definir dominio final da marca Orbita
 - [ ] A6. Criar conta Asaas e configurar webhook
 - [x] A7. Liberar acesso SSH de deploy (chave/usuario) para executar `quick-deploy` remoto
-- [ ] A8. Configurar Resend em producao (dominio/DNS + `RESEND_API_KEY` + `EMAIL_FROM` + `EMAIL_PROVIDER=resend`)
-Status atual: em validacao final. ENV operacional aplicado na VPS (`APP_BASE_URL`, `EMAIL_PROVIDER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`), `smoke-auth-email.sh` executado, release `5efe746` em producao e app online; falta concluir checklist manual de browser (envio/confirmacao/reset/reenvio/rate limit).
+- [x] A8. Configurar Resend em producao (dominio/DNS + `RESEND_API_KEY` + `EMAIL_FROM` + `EMAIL_PROVIDER=resend`)
+Status atual: concluido. ENV operacional aplicado na VPS (`APP_BASE_URL`, `EMAIL_PROVIDER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`), smoke executado e checklist manual de browser concluido (verificacao, reset, reenvio e rate limit).
 - [x] A9. Definir `USER_PII_ENCRYPTION_KEY` dedicado na VPS (recomendado)
 Status atual: concluido. Chave dedicada configurada na VPS com tamanho valido (32 bytes/64 hex), app online e sem erro de runtime relacionado.
 
 ### Proximas tarefas do dono (ordem sugerida)
 
-1. A8 (Resend em producao)
-- Validar dominio no Resend, configurar DNS (SPF/DKIM), adicionar ENVs no servidor e testar envio real de verificacao/reset.
-
-2. A1 + A2 (Google OAuth em producao)
+1. A1 + A2 (Google OAuth em producao)
 - Adicionar redirect URIs de producao e publicar o app fora de `Testing`.
 
-3. A6 (Asaas)
+2. A6 (Asaas)
 - Criar conta, gerar chave/API e configurar webhook de producao.
 
-4. A3 (rotacao de segredos)
+3. A3 (rotacao de segredos)
 - Rotacionar credenciais sensiveis do servidor (`JWT_SECRET`, OAuth client secret e demais chaves operacionais).
