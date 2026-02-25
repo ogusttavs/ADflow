@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 00:18:33 -0300
+Atualizado em: 2026-02-25 09:24:21 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -136,5 +136,66 @@ Bloqueios/Riscos:
 - Nenhum bloqueio operacional aberto para iniciar o proximo dia.
 
 Arquivos alterados:
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 09:15:02 -0300] [Codex]
+Contexto:
+- Dono confirmou comando operacional `Claude +` e reportou regressao do `TODO` no item 01 (Familia/Equipe).
+
+Feito:
+- `TODO_LANCAMENTO` corrigido para estado oficial: item 01 concluido como ocultacao temporaria no front com backend preservado.
+- `CENTRO_DE_OPERACAO` atualizado para refletir `Claude +` (consultor disponivel).
+- Reaberta execucao da Sprint 1 com foco no item 02 (ocultar Campanhas/IA ponta a ponta no frontend).
+
+Proximo:
+- Fechar ocultacao de Campanhas/IA em rotas, CTAs e onboarding mantendo backend para reativacao futura.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio operacional; apenas divergencia documental corrigida.
+
+Arquivos alterados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 09:24:21 -0300] [Codex]
+Contexto:
+- Execucao da Sprint 1 para fechar ocultacao de Campanhas/IA no frontend e remover pendencias tecnicas do baseline.
+
+Feito:
+- Campanhas/IA ocultadas no frontend mantendo backend para reativacao futura:
+  - rotas de campanhas condicionadas por feature flag (`FEATURE_FLAGS.campaigns=false`);
+  - CTAs e widgets de campanhas removidos do Dashboard;
+  - aba de campanhas removida do detalhe de cliente;
+  - onboarding ajustado sem passo de campanhas.
+- Assistente de voz basico desativado no layout por feature flag (`FEATURE_FLAGS.voiceAssistant=false`).
+- Navegacao do onboarding corrigida de `window.location.hash` para `navigate()`.
+- Erros TS2783 de `name` duplicado corrigidos em formularios (`ClientDetail`, `Clients`, `NewCampaign`).
+- Validacoes executadas com sucesso:
+  - `pnpm check`
+  - `pnpm test` (44 testes passando)
+  - `pnpm build`
+
+Proximo:
+- Iniciar Sprint 2 (Seguranca) na ordem do backlog oficial.
+- Opcional: pedir ao Claude revisao de arquitetura para rate limiting + hardening JWT/headers.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico imediato.
+- Existe arquivo local nao rastreado `docs/IDEIAS_PRODUTO.md` (fora da fonte oficial e nao incluido no commit desta rodada).
+
+Arquivos alterados:
+- client/src/const.ts
+- client/src/App.tsx
+- client/src/components/AppLayout.tsx
+- client/src/components/Onboarding.tsx
+- client/src/components/VoiceCommand.tsx
+- client/src/pages/Dashboard.tsx
+- client/src/pages/ClientDetail.tsx
+- client/src/pages/Clients.tsx
+- client/src/pages/NewCampaign.tsx
+- client/src/pages/Routine.tsx
+- docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md

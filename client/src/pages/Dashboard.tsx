@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "wouter";
 import {
-  Users, Megaphone, CheckCircle, TrendingUp, Plus, ArrowRight, Zap, Clock,
+  Users, TrendingUp, Plus, ArrowRight, Zap, Clock,
   BarChart3, Target, Timer, ListTodo, Contact, Wallet, Settings2,
   Eye, EyeOff, CheckCircle2, Circle, AlertTriangle, UserPlus,
 } from "lucide-react";
@@ -18,8 +18,7 @@ import {
 const WIDGETS_KEY = "adflow_dashboard_widgets";
 
 const ALL_WIDGETS = [
-  { id: "stats", label: "Resumo Campanhas", icon: BarChart3, section: "Principal" },
-  { id: "recent_campaigns", label: "Campanhas Recentes", icon: Megaphone, section: "Principal" },
+  { id: "stats", label: "Resumo Geral", icon: BarChart3, section: "Principal" },
   { id: "quick_actions", label: "Ações Rápidas", icon: Zap, section: "Principal" },
   { id: "tasks_today", label: "Tarefas de Hoje", icon: ListTodo, section: "Produtividade" },
   { id: "habits_today", label: "Hábitos de Hoje", icon: Target, section: "Produtividade" },
@@ -36,14 +35,6 @@ function loadHiddenWidgets(): Set<WidgetId> {
   catch { return new Set(); }
 }
 
-const statusColors: Record<string, string> = {
-  pending: "status-pending", generating: "status-generating", review: "status-review",
-  approved: "status-approved", published: "status-published", failed: "status-failed", scheduled: "status-scheduled",
-};
-const statusLabels: Record<string, string> = {
-  pending: "Pendente", generating: "Gerando IA", review: "Em Revisão",
-  approved: "Aprovada", published: "Publicada", failed: "Falhou", scheduled: "Agendada",
-};
 const PRIORITY_COLORS: Record<string, string> = {
   HIGH: "border-red-500/30 bg-red-500/14 text-red-700 dark:text-red-300",
   MEDIUM: "border-amber-500/30 bg-amber-500/14 text-amber-700 dark:text-amber-300",
@@ -59,14 +50,23 @@ function toIsoDate(value: unknown) {
 
 // ─── Individual Widgets ───────────────────────────────────────────────────────
 function StatsWidget() {
-  const { data: stats } = trpc.campaigns.stats.useQuery();
+  const today = new Date().toISOString().slice(0, 10);
+  const month = new Date().toISOString().slice(0, 7);
   const { data: clients } = trpc.clients.list.useQuery();
+  const { data: leads } = trpc.crm.listLeads.useQuery(undefined);
+  const { data: tasks } = trpc.productivity.listTasks.useQuery({ date: today });
+  const { data: cpf } = trpc.financeiro.summary.useQuery({ personType: "cpf", month });
+  const { data: cnpj } = trpc.financeiro.summary.useQuery({ personType: "cnpj", month });
+
+  const pendingTasks = (tasks ?? []).filter((task) => task.status === "PENDING").length;
+  const monthBalance = ((cpf?.balance ?? 0) + (cnpj?.balance ?? 0)) / 100;
+  const formatBRL = (value: number) => value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const items = [
     { label: "Clientes", value: clients?.length ?? 0, icon: Users, color: "text-primary", bg: "bg-primary/15" },
-    { label: "Campanhas", value: stats?.total ?? 0, icon: Megaphone, color: "text-indigo-700 dark:text-indigo-300", bg: "bg-indigo-500/14" },
-    { label: "Publicadas", value: stats?.published ?? 0, icon: CheckCircle, color: "text-emerald-700 dark:text-emerald-300", bg: "bg-emerald-500/14" },
-    { label: "Em Revisão", value: stats?.inReview ?? 0, icon: Clock, color: "text-amber-700 dark:text-amber-300", bg: "bg-amber-500/14" },
+    { label: "Leads", value: leads?.length ?? 0, icon: Contact, color: "text-indigo-700 dark:text-indigo-300", bg: "bg-indigo-500/14" },
+    { label: "Tarefas Pendentes", value: pendingTasks, icon: ListTodo, color: "text-amber-700 dark:text-amber-300", bg: "bg-amber-500/14" },
+    { label: "Saldo do Mês", value: formatBRL(monthBalance), icon: Wallet, color: "text-emerald-700 dark:text-emerald-300", bg: "bg-emerald-500/14" },
   ];
 
   return (
@@ -86,62 +86,13 @@ function StatsWidget() {
   );
 }
 
-function RecentCampaignsWidget() {
-  const { data: campaigns } = trpc.campaigns.list.useQuery();
-  const recent = (campaigns ?? []).slice(0, 5);
-
-  return (
-    <Card className="bg-card border-border">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-            <Megaphone className="w-4 h-4" />Campanhas Recentes
-          </CardTitle>
-          <Button variant="ghost" size="sm" className="text-xs" asChild>
-            <Link href="/campaigns">Ver todas <ArrowRight className="w-3 h-3 ml-1" /></Link>
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {recent.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <Megaphone className="w-8 h-8 mx-auto mb-2 opacity-30" />
-            <p className="text-sm">Nenhuma campanha criada</p>
-            <Button size="sm" className="mt-3" asChild>
-              <Link href="/campaigns/new"><Plus className="w-3 h-3 mr-1" />Criar campanha</Link>
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {recent.map(c => (
-              <div key={c.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/30 transition-colors">
-                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Megaphone className="w-3.5 h-3.5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{c.title}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(c.createdAt).toLocaleDateString("pt-BR")}</p>
-                </div>
-                <Badge className={`text-xs ${statusColors[c.status] ?? ""}`}>{statusLabels[c.status] ?? c.status}</Badge>
-                <Button variant="ghost" size="icon" className="w-7 h-7" asChild>
-                  <Link href={`/campaigns/${c.id}`}><ArrowRight className="w-3.5 h-3.5" /></Link>
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 
 function QuickActionsWidget() {
   const actions = [
-    { label: "Nova Campanha com IA", href: "/campaigns/new", icon: Zap, color: "text-primary" },
-    { label: "Adicionar Cliente", href: "/clients", icon: Users, color: "text-indigo-700 dark:text-indigo-300" },
+    { label: "Adicionar Cliente", href: "/clients", icon: Users, color: "text-primary" },
     { label: "Ver Agenda", href: "/agenda", icon: Clock, color: "text-sky-700 dark:text-sky-300" },
     { label: "CRM / Leads", href: "/crm", icon: Contact, color: "text-emerald-700 dark:text-emerald-300" },
+    { label: "Ver Financeiro", href: "/financeiro", icon: Wallet, color: "text-indigo-700 dark:text-indigo-300" },
   ];
   return (
     <Card className="bg-card border-border">
@@ -439,7 +390,6 @@ function FinanceiroSummaryWidget() {
 function renderWidget(id: WidgetId) {
   switch (id) {
     case "stats": return <StatsWidget />;
-    case "recent_campaigns": return <RecentCampaignsWidget />;
     case "quick_actions": return <QuickActionsWidget />;
     case "tasks_today": return <TasksTodayWidget />;
     case "habits_today": return <HabitsTodayWidget />;
@@ -452,7 +402,7 @@ function renderWidget(id: WidgetId) {
 }
 
 // Some widgets span full width
-const FULL_WIDTH_WIDGETS = new Set<WidgetId>(["stats", "recent_campaigns"]);
+const FULL_WIDTH_WIDGETS = new Set<WidgetId>(["stats"]);
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
@@ -490,8 +440,8 @@ export default function Dashboard() {
               <Settings2 className="w-4 h-4" />Personalizar
             </Button>
             <Button asChild size="sm">
-              <Link href="/campaigns/new">
-                <Plus className="w-4 h-4 mr-1" />Nova Campanha
+              <Link href="/clients">
+                <Plus className="w-4 h-4 mr-1" />Novo Cliente
               </Link>
             </Button>
           </div>
@@ -502,7 +452,7 @@ export default function Dashboard() {
           <div className="relative flex flex-wrap items-center gap-3">
             <Badge className="status-generating border px-2.5 py-1 text-[11px]">Painel inteligente</Badge>
             <p className="text-sm text-muted-foreground">
-              Widgets adaptáveis para acompanhar campanhas, rotina, CRM e financeiro em uma visão única.
+              Widgets adaptáveis para acompanhar rotina, CRM e financeiro em uma visão única.
             </p>
           </div>
         </div>

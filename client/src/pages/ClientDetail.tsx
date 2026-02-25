@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import {
-  ArrowLeft, Save, User, Settings, Megaphone,
+  ArrowLeft, Save, User, Settings,
   Image, FileText, Key, ClipboardList, Plus, Trash2,
   Eye, EyeOff, Copy, Download, ExternalLink, RefreshCw,
   Lock, Globe,
@@ -496,9 +496,6 @@ export default function ClientDetail() {
             <TabsTrigger value="info" className="flex items-center gap-1.5 text-xs">
               <User className="w-3.5 h-3.5" />Informações
             </TabsTrigger>
-            <TabsTrigger value="campaigns" className="flex items-center gap-1.5 text-xs">
-              <Megaphone className="w-3.5 h-3.5" />Campanhas ({clientData.campaignCount})
-            </TabsTrigger>
             <TabsTrigger value="creatives" className="flex items-center gap-1.5 text-xs">
               <Image className="w-3.5 h-3.5" />Criativos
             </TabsTrigger>
@@ -540,11 +537,11 @@ export default function ClientDetail() {
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="pages-clientdetail-personalidade-da-marca">Personalidade da Marca</Label>
-                      <Textarea name="pages-clientdetail-personalidade-da-marca" id="pages-clientdetail-personalidade-da-marca" {...register("brandPersonality")} placeholder="Ex: Inovadora, acessível, confiável..." className="bg-input border-border resize-none" rows={3} />
+                      <Textarea id="pages-clientdetail-personalidade-da-marca" {...register("brandPersonality")} placeholder="Ex: Inovadora, acessível, confiável..." className="bg-input border-border resize-none" rows={3} />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="pages-clientdetail-proposta-de-valor-principal">Proposta de Valor Principal</Label>
-                      <Textarea name="pages-clientdetail-proposta-de-valor-principal" id="pages-clientdetail-proposta-de-valor-principal" {...register("mainValueProposition")} placeholder="O que diferencia esta marca..." className="bg-input border-border resize-none" rows={3} />
+                      <Textarea id="pages-clientdetail-proposta-de-valor-principal" {...register("mainValueProposition")} placeholder="O que diferencia esta marca..." className="bg-input border-border resize-none" rows={3} />
                     </div>
                   </CardContent>
                 </Card>
@@ -556,12 +553,12 @@ export default function ClientDetail() {
                   <CardContent className="space-y-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="pages-clientdetail-descricao-do-publico">Descrição do Público</Label>
-                      <Textarea name="pages-clientdetail-descricao-do-publico" id="pages-clientdetail-descricao-do-publico" {...register("targetAudience")} placeholder="Ex: Empreendedores entre 25-40 anos..." className="bg-input border-border resize-none" rows={3} />
+                      <Textarea id="pages-clientdetail-descricao-do-publico" {...register("targetAudience")} placeholder="Ex: Empreendedores entre 25-40 anos..." className="bg-input border-border resize-none" rows={3} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
                         <Label htmlFor="pages-clientdetail-faixa-etaria">Faixa Etária</Label>
-                        <Input name="pages-clientdetail-faixa-etaria" id="pages-clientdetail-faixa-etaria" {...register("ageRange")} placeholder="Ex: 25-45 anos" className="bg-input border-border" />
+                        <Input id="pages-clientdetail-faixa-etaria" {...register("ageRange")} placeholder="Ex: 25-45 anos" className="bg-input border-border" />
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="pages-clientdetail-gender">Gênero</Label>
@@ -580,11 +577,11 @@ export default function ClientDetail() {
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="pages-clientdetail-localizacao">Localização</Label>
-                      <Input name="pages-clientdetail-localizacao" id="pages-clientdetail-localizacao" {...register("location")} placeholder="Ex: São Paulo, Brasil" className="bg-input border-border" />
+                      <Input id="pages-clientdetail-localizacao" {...register("location")} placeholder="Ex: São Paulo, Brasil" className="bg-input border-border" />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="pages-clientdetail-interesses">Interesses</Label>
-                      <Input name="pages-clientdetail-interesses" id="pages-clientdetail-interesses" {...register("interests")} placeholder="Ex: Tecnologia, negócios, fitness..." className="bg-input border-border" />
+                      <Input id="pages-clientdetail-interesses" {...register("interests")} placeholder="Ex: Tecnologia, negócios, fitness..." className="bg-input border-border" />
                     </div>
                   </CardContent>
                 </Card>
@@ -596,11 +593,11 @@ export default function ClientDetail() {
                   <CardContent className="space-y-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="pages-clientdetail-produtos-servicos-principais">Produtos/Serviços Principais</Label>
-                      <Textarea name="pages-clientdetail-produtos-servicos-principais" id="pages-clientdetail-produtos-servicos-principais" {...register("productsServices")} placeholder="Liste os principais produtos ou serviços..." className="bg-input border-border resize-none" rows={4} />
+                      <Textarea id="pages-clientdetail-produtos-servicos-principais" {...register("productsServices")} placeholder="Liste os principais produtos ou serviços..." className="bg-input border-border resize-none" rows={4} />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="pages-clientdetail-concorrentes">Concorrentes</Label>
-                      <Input name="pages-clientdetail-concorrentes" id="pages-clientdetail-concorrentes" {...register("competitors")} placeholder="Ex: Empresa A, Empresa B..." className="bg-input border-border" />
+                      <Input id="pages-clientdetail-concorrentes" {...register("competitors")} placeholder="Ex: Empresa A, Empresa B..." className="bg-input border-border" />
                     </div>
                   </CardContent>
                 </Card>
@@ -614,15 +611,15 @@ export default function ClientDetail() {
                       <div className="space-y-1.5">
                         <Label htmlFor="pages-clientdetail-cor-primaria">Cor Primária</Label>
                         <div className="flex gap-2">
-                          <input name="pages-clientdetail-cor-primaria" id="pages-clientdetail-cor-primaria" type="color" {...register("primaryColor")} className="w-10 h-10 rounded cursor-pointer bg-transparent border-0" />
-                          <Input id="pages-clientdetail-cor-primaria-texto" name="pages-clientdetail-cor-primaria-texto" {...register("primaryColor")} className="bg-input border-border" />
+                          <input id="pages-clientdetail-cor-primaria" type="color" {...register("primaryColor")} className="w-10 h-10 rounded cursor-pointer bg-transparent border-0" />
+                          <Input id="pages-clientdetail-cor-primaria-texto" {...register("primaryColor")} className="bg-input border-border" />
                         </div>
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="pages-clientdetail-cor-secundaria">Cor Secundária</Label>
                         <div className="flex gap-2">
-                          <input name="pages-clientdetail-cor-secundaria" id="pages-clientdetail-cor-secundaria" type="color" {...register("secondaryColor")} className="w-10 h-10 rounded cursor-pointer bg-transparent border-0" />
-                          <Input id="pages-clientdetail-cor-secundaria-texto" name="pages-clientdetail-cor-secundaria-texto" {...register("secondaryColor")} className="bg-input border-border" />
+                          <input id="pages-clientdetail-cor-secundaria" type="color" {...register("secondaryColor")} className="w-10 h-10 rounded cursor-pointer bg-transparent border-0" />
+                          <Input id="pages-clientdetail-cor-secundaria-texto" {...register("secondaryColor")} className="bg-input border-border" />
                         </div>
                       </div>
                     </div>
@@ -661,7 +658,7 @@ export default function ClientDetail() {
                     <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Contexto Adicional para IA</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Textarea id="pages-clientdetail-additional-context" name="pages-clientdetail-additional-context" {...register("additionalContext")}
+                    <Textarea id="pages-clientdetail-additional-context" {...register("additionalContext")}
                       placeholder="Informações extras que a IA deve considerar ao criar campanhas..."
                       className="bg-input border-border resize-none" rows={4} />
                   </CardContent>
@@ -696,19 +693,6 @@ export default function ClientDetail() {
                     </div>
                   ) : null)}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Campaigns Tab */}
-          <TabsContent value="campaigns">
-            <Card className="bg-card border-border">
-              <CardContent className="p-6 text-center text-muted-foreground">
-                <Megaphone className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Veja as campanhas na seção Campanhas</p>
-                <Button size="sm" className="mt-3" asChild>
-                  <Link href="/campaigns/new"><Megaphone className="w-4 h-4 mr-2" />Nova Campanha</Link>
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>

@@ -127,7 +127,7 @@ export default function NewCampaign() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="pages-newcampaign-titulo-da-campanha">Título da Campanha *</Label>
-                <Input name="pages-newcampaign-titulo-da-campanha" id="pages-newcampaign-titulo-da-campanha"
+                <Input id="pages-newcampaign-titulo-da-campanha"
                   {...register("title", { required: true })}
                   placeholder="Ex: Lançamento Produto X - Janeiro 2025"
                   className="bg-input border-border"
@@ -135,7 +135,7 @@ export default function NewCampaign() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="pages-newcampaign-objetivo-da-campanha">Objetivo da Campanha</Label>
-                <Textarea name="pages-newcampaign-objetivo-da-campanha" id="pages-newcampaign-objetivo-da-campanha"
+                <Textarea id="pages-newcampaign-objetivo-da-campanha"
                   {...register("objective")}
                   placeholder="Ex: Aumentar vendas do produto X em 30%, gerar leads qualificados, lançar nova linha..."
                   className="bg-input border-border resize-none"
@@ -190,7 +190,6 @@ export default function NewCampaign() {
                     <input
                       type="checkbox"
                       id="pages-newcampaign-auto-generate"
-                      name="pages-newcampaign-auto-generate"
                       {...register("autoGenerate")}
                       defaultChecked
                       className="w-4 h-4 accent-primary"

@@ -86,31 +86,31 @@ export default function Clients() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="pages-clients-nome">Nome *</Label>
-                    <Input name="pages-clients-nome" id="pages-clients-nome" {...register("name", { required: true })} placeholder="João Silva" className="bg-input border-border" />
+                    <Input id="pages-clients-nome" {...register("name", { required: true })} placeholder="João Silva" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="pages-clients-empresa">Empresa</Label>
-                    <Input name="pages-clients-empresa" id="pages-clients-empresa" {...register("company")} placeholder="Empresa Ltda" className="bg-input border-border" />
+                    <Input id="pages-clients-empresa" {...register("company")} placeholder="Empresa Ltda" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="pages-clients-e-mail">E-mail</Label>
-                    <Input name="pages-clients-e-mail" id="pages-clients-e-mail" {...register("email")} type="email" placeholder="email@empresa.com" className="bg-input border-border" />
+                    <Input id="pages-clients-e-mail" {...register("email")} type="email" placeholder="email@empresa.com" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="pages-clients-telefone">Telefone</Label>
-                    <Input name="pages-clients-telefone" id="pages-clients-telefone" {...register("phone")} placeholder="+55 11 99999-9999" className="bg-input border-border" />
+                    <Input id="pages-clients-telefone" {...register("phone")} placeholder="+55 11 99999-9999" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="pages-clients-whatsapp">WhatsApp</Label>
-                    <Input name="pages-clients-whatsapp" id="pages-clients-whatsapp" {...register("whatsappNumber")} placeholder="+5511999999999" className="bg-input border-border" />
+                    <Input id="pages-clients-whatsapp" {...register("whatsappNumber")} placeholder="+5511999999999" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="pages-clients-setor">Setor</Label>
-                    <Input name="pages-clients-setor" id="pages-clients-setor" {...register("industry")} placeholder="E-commerce, Saúde..." className="bg-input border-border" />
+                    <Input id="pages-clients-setor" {...register("industry")} placeholder="E-commerce, Saúde..." className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5 sm:col-span-2">
                     <Label htmlFor="pages-clients-website">Website</Label>
-                    <Input name="pages-clients-website" id="pages-clients-website" {...register("website")} placeholder="https://empresa.com.br" className="bg-input border-border" />
+                    <Input id="pages-clients-website" {...register("website")} placeholder="https://empresa.com.br" className="bg-input border-border" />
                   </div>
                   <div className="space-y-1.5 sm:col-span-2">
                     <Label htmlFor="pages-clients-status">Status</Label>

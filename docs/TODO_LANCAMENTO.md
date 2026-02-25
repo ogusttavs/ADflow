@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 00:30:15 -0300
+Atualizado em: 2026-02-25 09:24:21 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -10,7 +10,7 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase A: em andamento (com itens parciais).
+- Fase A: em andamento (Sprint 1 concluida; Sprint 2 pendente).
 
 ---
 
@@ -21,14 +21,14 @@ Este e o backlog oficial do projeto.
 - [x] 01. Ocultar Familia & Equipe temporariamente na interface (manter backend para reativacao futura)
 Status atual: concluido. Modulo oculto na interface; backend/rotas preservados para uso futuro.
 
-- [ ] 02. Ocultar Campanhas e IA de campanhas em todos os planos
-Status atual: parcial. Item ocultado no menu principal, mas fluxos/rotas/CTAs ainda ativos.
+- [x] 02. Ocultar Campanhas e IA de campanhas em todos os planos
+Status atual: concluido. Rotas/CTAs/onboarding e acessos principais ocultados no frontend; backend preservado para reativacao futura.
 
-- [ ] 03. Remover assistente de voz basico (VoiceCommandButton)
-Status atual: nao iniciado.
+- [x] 03. Remover assistente de voz basico (VoiceCommandButton)
+Status atual: concluido. Assistente desativado no layout por flag de feature, sem remocao destrutiva de codigo.
 
-- [ ] 04. Corrigir onboarding navigation (`window.location.hash` -> `navigate()`)
-Status atual: nao iniciado.
+- [x] 04. Corrigir onboarding navigation (`window.location.hash` -> `navigate()`)
+Status atual: concluido. Onboarding agora usa `navigate()` em vez de alterar `window.location.hash`.
 
 ### Sprint 2 - Seguranca
 

@@ -1,6 +1,6 @@
 # Centro de Operacao - AdFlow/Orbita
 
-Atualizado em: 2026-02-25 00:39:52 -0300
+Atualizado em: 2026-02-25 09:24:21 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -16,7 +16,7 @@ Estado de disponibilidade:
 | Papel | Estado |
 |---|---|
 | Codex (dev principal) | Ativo |
-| Claude (consultor) | Indisponivel (`Claude -`) |
+| Claude (consultor) | Disponivel (`Claude +`) |
 
 Comandos operacionais:
 - `Claude +`: consultor disponivel novamente.
@@ -71,24 +71,23 @@ Producao:
 ## 6) Situacao real (agora)
 
 Estado atual de desenvolvimento:
-- A transicao para o plano `Orbita - Fase A` foi iniciada, mas esta parcial.
+- A transicao para o plano `Orbita - Fase A` segue ativa com Sprint 1 concluida.
 - Modulo Familia & Equipe esta oculto na interface por decisao de produto, com backend preservado para reativacao futura.
-- Ocultacao de Campanhas foi iniciada apenas no menu principal; ainda existe em varias telas/rotas.
+- Modulo Campanhas/IA de campanhas esta oculto no frontend (rotas, CTAs, onboarding e atalhos), mantendo backend para reativacao futura.
 
 Pendencias tecnicas objetivas:
-- `pnpm check` falha no estado atual com erros TS2783 (`name` duplicado) em formulários de clientes/campanhas.
-- Tarefa 02 da `Fase A` esta parcial e precisa fechamento end-to-end.
-- Onboarding ainda usa `window.location.hash` em vez de `navigate()`.
-- Voice assistant ainda ativo no layout.
+- Validacao de baseline verde confirmada: `pnpm check`, `pnpm test` e `pnpm build` executados com sucesso.
+- Sprint 2 (Seguranca) ainda nao iniciada: rate-limit, `helmet`, expiração JWT e encrypt de credenciais.
 
 ## 7) Prioridade recomendada (curto prazo)
 
-1. Fechar Sprint 1 da Fase A com criterio de pronto tecnico:
-- ocultar Campanhas/IA de campanhas de forma consistente (menu + rotas + CTAs + onboarding).
-- remover assistente de voz basico.
-- corrigir navegacao do onboarding para `navigate()`.
-2. Corrigir `pnpm check` para voltar baseline de build limpo.
-3. Seguir Sprint 2 (seguranca) sem pular ordem.
+1. Iniciar Sprint 2 da Fase A (Seguranca) pela ordem do backlog oficial (`TODO_LANCAMENTO`):
+- rate limiting no auth;
+- `helmet` com headers de seguranca;
+- reduzir expiry de JWT;
+- encrypt de credenciais de cliente.
+2. Manter disciplina de docs/guardrails a cada alteracao.
+3. Preparar revisao arquitetural pontual com o Claude para Sprint 2 (`Claude +`).
 
 ## 8) Marcos recentes
 
@@ -96,3 +95,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-24: guardrails de documentacao implantados (hooks + CI).
 - 2026-02-25: documentacao consolidada para modelo definitivo (Codex principal, Claude consultor, Gemini fora).
 - 2026-02-25: deploy em producao da versao `f83d346` validado pelo dono (`pm2 online` + `curl -I https://metrizy.com.br` retornando `200 OK`).
+- 2026-02-25: Sprint 1 consolidada (ocultacao de Campanhas/IA no front, voice assistant desativado e onboarding com `navigate()`), com `check/test/build` verdes.

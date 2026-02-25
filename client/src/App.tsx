@@ -32,6 +32,7 @@ import IntakeForm from "./pages/IntakeForm";
 import Diary from "./pages/Diary";
 import Dreams from "./pages/Dreams";
 import Login from "./pages/Login";
+import { FEATURE_FLAGS } from "./const";
 
 function normalizeLocationPath(location: string) {
   const [pathPart, queryPart] = location.split("?");
@@ -69,9 +70,9 @@ function Router() {
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/clients" component={Clients} />
         <Route path="/clients/:id" component={ClientDetail} />
-        <Route path="/campaigns" component={Campaigns} />
-        <Route path="/campaigns/new" component={NewCampaign} />
-        <Route path="/campaigns/:id" component={CampaignDetail} />
+        {FEATURE_FLAGS.campaigns && <Route path="/campaigns" component={Campaigns} />}
+        {FEATURE_FLAGS.campaigns && <Route path="/campaigns/new" component={NewCampaign} />}
+        {FEATURE_FLAGS.campaigns && <Route path="/campaigns/:id" component={CampaignDetail} />}
         <Route path="/calendar" component={Calendar} />
         <Route path="/agenda" component={Agenda} />
         <Route path="/whatsapp" component={WhatsApp} />

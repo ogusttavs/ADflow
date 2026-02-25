@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
-  Users, Megaphone, MessageSquare, BarChart3, Settings, Sparkles,
+  Users, MessageSquare, BarChart3, Settings, Sparkles,
   ChevronRight, X, CheckCircle2, Rocket,
 } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface OnboardingProps {
   onComplete: () => void;
@@ -21,36 +22,29 @@ const STEPS = [
     path: "/clients",
   },
   {
-    icon: Megaphone,
-    title: "2. Crie sua primeira campanha",
-    description: "Em Campanhas, selecione o cliente e descreva o objetivo. A IA vai gerar automaticamente a estratégia, cópias para cada canal e criativos visuais.",
-    action: "Ir para Campanhas",
-    path: "/campaigns",
-  },
-  {
     icon: MessageSquare,
-    title: "3. Configure o WhatsApp Bot",
-    description: "Na página WhatsApp Bot, copie o URL do webhook e configure no Meta Business Manager. Assim seus clientes poderão solicitar campanhas directamente pelo WhatsApp.",
+    title: "2. Configure o WhatsApp Bot",
+    description: "Na página WhatsApp Bot, copie o URL do webhook e configure no Meta Business Manager. Assim você centraliza atendimento e notificações de forma prática.",
     action: "Ir para WhatsApp",
     path: "/whatsapp",
   },
   {
     icon: BarChart3,
-    title: "4. Acompanhe a Performance",
-    description: "Use o Dashboard de Performance para monitorar ROAS, CPA e CTR por canal. A IA gera alertas preditivos quando detecta queda de performance.",
+    title: "3. Acompanhe a Performance",
+    description: "Use o Dashboard de Performance para monitorar os indicadores principais do seu negócio.",
     action: "Ir para Performance",
     path: "/performance",
   },
   {
     icon: Sparkles,
-    title: "5. Use o CRM com IA",
-    description: "No CRM, gerencie seu funil de vendas e use a IA para gerar listas de leads ideais baseadas no perfil do seu negócio.",
+    title: "4. Use o CRM com IA",
+    description: "No CRM, gerencie seu funil de vendas e use recursos de IA para acelerar o trabalho comercial.",
     action: "Ir para CRM",
     path: "/crm",
   },
   {
     icon: Settings,
-    title: "6. Configure as Integrações",
+    title: "5. Configure as Integrações",
     description: "Conecte suas contas de redes sociais e APIs (Freepik, Meta Ads, Google Ads) para activar publicação automática e importação de métricas reais.",
     action: "Ir para Integrações",
     path: "/integrations",
@@ -60,6 +54,7 @@ const STEPS = [
 export default function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [, navigate] = useLocation();
 
   const progress = (completedSteps.length / STEPS.length) * 100;
 
@@ -115,7 +110,7 @@ export default function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
                       <p className="text-xs text-muted-foreground">{step.description}</p>
                       <div className="flex gap-2 mt-3">
                         <Button size="sm" variant="outline" className="text-xs" onClick={() => {
-                          window.location.hash = step.path;
+                          navigate(step.path);
                         }}>
                           {step.action} <ChevronRight className="h-3 w-3 ml-1" />
                         </Button>

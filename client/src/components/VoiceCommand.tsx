@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Mic, MicOff, Loader2, Sparkles, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
+import { FEATURE_FLAGS } from "@/const";
 
 type CommandResult = {
   type: "action" | "message" | "error";
@@ -35,7 +36,16 @@ export function VoiceCommandButton({ onWhatsAppMessage }: { onWhatsAppMessage?: 
     if (res.type === "action") {
       switch (res.action) {
         case "navigate":
-          setTimeout(() => { navigate(res.data?.path as string || "/dashboard"); setOpen(false); }, 800);
+          setTimeout(() => {
+            const targetPath = (res.data?.path as string) || "/dashboard";
+            if (!FEATURE_FLAGS.campaigns && targetPath.startsWith("/campaigns")) {
+              toast.info("Campanhas está oculto neste momento.");
+              navigate("/dashboard");
+            } else {
+              navigate(targetPath);
+            }
+            setOpen(false);
+          }, 800);
           break;
         case "startPomodoro":
           setTimeout(() => { navigate("/routine"); setOpen(false); }, 800);
@@ -45,7 +55,11 @@ export function VoiceCommandButton({ onWhatsAppMessage }: { onWhatsAppMessage?: 
           toast.success(res.text || "Ação executada!");
           break;
         case "navigateToCampaignCreation":
-          setTimeout(() => { navigate("/campaigns/new"); setOpen(false); }, 800);
+          if (FEATURE_FLAGS.campaigns) {
+            setTimeout(() => { navigate("/campaigns/new"); setOpen(false); }, 800);
+          } else {
+            toast.info("Campanhas está oculto neste momento.");
+          }
           break;
       }
     }

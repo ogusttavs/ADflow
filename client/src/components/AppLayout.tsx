@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { VoiceCommandButton } from "@/components/VoiceCommand";
 import { DailyBriefingPopup } from "@/components/DailyBriefingPopup";
+import { FEATURE_FLAGS } from "@/const";
 
 const HIDDEN_KEY = "adflow_sidebar_hidden";
 
@@ -437,7 +438,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </div>
             </div>
             {renderThemeToggle(true)}
-            <VoiceCommandButton />
+            {FEATURE_FLAGS.voiceAssistant && <VoiceCommandButton />}
           </div>
         </header>
 
@@ -452,7 +453,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               <p className="text-sm font-medium capitalize">{todayLabel}</p>
             </div>
             {renderThemeToggle()}
-            <VoiceCommandButton />
+            {FEATURE_FLAGS.voiceAssistant && <VoiceCommandButton />}
           </div>
         </div>
 

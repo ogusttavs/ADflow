@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import {
   Timer, Plus, CheckCircle2, Circle, Trash2, Play, Pause, RotateCcw,
-  Target, Flame, AlertTriangle, Megaphone, Bell,
+  Target, Flame, AlertTriangle, Bell,
   Sun, Coffee, Brain, Zap, ListTodo,
 } from "lucide-react";
 
@@ -359,7 +359,6 @@ function DailyBriefing() {
     { icon: ListTodo, label: "Tarefas hoje", value: briefing.todayTasks.length, color: "text-primary" },
     { icon: AlertTriangle, label: "Atrasadas", value: briefing.overdueTasks.length, color: briefing.overdueTasks.length > 0 ? "text-red-400" : "text-green-400" },
     { icon: Timer, label: "Pomodoros hoje", value: briefing.pomodoroStats.today, color: "text-violet-400" },
-    { icon: Megaphone, label: "Campanhas pendentes", value: briefing.pendingCampaigns, color: "text-blue-400" },
     { icon: Bell, label: "Notificações", value: briefing.unreadNotifications, color: briefing.unreadNotifications > 0 ? "text-yellow-400" : "text-muted-foreground" },
   ];
 
@@ -371,7 +370,7 @@ function DailyBriefing() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
           {items.map(({ icon: Icon, label, value, color }) => (
             <div key={label} className="text-center p-2 rounded-lg bg-background/50">
               <Icon className={`w-4 h-4 mx-auto mb-1 ${color}`} />
