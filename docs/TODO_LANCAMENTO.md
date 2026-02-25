@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 09:24:21 -0300
+Atualizado em: 2026-02-25 09:56:07 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -80,6 +80,11 @@ Status atual: concluido. Onboarding agora usa `navigate()` em vez de alterar `wi
 ### Sprint 9 - LP
 
 - [ ] 31. Landing page Orbita com pricing dos 4 planos
+
+### Operacional - Documentacao e governanca
+
+- [x] 32. Oficializar `docs/DECISOES_PRODUTO.md` como referencia para decisoes de produto
+Status atual: concluido. Documento integrado na hierarquia oficial (`AGENTS`, `LEIA_PRIMEIRO` e `CENTRO`).
 
 ---
 

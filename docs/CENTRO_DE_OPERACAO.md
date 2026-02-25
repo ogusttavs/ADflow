@@ -1,6 +1,6 @@
 # Centro de Operacao - AdFlow/Orbita
 
-Atualizado em: 2026-02-25 09:24:21 -0300
+Atualizado em: 2026-02-25 09:56:07 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -46,7 +46,8 @@ Comandos operacionais:
 - `docs/TODO_LANCAMENTO.md`: o que fazer agora e o status de cada tarefa.
 - `docs/LOG_AGENTES.md`: historico cronologico de execucao.
 - `docs/DEPLOY_VPS.md`: operacao de producao/VPS.
-- `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md`: referencia estrategica e criterios de decisao.
+- `docs/DECISOES_PRODUTO.md`: decisoes de produto vigentes (priorizacao e escopo).
+- `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md`: base de pesquisa e criterios estrategicos.
 - `docs/LEIA_PRIMEIRO.md`: mapa rapido da documentacao.
 - `docs/ARQUIVO/*`: historico antigo (nao usar como regra operacional diaria).
 
@@ -96,3 +97,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: documentacao consolidada para modelo definitivo (Codex principal, Claude consultor, Gemini fora).
 - 2026-02-25: deploy em producao da versao `f83d346` validado pelo dono (`pm2 online` + `curl -I https://metrizy.com.br` retornando `200 OK`).
 - 2026-02-25: Sprint 1 consolidada (ocultacao de Campanhas/IA no front, voice assistant desativado e onboarding com `navigate()`), com `check/test/build` verdes.
+- 2026-02-25: `docs/DECISOES_PRODUTO.md` oficializado como documento de decisao de produto para todos os agentes.

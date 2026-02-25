@@ -1,6 +1,6 @@
 # LEIA PRIMEIRO - Documentacao Oficial
 
-Atualizado em: 2026-02-25 00:18:33 -0300
+Atualizado em: 2026-02-25 09:56:07 -0300
 
 Este arquivo define a estrutura oficial dos documentos para evitar duplicacao e conflito.
 
@@ -9,7 +9,8 @@ Este arquivo define a estrutura oficial dos documentos para evitar duplicacao e 
 2. `docs/CENTRO_DE_OPERACAO.md` -> regras operacionais e estado atual do projeto.
 3. `docs/LOG_AGENTES.md` -> historico cronologico do que foi feito.
 4. `docs/DEPLOY_VPS.md` -> operacao de deploy em VPS/producao.
-5. `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md` -> referencia estrategica (nao operacional diaria).
+5. `docs/DECISOES_PRODUTO.md` -> decisoes de produto vigentes (fonte para priorizacao).
+6. `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md` -> base de pesquisa e referencia estrategica (nao operacional diaria).
 
 ## Regras de manutencao
 - Ao concluir tarefa: atualizar imediatamente `docs/TODO_LANCAMENTO.md`.

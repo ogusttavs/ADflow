@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 09:24:21 -0300
+Atualizado em: 2026-02-25 09:56:07 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -196,6 +196,32 @@ Arquivos alterados:
 - client/src/pages/Clients.tsx
 - client/src/pages/NewCampaign.tsx
 - client/src/pages/Routine.tsx
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 09:56:07 -0300] [Codex]
+Contexto:
+- Dono pediu revisao de mudanca pendente em `AppLayout` e oficializacao do documento `DECISOES_PRODUTO` para todos os agentes.
+
+Feito:
+- Mudanca revisada e aprovada: remocao de import nao utilizado (`Megaphone`) em `client/src/components/AppLayout.tsx`.
+- `docs/DECISOES_PRODUTO.md` oficializado na governanca:
+  - adicionado como referencia oficial no `AGENTS`;
+  - incluido na ordem obrigatoria do `LEIA_PRIMEIRO`;
+  - incorporado na fonte de verdade do `CENTRO`.
+- `TODO_LANCAMENTO` atualizado com tarefa operacional concluida (item 32).
+
+Proximo:
+- Iniciar Sprint 2 (Seguranca): rate limiting, helmet, JWT 7 dias e criptografia de credenciais.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico no momento.
+
+Arquivos alterados:
+- client/src/components/AppLayout.tsx
+- AGENTS.md
+- docs/LEIA_PRIMEIRO.md
 - docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md

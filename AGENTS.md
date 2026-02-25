@@ -23,7 +23,8 @@ Sem isso, o trabalho e considerado incompleto.
 2. `docs/CENTRO_DE_OPERACAO.md` (governanca e estado atual)
 3. `docs/LOG_AGENTES.md` (historico)
 4. `docs/DEPLOY_VPS.md` (operacao de producao)
-5. `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md` (referencia estrategica)
+5. `docs/DECISOES_PRODUTO.md` (decisoes de produto vigentes)
+6. `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md` (base de pesquisa e referencia estrategica)
 
 ## Guardrails automaticos
 - Hook local de `pre-commit` e `pre-push` valida update de `CENTRO`, `LOG` e `TODO`.
