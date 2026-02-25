@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 14:23:54 -0300
+Atualizado em: 2026-02-25 15:05:00 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -88,7 +88,9 @@ Estado atual de desenvolvimento:
 Pendencias tecnicas objetivas:
 - Validacao de baseline verde confirmada: `pnpm check`, `pnpm test` e `pnpm build` executados com sucesso.
 - Sprint 2 (Seguranca) concluida: `helmet`, rate limiting em auth, sessao JWT de 7 dias e criptografia AES-256-GCM em credenciais.
-- Codigo da Sprint 2 ja publicado em `origin/main` (commit `1f82a20`), com deploy em producao pendente por credencial SSH.
+- Deploy da Sprint 2 aplicado em producao na VPS com HEAD `6aa1b1d`, `.env` ajustado (`VITE_APP_ID=orbita` e `CREDENTIAL_ENCRYPTION_KEY`), `pm2` online e HTTPS `200 OK` em `getorbita.com.br` e `www.getorbita.com.br`.
+- Acesso SSH remoto local liberado e `quick-deploy` validado com sucesso em producao (A7 concluido).
+- Pendencias atuais do dono no backlog: A1, A2, A3 e A6.
 - Proxima prioridade tecnica: iniciar Sprint 3 (Auth e Email).
 
 ## 7) Prioridade recomendada (curto prazo)
@@ -116,3 +118,5 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: Sprint 2 (Seguranca) concluida com `helmet`, rate limiting em auth com `trust proxy`, expiracao de sessao em 7 dias e criptografia de credenciais de cliente (AES-256-GCM), validada por `pnpm check`, `pnpm test` e `pnpm build`.
 - 2026-02-25: hardening pós-revisao da Sprint 2 concluido com rate limit global (`200 req/min` em `/api`) e ajuste do `.env.example` para `VITE_APP_ID=orbita`, removendo bloco AWS legado.
 - 2026-02-25: commit `1f82a20` da Sprint 2 enviado para `origin/main`; tentativa de deploy remoto bloqueada por autenticacao SSH (`Permission denied (publickey,password)`).
+- 2026-02-25: deploy manual na VPS concluido para `origin/main` HEAD `6aa1b1d` com `bash scripts/vps/deploy-app.sh`; `db:push` sem migracoes pendentes, PM2 `adflow` online e `curl -I` em `https://getorbita.com.br` e `https://www.getorbita.com.br` retornando `200 OK` com headers de seguranca ativos.
+- 2026-02-25: apos reboot da VPS, incidente `502 Bad Gateway` resolvido com recuperacao do PM2 (`start/save/startup systemd`), validacao interna em `127.0.0.1:3000` e health externo `200 OK`; `quick-deploy` remoto executado com sucesso via `root@167.88.32.1` (fallback IPv4).

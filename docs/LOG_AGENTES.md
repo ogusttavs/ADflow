@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 11:10:52 -0300
+Atualizado em: 2026-02-25 15:05:00 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -557,4 +557,88 @@ Arquivos alterados:
 - docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/DEPLOY_VPS.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 14:40:00 -0300] [Codex]
+Contexto:
+- Dono executou manualmente o deploy na VPS e enviou o log completo de execucao para validacao final.
+
+Feito:
+- Validada configuracao de ambiente na VPS:
+  - `VITE_APP_ID=orbita`
+  - `CREDENTIAL_ENCRYPTION_KEY` presente e definida.
+- Validado deploy recorrente executado dentro da VPS com sucesso:
+  - comando: `bash scripts/vps/deploy-app.sh`;
+  - `git pull` atualizado ate `origin/main` HEAD `6aa1b1d`;
+  - `pnpm build` concluido sem erro;
+  - `pnpm db:push` sem mudancas pendentes;
+  - PM2 reiniciado com app `adflow` online.
+- Validada saude publica apos restart:
+  - `curl -I https://getorbita.com.br` => `200 OK`;
+  - `curl -I https://www.getorbita.com.br` => `200 OK`;
+  - headers de seguranca do `helmet` presentes (HSTS, `X-Content-Type-Options`, `X-Frame-Options`, etc).
+- Documentacao operacional sincronizada para remover o status de bloqueio de deploy e marcar a acao do dono A4 como concluida.
+
+Proximo:
+- Iniciar Sprint 3 (Auth e Email) pela ordem do backlog oficial.
+- Opcional operacional: liberar SSH remoto no ambiente local para retomar `quick-deploy` automatizado (A7).
+
+Bloqueios/Riscos:
+- Sem bloqueio tecnico para producao no estado atual.
+- Risco residual operacional: deploy remoto automatizado local ainda depende de ajuste de acesso SSH (A7).
+
+Arquivos alterados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 14:52:00 -0300] [Codex]
+Contexto:
+- Dono solicitou fechar a pendencia operacional A7 (SSH remoto para `quick-deploy`) e reportou incidente `502` apos reboot da VPS.
+
+Feito:
+- Recuperacao pos-reboot validada no servidor:
+  - PM2 recriado/reiniciado para `adflow`;
+  - `pm2 save` executado;
+  - `pm2 startup systemd -u root --hp /root` configurado para persistencia em reboot.
+- Validacoes de saude apos recuperacao:
+  - `curl -I http://127.0.0.1:3000` => `200 OK`;
+  - `curl -I https://getorbita.com.br` => `200 OK`.
+- Acesso SSH por chave confirmado a partir do Mac (`ssh ... "echo SSH_OK"`).
+- `quick-deploy` testado com sucesso remoto via IPv4:
+  - `bash scripts/vps/quick-deploy.sh root@167.88.32.1`;
+  - build, `db:push`, restart PM2 e verificacao final `200 OK`.
+- Observacao operacional registrada: para esse ambiente, `root@getorbita.com.br` pode falhar por rota IPv6 (`Network is unreachable`); usar IPv4 (`ssh -4` ou IP direto) evita o problema.
+- Backlog atualizado com A7 concluido.
+
+Proximo:
+- Iniciar Sprint 3 (Auth e Email) pela ordem do backlog oficial.
+
+Bloqueios/Riscos:
+- Sem bloqueio tecnico ativo em producao.
+
+Arquivos alterados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 15:05:00 -0300] [Codex]
+Contexto:
+- Dono pediu confirmacao de documentacao atualizada e consolidacao das tarefas que ainda dependem dele.
+
+Feito:
+- Backlog oficial revisado e mantido consistente com o estado atual (Sprint 2 em producao, A4/A7 concluidas).
+- `TODO_LANCAMENTO` atualizado com secao objetiva de "Proximas tarefas do dono (ordem sugerida)".
+- Pendencias do dono consolidadas como: A1, A2, A3 e A6.
+- `CENTRO_DE_OPERACAO` sincronizado com esse estado.
+
+Proximo:
+- Executar A1 e A2 (Google OAuth em producao), seguido de A6 (Asaas) e A3 (rotacao de segredos).
+
+Bloqueios/Riscos:
+- Sem bloqueio tecnico imediato no ambiente de producao.
+
+Arquivos alterados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
