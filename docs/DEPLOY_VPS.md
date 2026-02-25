@@ -1,18 +1,14 @@
-# Deploy VPS (Publico) - AdFlow
+# Deploy VPS - Operacao Oficial
 
-Objetivo: publicar o app em dominio proprio usando Ubuntu + PM2 + Nginx + SSL.
+Atualizado em: 2026-02-25 00:18:33 -0300
 
-## 1) Requisitos
-- VPS Ubuntu 22.04+ com acesso SSH.
-- Dominio apontando para o IP da VPS (registro A).
-- Portas 80 e 443 liberadas.
+Objetivo: publicar e manter o app em VPS com PM2 + Nginx + SSL.
 
-## 2) Setup inicial na VPS (uma vez)
-No seu computador local:
+## Producao atual
+- Dominio em uso: `https://metrizy.com.br`
+- Processo: `pm2` app `adflow`
 
-```bash
-ssh root@SEU_IP
-```
+## 1) Setup inicial (uma vez)
 
 No servidor:
 
@@ -21,14 +17,10 @@ cd /var/www
 mkdir -p adflow
 cd adflow
 git clone https://github.com/ogusttavs/ADflow.git .
-
-# setup base (pacotes, node, pnpm, pm2, mysql, firewall)
 DB_PASS='SENHA_FORTE_AQUI' bash scripts/vps/setup-ubuntu.sh
 ```
 
-## 3) Configurar `.env` de producao
-Edite `/var/www/adflow/.env` com valores reais.
-Campos minimos:
+## 2) Variaveis obrigatorias (`/var/www/adflow/.env`)
 
 ```env
 NODE_ENV=production
@@ -38,63 +30,50 @@ JWT_SECRET=UM_SEGREDO_FORTE_E_UNICO
 VITE_APP_ID=adflow
 ```
 
-Se usar Google OAuth, ajuste redirects para o dominio publico:
+Se usar Google OAuth:
 
 ```env
 GOOGLE_OAUTH_REDIRECT_URI=https://SEU_DOMINIO/api/oauth/google/callback
 GOOGLE_LOGIN_OAUTH_REDIRECT_URI=https://SEU_DOMINIO/api/oauth/google/login/callback
 ```
 
-## 4) Build + start do app
-No servidor:
+## 3) Deploy recorrente (oficial)
+
+Dentro da VPS:
 
 ```bash
 cd /var/www/adflow
 bash scripts/vps/deploy-app.sh
 ```
 
-## 5) Publicar no dominio (Nginx)
-No servidor:
-
-```bash
-sudo DOMAIN=SEU_DOMINIO bash scripts/vps/configure-nginx.sh
-```
-
-## 6) SSL (HTTPS)
-No servidor:
-
-```bash
-sudo DOMAIN=SEU_DOMINIO EMAIL=seu-email@dominio.com bash scripts/vps/enable-ssl.sh
-```
-
-## 7) Validacao
-- URL: `https://SEU_DOMINIO`
-- Status processo:
-
-```bash
-pm2 status adflow
-pm2 logs adflow --lines 200
-```
-
-## 8) Atualizacao de producao (deploy recorrente)
-Opcao A: dentro da VPS
-
-```bash
-cd /var/www/adflow
-bash scripts/vps/deploy-app.sh
-```
-
-Opcao B: do computador local (1 comando)
+Do computador local:
 
 ```bash
 bash scripts/vps/quick-deploy.sh root@SEU_IP
 ```
 
-Opcional:
-- sem migracao no deploy: `RUN_MIGRATIONS=0 bash scripts/vps/quick-deploy.sh root@SEU_IP`
-- branch especifica: `BRANCH=main bash scripts/vps/quick-deploy.sh root@SEU_IP`
+## 4) Nginx e SSL
 
-## 9) Observacoes importantes
-- Nao editar codigo direto na VPS. Fluxo correto: local -> commit/push -> deploy.
-- Se segredos vazaram em conversas, rotacione imediatamente (Google, JWT, DB).
-- O app usa `PORT` do `.env`; Nginx faz proxy para `127.0.0.1:3000`.
+```bash
+sudo DOMAIN=SEU_DOMINIO bash scripts/vps/configure-nginx.sh
+sudo DOMAIN=SEU_DOMINIO EMAIL=seu-email@dominio.com bash scripts/vps/enable-ssl.sh
+```
+
+## 5) Validacao rapida
+
+```bash
+pm2 status adflow
+pm2 logs adflow --lines 200
+curl -I https://SEU_DOMINIO
+curl -I http://SEU_DOMINIO
+```
+
+Esperado:
+- HTTPS `200 OK`
+- HTTP `301` para HTTPS
+
+## 6) Regras operacionais
+
+- Nao editar codigo direto na VPS.
+- Fluxo correto: local -> commit/push -> deploy.
+- Se segredo vazar, rotacionar imediatamente.

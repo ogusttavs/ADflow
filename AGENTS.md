@@ -1,30 +1,44 @@
 # AGENTS - Regras Operacionais do Projeto
 
-Estas regras valem para qualquer IA/agente que atuar neste repositório.
+Estas regras valem para qualquer IA/agente neste repositorio.
 
-## Regra obrigatória de documentação (hard rule)
-Sempre que houver alteração de código, config, infra, testes, banco, commit ou push, atualize e stage no mesmo commit:
-- `docs/LOG_AGENTES.md`
+## Modelo de trabalho atual
+- Dono do produto: decisao final.
+- Codex: dev principal (execucao).
+- Claude: consultor tecnico.
+- Gemini: fora do projeto.
+
+## Regra obrigatoria de documentacao (hard rule)
+Sempre que houver alteracao de codigo, config, infra, testes, banco, commit ou push, atualizar e stage no mesmo commit:
 - `docs/CENTRO_DE_OPERACAO.md`
+- `docs/LOG_AGENTES.md`
 
-Sem isso, o trabalho é considerado incompleto.
+Sempre que tarefa for concluida ou criada:
+- atualizar `docs/TODO_LANCAMENTO.md` imediatamente.
 
-## Guardrails automáticos
-- Hook local de `pre-commit` e `pre-push` valida a regra acima.
+Sem isso, o trabalho e considerado incompleto.
+
+## Fonte de verdade dos docs
+1. `docs/TODO_LANCAMENTO.md` (backlog oficial)
+2. `docs/CENTRO_DE_OPERACAO.md` (governanca e estado atual)
+3. `docs/LOG_AGENTES.md` (historico)
+4. `docs/DEPLOY_VPS.md` (operacao de producao)
+5. `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md` (referencia estrategica)
+
+## Guardrails automaticos
+- Hook local de `pre-commit` e `pre-push` valida update de `CENTRO`, `LOG` e `TODO`.
 - CI (`.github/workflows/docs-guardrail.yml`) valida a mesma regra no GitHub.
 
-## Setup obrigatório em máquina/clone novo
+## Setup obrigatorio em maquina/clone novo
 Execute uma vez:
 
 ```bash
 ./scripts/install-hooks.sh
 ```
 
-Isso ativa `core.hooksPath=.githooks` e os hooks do projeto.
-
-## Exceções
-Não há exceção automática. Se for necessário bypass manual em emergência, registrar no `docs/LOG_AGENTES.md`:
+## Excecoes
+Nao ha excecao automatica. Em emergencia, registrar no `docs/LOG_AGENTES.md`:
 - motivo,
 - data/hora,
-- responsável,
-- correção posterior aplicada.
+- responsavel,
+- correcao posterior aplicada.

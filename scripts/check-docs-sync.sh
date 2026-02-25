@@ -4,6 +4,7 @@ set -euo pipefail
 required_docs=(
   "docs/LOG_AGENTES.md"
   "docs/CENTRO_DE_OPERACAO.md"
+  "docs/TODO_LANCAMENTO.md"
 )
 
 mode="staged"
@@ -82,7 +83,7 @@ if [[ ${#missing_docs[@]} -gt 0 ]]; then
   done
   echo ""
   echo "Sugestao: registre o resumo final da tarefa e rode:"
-  echo "  git add docs/LOG_AGENTES.md docs/CENTRO_DE_OPERACAO.md"
+  echo "  git add docs/LOG_AGENTES.md docs/CENTRO_DE_OPERACAO.md docs/TODO_LANCAMENTO.md"
   echo ""
   exit 1
 fi
@@ -95,7 +96,7 @@ if [[ "$mode" == "staged" ]]; then
     echo "$unstaged_required_docs"
     echo ""
     echo "Rode:"
-    echo "  git add docs/LOG_AGENTES.md docs/CENTRO_DE_OPERACAO.md"
+    echo "  git add docs/LOG_AGENTES.md docs/CENTRO_DE_OPERACAO.md docs/TODO_LANCAMENTO.md"
     echo ""
     exit 1
   fi

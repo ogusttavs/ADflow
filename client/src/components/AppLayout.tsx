@@ -62,7 +62,7 @@ const ALL_NAV_SECTIONS: NavSection[] = [
     items: [
       { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
       { href: "/clients", icon: Users, label: "Clientes" },
-      { href: "/campaigns", icon: Megaphone, label: "Campanhas" },
+      // Campanhas: oculto até sistema de planos — { href: "/campaigns", icon: Megaphone, label: "Campanhas" },
     ],
   },
   {
