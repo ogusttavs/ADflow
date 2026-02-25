@@ -960,3 +960,26 @@ Arquivos alterados:
 - scripts/vps/setup-ubuntu.sh
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
+
+[2026-02-24 21:08:52 -0300] [Codex]
+Contexto:
+- Publicacao do SaaS em VPS Hostinger concluida com dominio publico e SSL; dono pediu commit consolidado de tudo que estava pendente no repositorio.
+
+Feito:
+- Deploy de producao finalizado na VPS.
+- Dominio `metrizy.com.br` publicado com HTTPS.
+- Validacao operacional concluida:
+- `pm2 status adflow` com processo `online`.
+- `curl -I https://metrizy.com.br` retornando `200 OK`.
+- `curl -I http://metrizy.com.br` retornando `301` para HTTPS.
+- Certificado Let's Encrypt emitido/aplicado com renovacao automatica habilitada.
+
+Proximo:
+- Commitar e enviar ao GitHub todos os arquivos pendentes no working tree conforme solicitado pelo dono.
+
+Bloqueios/Riscos:
+- Aplicacao em estado beta; recomendada comunicacao explicita de instabilidade para primeiros usuarios convidados.
+
+Arquivos alterados:
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md

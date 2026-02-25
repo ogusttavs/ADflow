@@ -1,6 +1,6 @@
 # Centro de Operacao - AdFlow
 
-Atualizado em: 2026-02-24 20:33:17 -0300
+Atualizado em: 2026-02-24 21:08:52 -0300
 
 Este arquivo e o ponto unico de sincronizacao entre voce, Codex, Claude e Gemini.
 Hierarquia oficial:
@@ -622,3 +622,22 @@ Proximo:
 
 Bloqueios/Riscos:
 - Sem dados de acesso SSH ainda; execucao real depende de credenciais da VPS e DNS.
+
+[2026-02-24 21:08:52 -0300] [Codex]
+Feito:
+- Publicacao em producao concluida na VPS da Hostinger.
+- Dominio publico ativo com HTTPS: `https://metrizy.com.br`.
+- Validacoes executadas com sucesso:
+- PM2 com processo `adflow` em `online`.
+- `curl -I https://metrizy.com.br` retornando `200 OK`.
+- `curl -I http://metrizy.com.br` retornando `301` para HTTPS.
+- Certificado Let's Encrypt emitido e aplicado no Nginx para `metrizy.com.br`.
+
+Fazendo:
+- Fechamento de ciclo com commit consolidado das pendencias restantes no repositorio.
+
+Proximo:
+- Iniciar checklist curto de hardening de producao (backup/monitoramento/seguranca) antes de ampliar uso.
+
+Bloqueios/Riscos:
+- Produto ainda em fase de evolucao funcional; manter comunicacao de beta ao compartilhar com usuarios.
