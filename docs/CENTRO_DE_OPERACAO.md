@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 19:19:21 -0300
+Atualizado em: 2026-02-25 19:37:36 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -94,6 +94,7 @@ Pendencias tecnicas objetivas:
 - Pendencias atuais do dono no backlog: A1, A2 e A6 (A3 concluido).
 - A9 concluido operacionalmente: `USER_PII_ENCRYPTION_KEY` dedicada configurada na VPS com tamanho valido e sem erro de runtime.
 - Sprint 3 (Auth e Email) concluida e deployada em producao (`5efe746`): itens 09, 10 e 11 ativos.
+- Sprint 10 criado no backlog para encerramento de fase com auditoria final de seguranca, velocidade e SEO.
 - Refinamentos de seguranca/conta adicionados na Sprint 3:
   - cadastro ampliado com dados completos de perfil e consentimento;
   - area Conta em modo somente leitura por padrao (edicao explicita por botao `Editar`);
@@ -117,6 +118,7 @@ Pendencias tecnicas objetivas:
 1. A6 (Asaas + webhook) para destravar Sprint 4 de pagamentos.
 2. A1 + A2 (Google OAuth em producao), mais perto do fechamento da fase.
 3. Rotacao recorrente de segredos operacionais.
+4. Ao final das entregas funcionais, executar Sprint 10 (hardening final de seguranca + performance + SEO).
 
 ## 8) Marcos recentes
 
@@ -145,3 +147,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: release `5efe746` (Sprint 3 final) deployado via `quick-deploy` em `root@167.88.32.1` com build+db:push+restart PM2, HEAD remoto confirmado em `5efe746`, `pm2 status adflow` online e `https://getorbita.com.br` retornando `200 OK`.
 - 2026-02-25: dono confirmou validacao manual fim-a-fim dos fluxos de email em producao; A8 marcado como concluido e Sprint 3 encerrada operacionalmente.
 - 2026-02-25: dono confirmou A3 concluido (rotacao de credenciais no servidor) e A6 em andamento com conta Asaas criada, faltando configuracao de webhook.
+- 2026-02-25: dono solicitou incluir Sprint final de fechamento para revisao completa de seguranca, velocidade e SEO; backlog atualizado com Sprint 10.

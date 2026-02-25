@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 19:19:21 -0300
+Atualizado em: 2026-02-25 19:37:36 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -11,6 +11,7 @@ Este e o backlog oficial do projeto.
 
 ## Status geral
 - Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida, deployada em producao no release `5efe746` e validada manualmente em fluxo real de email; acoes do dono focadas agora em webhook Asaas).
+- Sprint final de fechamento criado no backlog: revisao completa de seguranca, performance e SEO antes do encerramento do ciclo.
 
 ---
 
@@ -129,6 +130,38 @@ Status atual: concluido. Deletados: ComponentShowcase.tsx (155 linhas), ManusDia
 ### Sprint 9 - LP
 
 - [ ] 31. Landing page Orbita com pricing dos 4 planos
+
+### Sprint 10 - Revisao final (Seguranca, Velocidade e SEO)
+
+- [ ] 37. Revisao final de seguranca de dados sensiveis (PII)
+Status esperado: criptografia em repouso para PII critica (incluindo endereco), minimizacao de dados retornados por endpoint e checklist de risco residual.
+
+- [ ] 38. Revisao de sessao/cookies/CSRF/CSP para producao
+Status esperado: politica final de cookie e CSP revisada para reduzir superficie de ataque sem quebrar fluxo do app.
+
+- [ ] 39. Auditoria de logs e segredos
+Status esperado: ausencia de segredos/tokens/PII em logs, `env` saneado e plano de rotacao recorrente de chaves validado.
+
+- [ ] 40. Baseline de performance frontend (Core Web Vitals)
+Status esperado: metas de LCP/INP/CLS definidas e atingidas para a home e telas criticas.
+
+- [ ] 41. Otimizacao de bundle e carregamento inicial
+Status esperado: reducao do JS inicial (code splitting/manual chunks) e queda no tempo de carregamento percebido.
+
+- [ ] 42. Auditoria de consultas e latencia de API
+Status esperado: endpoints criticos com latencia monitorada e sem gargalos evidentes de banco.
+
+- [ ] 43. SEO tecnico base (sitemap, robots, canonicals)
+Status esperado: indexacao controlada e estrutura tecnica SEO pronta para crescimento organico.
+
+- [ ] 44. Metatags sociais (Open Graph/Twitter) e snippets
+Status esperado: compartilhamento com preview correto e consistente nas paginas publicas.
+
+- [ ] 45. Dados estruturados (Schema.org) para paginas publicas
+Status esperado: markup estruturado valido para melhorar entendimento em buscadores.
+
+- [ ] 46. Auditoria final de release (seguranca + performance + SEO)
+Status esperado: checklist final assinado antes de declarar encerramento geral da fase.
 
 ### Operacional - Documentacao e governanca
 
