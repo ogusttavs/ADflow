@@ -33,7 +33,7 @@ function createAuthContext(): { ctx: TrpcContext; clearedCookies: Array<{ name: 
   const user: AuthenticatedUser = {
     id: 1,
     openId: "test-user-openid",
-    email: "test@adflow.com",
+    email: "test@orbita.app",
     name: "Test User",
     loginMethod: "manus",
     role: "admin",
@@ -75,7 +75,7 @@ describe("auth.me", () => {
     const caller = appRouter.createCaller(ctx);
     const user = await caller.auth.me();
     expect(user).toBeDefined();
-    expect(user?.email).toBe("test@adflow.com");
+    expect(user?.email).toBe("test@orbita.app");
     expect(user?.role).toBe("admin");
   });
 });

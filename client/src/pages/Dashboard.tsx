@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 // ─── Widget Registry ─────────────────────────────────────────────────────────
-const WIDGETS_KEY = "adflow_dashboard_widgets";
+const WIDGETS_KEY = "orbita_dashboard_widgets";
 
 const ALL_WIDGETS = [
   { id: "stats", label: "Resumo Geral", icon: BarChart3, section: "Principal" },
@@ -401,7 +401,7 @@ const FULL_WIDTH_WIDGETS = new Set<WidgetId>(["stats"]);
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(() =>
-    localStorage.getItem("adflow_onboarding_complete") !== "true"
+    localStorage.getItem("orbita_onboarding_complete") !== "true"
   );
   const [hiddenWidgets, setHiddenWidgets] = useState<Set<WidgetId>>(loadHiddenWidgets);
   const [showCustomize, setShowCustomize] = useState(false);
@@ -487,8 +487,8 @@ export default function Dashboard() {
         {/* Onboarding */}
         {showOnboarding && (
           <Onboarding
-            onComplete={() => { localStorage.setItem("adflow_onboarding_complete", "true"); setShowOnboarding(false); }}
-            onDismiss={() => { localStorage.setItem("adflow_onboarding_complete", "true"); setShowOnboarding(false); }}
+            onComplete={() => { localStorage.setItem("orbita_onboarding_complete", "true"); setShowOnboarding(false); }}
+            onDismiss={() => { localStorage.setItem("orbita_onboarding_complete", "true"); setShowOnboarding(false); }}
           />
         )}
 

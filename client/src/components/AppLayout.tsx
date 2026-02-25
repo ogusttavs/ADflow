@@ -16,7 +16,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Zap,
   Menu,
   Contact,
   FlaskConical,
@@ -40,7 +39,7 @@ import { VoiceCommandButton } from "@/components/VoiceCommand";
 import { DailyBriefingPopup } from "@/components/DailyBriefingPopup";
 import { FEATURE_FLAGS } from "@/const";
 
-const HIDDEN_KEY = "adflow_sidebar_hidden";
+const HIDDEN_KEY = "orbita_sidebar_hidden";
 
 // To re-enable a "disabled" item, remove the `disabled: true` property.
 type NavItem = {
@@ -207,7 +206,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       >
         <div className="absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-sidebar-border to-transparent" />
         <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 ring-1 ring-primary/30 shadow-sm shadow-primary/20 flex items-center justify-center shrink-0">
-          <Zap className="h-5 w-5 text-primary-foreground" />
+          <img src="/logo-icon.svg" className="h-5 w-5 brightness-0 invert" alt="" />
         </div>
         {(!collapsed || mobile) && (
           <div className="min-w-0">
@@ -401,7 +400,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </Button>
             <div className="min-w-0 flex-1 flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shrink-0">
-                <Zap className="h-4 w-4 text-primary-foreground" />
+                <img src="/logo-icon.svg" className="h-4 w-4 brightness-0 invert" alt="" />
               </div>
               <div className="min-w-0">
                 <p className="truncate font-['Space_Grotesk'] text-base font-bold leading-none">{currentPage}</p>

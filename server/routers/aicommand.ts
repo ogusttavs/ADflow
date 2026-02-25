@@ -129,7 +129,7 @@ export const aiCommandRouter = router({
         messages: [
           {
             role: "system",
-            content: `Você é o assistente de IA da plataforma AdFlow AI, uma plataforma de automação de marketing.
+            content: `Você é o assistente de IA da plataforma Orbita.
 Interprete o comando do usuário e execute a ação apropriada usando as ferramentas disponíveis.
 Data de hoje: ${today}. Amanhã: ${tomorrow}.
 Se o comando for ambíguo, escolha a ação mais provável.

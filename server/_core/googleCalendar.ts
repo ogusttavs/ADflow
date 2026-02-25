@@ -12,8 +12,8 @@ const GOOGLE_OPENID_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1
 const GOOGLE_OAUTH2_USERINFO_ENDPOINT = "https://www.googleapis.com/oauth2/v2/userinfo";
 const TOKEN_REFRESH_BUFFER_MS = 60_000;
 
-export const GOOGLE_CALENDAR_OAUTH_STATE_COOKIE = "adflow_google_calendar_oauth_state";
-export const GOOGLE_LOGIN_OAUTH_STATE_COOKIE = "adflow_google_login_oauth_state";
+export const GOOGLE_CALENDAR_OAUTH_STATE_COOKIE = "orbita_google_calendar_oauth_state";
+export const GOOGLE_LOGIN_OAUTH_STATE_COOKIE = "orbita_google_login_oauth_state";
 // Backward-compatible alias for old imports.
 export const GOOGLE_OAUTH_STATE_COOKIE = GOOGLE_CALENDAR_OAUTH_STATE_COOKIE;
 

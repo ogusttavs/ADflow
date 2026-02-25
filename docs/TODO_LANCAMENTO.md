@@ -10,7 +10,7 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase A: em andamento (Sprint 1 concluida; Sprint 2 pendente).
+- Fase A: em andamento (Sprints 1 e branding concluidas; Sprint 2 pendente).
 
 ---
 
@@ -72,8 +72,15 @@ Status atual: concluido. Onboarding agora usa `navigate()` em vez de alterar `wi
 
 ### Sprint 8 - Branding e Design
 
-- [ ] 27. Logo + favicon Orbita
-- [ ] 28. Rename completo AdFlow -> Orbita
+- [x] 27. Logo + favicon Orbita
+Status atual: concluido. `client/public/favicon.svg` e `client/public/logo-icon.svg` criados (orbital ring, azul #1741C6). Favicon linkado no index.html. Icone Zap substituido pelo logo SVG na sidebar e mobile header.
+
+- [x] 28. Rename completo AdFlow -> Orbita
+Status atual: concluido. 13 substituicoes em codigo ativo (localStorage keys, UI, AI prompt, Google Calendar events, OAuth cookies, env default, package.json name, analytics). grep -r AdFlow|adflow client/src server/ = zero resultados.
+
+- [x] 28b. Remocao de codigo morto e deps sem uso
+Status atual: concluido. Deletados: ComponentShowcase.tsx (155 linhas), ManusDialog.tsx (89 linhas), Map.tsx (155 linhas). Deps axios e @aws-sdk ja ausentes do package.json.
+
 - [ ] 29. Design overhaul (sem cara de template generico)
 - [ ] 30. Cards compartilhaveis para redes sociais
 

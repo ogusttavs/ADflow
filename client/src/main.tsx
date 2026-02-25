@@ -22,7 +22,7 @@ function setupAnalyticsScript() {
     return;
   }
 
-  if (document.querySelector('script[data-adflow-analytics="umami"]')) {
+  if (document.querySelector('script[data-orbita-analytics="umami"]')) {
     return;
   }
 
@@ -30,7 +30,7 @@ function setupAnalyticsScript() {
   script.defer = true;
   script.src = `${normalizedEndpoint}/umami`;
   script.dataset.websiteId = websiteId;
-  script.dataset.adflowAnalytics = "umami";
+  script.dataset.orbitaAnalytics = "umami";
   document.body.appendChild(script);
 }
 

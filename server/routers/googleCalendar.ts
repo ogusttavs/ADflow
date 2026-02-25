@@ -202,7 +202,7 @@ export const googleCalendarRouter = router({
 
       for (const task of eligibleTasks) {
         try {
-          const title = `[AdFlow] ${task.title}`;
+          const title = `[Orbita] ${task.title}`;
           const descriptionParts = [
             task.description ? `Descrição: ${task.description}` : "",
             `Categoria: ${task.category}`,

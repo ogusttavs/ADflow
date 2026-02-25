@@ -377,3 +377,49 @@ Arquivos alterados:
 - docs/LOG_AGENTES.md
 - docs/TODO_LANCAMENTO.md
 - docs/DEPLOY_VPS.md
+
+[2026-02-25 13:00:00 -0300] [Claude]
+Contexto:
+- Sessao de consultoria: revisao de codigo completa, branding Orbita, limpeza de arquivos mortos e metadados atualizados.
+- Problema reportado pelo dono: SSL mismatch em `getorbita.com.br` (visitante vendo "conexao nao e privada").
+
+Feito:
+- Logo e favicon criados: `client/public/favicon.svg` e `client/public/logo-icon.svg` (orbital ring, azul #1741C6).
+- Favicon linkado em `client/index.html` com `<link rel="icon">` e `<link rel="apple-touch-icon">`.
+- Icone Zap substituido pelo logo SVG na sidebar e mobile header (`AppLayout.tsx`).
+- Metadata `client/index.html` completamente reescrita: title, description, og:*, twitter:* com branding Orbita.
+- 13 substituicoes de "AdFlow/adflow" em codigo ativo (localStorage keys, UI, AI prompt, Google Calendar events, OAuth cookies, env default, package.json name, analytics).
+- Codigo morto deletado: `ComponentShowcase.tsx` (155 ln), `ManusDialog.tsx` (89 ln), `Map.tsx` (155 ln).
+- Validacao final: `pnpm check` zerado, `grep AdFlow|adflow client/src server/` zerado.
+- SSL issue diagnosticado: cert Certbot cobre `getorbita.com.br` mas pode ter sido emitido sem `www.` ou esta expirado. Fix: reemitir via `sudo certbot --nginx -d getorbita.com.br -d www.getorbita.com.br`.
+
+Proximo:
+- Commitar e fazer deploy do branding/limpeza na VPS.
+- Reemitir SSL na VPS para cobrir `www.getorbita.com.br` se necessario.
+- Iniciar Sprint 2 (Seguranca) conforme backlog.
+
+Bloqueios/Riscos:
+- SSL mismatch na VPS: dono precisa executar o comando Certbot via SSH para resolver.
+
+Arquivos alterados:
+- client/index.html
+- client/public/favicon.svg (novo)
+- client/public/logo-icon.svg (novo)
+- client/src/components/AppLayout.tsx
+- client/src/components/DailyBriefingPopup.tsx
+- client/src/main.tsx
+- client/src/pages/Dashboard.tsx
+- client/src/pages/IntakeForm.tsx
+- client/src/pages/WhatsApp.tsx
+- client/src/pages/ComponentShowcase.tsx (deletado)
+- client/src/components/ManusDialog.tsx (deletado)
+- client/src/components/Map.tsx (deletado)
+- package.json
+- server/_core/env.ts
+- server/_core/googleCalendar.ts
+- server/platform.test.ts
+- server/routers/aicommand.ts
+- server/routers/googleCalendar.ts
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md

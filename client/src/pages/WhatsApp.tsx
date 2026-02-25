@@ -135,7 +135,7 @@ export default function WhatsApp() {
                     <MessageSquare className="w-5 h-5 text-green-400" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm">AdFlow AI Bot</p>
+                    <p className="font-semibold text-sm">Orbita Bot</p>
                     <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-full bg-green-400" />
                       <p className="text-xs text-muted-foreground">Online</p>

@@ -172,7 +172,7 @@ function PageShell({ children }: { children: React.ReactNode }) {
           <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
             <span className="text-primary-foreground text-xs font-bold">A</span>
           </div>
-          <span className="font-semibold text-sm">AdFlow AI</span>
+          <span className="font-semibold text-sm">Orbita</span>
         </div>
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           {children}

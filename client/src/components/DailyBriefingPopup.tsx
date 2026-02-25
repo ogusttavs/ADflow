@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { localDateKey } from "@/lib/date";
 import { USER_SETTINGS_KEYS, getSettingBoolean } from "@/lib/user-settings";
 
-const STORAGE_KEY = "adflow_briefing_date";
+const STORAGE_KEY = "orbita_briefing_date";
 
 function getGreeting() {
   const h = new Date().getHours();
