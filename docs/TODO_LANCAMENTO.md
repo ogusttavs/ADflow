@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 10:25:07 -0300
+Atualizado em: 2026-02-25 11:01:28 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -94,6 +94,9 @@ Status atual: concluido. Subdivisoes do menu renomeadas e configuracoes revisada
 
 - [x] 35. Fechar baseline funcional do que esta visivel no app para demo publica
 Status atual: concluido. Configuracoes com persistencia real (incluindo metas), onboarding alinhado aos modulos ativos, datas em timezone local, LP/login com branding Orbita e textos ajustados para escopo atual.
+
+- [x] 36. Definir tema inicial escuro e alinhar LP ao que o app entrega hoje
+Status atual: concluido. `ThemeProvider` agora inicia em dark por padrao e a Home comunica apenas modulos ativos no Orbita.
 
 ---
 

@@ -1,6 +1,6 @@
 # Centro de Operacao - AdFlow/Orbita
 
-Atualizado em: 2026-02-25 10:25:07 -0300
+Atualizado em: 2026-02-25 11:01:28 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -67,6 +67,7 @@ Comandos principais:
 
 Producao:
 - Dominio ativo: `https://metrizy.com.br`
+- Novo dominio em transicao: `https://getorbita.com.br` (DNS ja configurado; cutover da VPS pendente)
 - App em PM2 + Nginx + SSL
 
 ## 6) Situacao real (agora)
@@ -81,9 +82,12 @@ Estado atual de desenvolvimento:
 - Onboarding do dashboard foi alinhado 100% aos modulos ativos/visiveis (clientes, rotina, CRM, financeiro, configuracoes).
 - Fluxos diarios usam chave de data local (sem dependencia de `toISOString` para "hoje"), reduzindo risco de virada de dia por UTC.
 - Landing page/login alinhados ao branding Orbita e ao escopo funcional atual para demo publica.
+- Tema inicial do app definido como escuro por padrao para novos acessos.
+- Landing page atualizada para comunicar apenas modulos realmente ativos no produto hoje.
 
 Pendencias tecnicas objetivas:
 - Validacao de baseline verde confirmada: `pnpm check`, `pnpm test` e `pnpm build` executados com sucesso.
+- Cutover para `getorbita.com.br` pendente de reconfiguracao de Nginx/SSL na VPS apos push do codigo.
 - Sprint 2 (Seguranca) ainda nao iniciada: rate-limit, `helmet`, expiração JWT e encrypt de credenciais.
 
 ## 7) Prioridade recomendada (curto prazo)
@@ -105,3 +109,4 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: Sprint 1 consolidada (ocultacao de Campanhas/IA no front, voice assistant desativado e onboarding com `navigate()`), com `check/test/build` verdes.
 - 2026-02-25: `docs/DECISOES_PRODUTO.md` oficializado como documento de decisao de produto para todos os agentes.
 - 2026-02-25: baseline funcional do app visivel fechado para demo (persistencia em settings, datas locais, onboarding e LP coerentes), com `check/test/build` verdes.
+- 2026-02-25: tema padrao alterado para dark e LP refinada para refletir somente funcionalidades ativas do Orbita.

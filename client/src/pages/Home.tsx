@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
-import { Zap, Calendar, Wallet, BarChart3, MessageSquare, ArrowRight, CheckCircle, Users, Target } from "lucide-react";
+import { Zap, Calendar, Wallet, BarChart3, ArrowRight, CheckCircle, Users, Target, BookOpen, Star } from "lucide-react";
 import { getStartPageRoute } from "@/lib/user-settings";
 
 const features = [
@@ -13,7 +13,7 @@ const features = [
     color: "text-primary bg-primary/15",
   },
   {
-    icon: MessageSquare,
+    icon: Target,
     title: "CRM e Prospecção",
     desc: "Organize leads por estágio e acompanhe metas diárias de prospecção em tempo real.",
     color: "text-emerald-700 dark:text-emerald-300 bg-emerald-500/15",
@@ -41,6 +41,18 @@ const features = [
     title: "Configuração por Perfil",
     desc: "Ajuste metas, preferências e aparência para deixar o Orbita adaptado ao seu ritmo.",
     color: "text-orange-700 dark:text-orange-300 bg-orange-500/15",
+  },
+  {
+    icon: BookOpen,
+    title: "Diário e Sonhos",
+    desc: "Registre reflexões no diário e mantenha seu quadro de sonhos ativo dentro da rotina.",
+    color: "text-violet-700 dark:text-violet-300 bg-violet-500/15",
+  },
+  {
+    icon: Star,
+    title: "Foco no Essencial",
+    desc: "Interface enxuta com os módulos úteis no dia a dia, sem áreas que ainda não estão prontas.",
+    color: "text-cyan-700 dark:text-cyan-300 bg-cyan-500/15",
   },
 ];
 
@@ -95,7 +107,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6">
             <Zap className="w-3.5 h-3.5" />
-            Sistema de Gestão Pessoal + Comercial
+            Módulos ativos hoje no Orbita
           </div>
           <h1 className="text-5xl md:text-6xl font-bold font-['Space_Grotesk'] leading-tight mb-6">
             Rotina, clientes e financeiro
@@ -103,7 +115,7 @@ export default function Home() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-500">no mesmo painel</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            O Orbita organiza o que você precisa executar no dia e simplifica a operação com clientes, CRM e financeiro.
+            Hoje o app entrega: Dashboard, Clientes, Rotina, Agenda, CRM, Prospecção, Financeiro, Diário, Quadro dos Sonhos e Configurações.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button size="lg" className="text-base px-8" onClick={() => navigate("/login")}>
@@ -126,8 +138,8 @@ export default function Home() {
       <section className="px-4 py-16 sm:px-6 sm:py-20 bg-muted/20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold font-['Space_Grotesk'] mb-3">Tudo em uma única operação</h2>
-            <p className="text-muted-foreground">Menos troca de ferramenta e mais clareza para executar.</p>
+            <h2 className="text-3xl font-bold font-['Space_Grotesk'] mb-3">Funcionalidades já disponíveis</h2>
+            <p className="text-muted-foreground">Tudo abaixo já está funcionando na versão atual.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map(({ icon: Icon, title, desc, color }) => (

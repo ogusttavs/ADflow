@@ -1,6 +1,6 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 10:25:07 -0300
+Atualizado em: 2026-02-25 11:01:28 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -326,3 +326,30 @@ Arquivos alterados:
 - docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
+
+[2026-02-25 11:01:28 -0300] [Codex]
+Contexto:
+- Dono pediu ajuste final antes do proximo deploy: tema padrao escuro e LP fiel ao que esta realmente ativo no app.
+
+Feito:
+- Tema inicial alterado para dark por padrao em `ThemeProvider`.
+- LP/Home ajustada para comunicar apenas funcionalidades ativas (sem promessas de modulos ainda ocultos).
+- Validacoes executadas com sucesso:
+  - `pnpm check`
+  - `pnpm test` (44 testes passando)
+  - `pnpm build`
+- Documentacao obrigatoria sincronizada (`CENTRO`, `LOG`, `TODO`).
+
+Proximo:
+- Commitar e subir para `origin/main`.
+- Executar cutover da VPS para o dominio `getorbita.com.br` (Nginx + SSL) e validar HTTP/HTTPS.
+
+Bloqueios/Riscos:
+- Arquivo local nao rastreado `docs/IDEIAS_PRODUTO.md` segue fora do commit.
+
+Arquivos alterados:
+- client/src/App.tsx
+- client/src/pages/Home.tsx
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+- docs/TODO_LANCAMENTO.md
