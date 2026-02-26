@@ -1,4 +1,5 @@
 import AppLayout from "@/components/AppLayout";
+import { PlanGate } from "@/components/PlanGate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -99,6 +100,7 @@ export default function CRM() {
 
   return (
     <AppLayout>
+    <PlanGate feature="crm">
     <div className="page-content space-y-6">
       {/* Header */}
       <div className="page-header">
@@ -437,6 +439,7 @@ export default function CRM() {
         </Card>
       )}
     </div>
+    </PlanGate>
     </AppLayout>
   );
 }

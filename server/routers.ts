@@ -14,12 +14,19 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { sendTransactionalEmail } from "./_core/email";
 import { ENV } from "./_core/env";
 import {
+  createAsaasCustomer,
+  createAsaasSubscription,
+  resolveCheckoutUrlFromSubscriptionPayments,
+  resolveSubscriptionCheckoutUrl,
+} from "./_core/asaas";
+import {
   decryptProfileSensitiveValue,
   encryptProfileSensitiveValue,
 } from "./_core/profileCrypto";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { sdk } from "./_core/sdk";
+import type { SessionUser } from "./_core/context";
 import * as db from "./db";
 import { clientsRouter } from "./routers/clients";
 import { campaignsRouter } from "./routers/campaigns";
@@ -63,6 +70,14 @@ function resolveAppBaseUrl(req: {
 }
 
 const EMAIL_VERIFICATION_EXPIRY_MS = 24 * 60 * 60 * 1000;
+const BILLING_GRACE_PERIOD_MS = 3 * 24 * 60 * 60 * 1000;
+const ORBITA_PLANS = [
+  "personal_standard",
+  "personal_pro",
+  "business_standard",
+  "business_pro",
+] as const;
+const ASAAS_BILLING_TYPES = ["PIX", "BOLETO", "CREDIT_CARD"] as const;
 
 const registerInputSchema = z.object({
   firstName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres").max(120),
@@ -134,7 +149,7 @@ function maskTaxId(
   return `***.***.***-${taxIdLast4}`;
 }
 
-function toPublicUser(user: User) {
+function toPublicUser(user: SessionUser) {
   return {
     id: user.id,
     openId: user.openId,
@@ -152,6 +167,9 @@ function toPublicUser(user: User) {
     marketingOptIn: user.marketingOptIn,
     emailVerified: user.emailVerified,
     emailVerifiedAt: user.emailVerifiedAt,
+    plan: user.plan,
+    planStatus: user.planStatus,
+    planExpiry: user.planExpiry,
     taxIdMasked: maskTaxId(user.taxIdType, user.taxIdLast4),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
@@ -807,6 +825,148 @@ export const appRouter = router({
 
         return { success: true } as const;
       }),
+
+    createSubscription: protectedProcedure
+      .input(
+        z.object({
+          plan: z.enum(ORBITA_PLANS),
+          billingType: z.enum(ASAAS_BILLING_TYPES).default("PIX"),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        const database = await db.getDb();
+        if (!database) {
+          throw new TRPCError({
+            code: "SERVICE_UNAVAILABLE",
+            message: "Banco de dados indisponível",
+          });
+        }
+
+        const currentUser = await db.getUserByOpenId(ctx.user.openId);
+        if (!currentUser) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Usuário não autenticado.",
+          });
+        }
+        if (await expireUnverifiedAccountIfNeeded(currentUser)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "Sua conta expirou por falta de verificação de email. Faça um novo cadastro.",
+          });
+        }
+        if (!currentUser.emailVerified) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Confirme seu email antes de ativar um plano.",
+          });
+        }
+        if (!currentUser.email) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Seu usuário precisa ter email para contratar um plano.",
+          });
+        }
+
+        let asaasCustomerId = currentUser.asaasCustomerId ?? null;
+        if (!asaasCustomerId) {
+          let cpfCnpj: string | null = null;
+          if (currentUser.taxIdEncrypted) {
+            try {
+              cpfCnpj = decryptProfileSensitiveValue(currentUser.taxIdEncrypted);
+            } catch (error) {
+              console.warn("[Asaas] Could not decrypt taxId for customer creation", error);
+            }
+          }
+
+          const customer = await createAsaasCustomer({
+            name: currentUser.name || `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim(),
+            email: currentUser.email,
+            cpfCnpj,
+            mobilePhone: currentUser.whatsapp || null,
+            externalReference: `orbita_user_${currentUser.id}`,
+          });
+          asaasCustomerId = customer.id;
+        }
+
+        const nextDueDate = new Date();
+        nextDueDate.setDate(nextDueDate.getDate() + 1);
+        const nextDueDateStr = nextDueDate.toISOString().slice(0, 10);
+
+        const subscription = await createAsaasSubscription({
+          customer: asaasCustomerId,
+          plan: input.plan,
+          billingType: input.billingType,
+          nextDueDate: nextDueDateStr,
+        });
+        let checkoutUrl = resolveSubscriptionCheckoutUrl(subscription);
+        if (!checkoutUrl && subscription.id) {
+          try {
+            checkoutUrl = await resolveCheckoutUrlFromSubscriptionPayments(subscription.id);
+          } catch (error) {
+            console.warn("[Asaas] Could not resolve checkout URL from subscription payments", error);
+          }
+        }
+
+        const subscriptionId = subscription.id;
+        await db.updateUserById(currentUser.id, {
+          plan: input.plan,
+          planStatus: "trial",
+          planExpiry: nextDueDate,
+          asaasCustomerId,
+          asaasSubscriptionId: subscriptionId,
+        });
+
+        return {
+          success: true,
+          plan: input.plan,
+          planStatus: "trial",
+          asaasCustomerId,
+          asaasSubscriptionId: subscriptionId,
+          checkoutUrl,
+        } as const;
+      }),
+
+    getSubscriptionStatus: protectedProcedure.query(async ({ ctx }) => {
+      const database = await db.getDb();
+      if (!database) {
+        throw new TRPCError({
+          code: "SERVICE_UNAVAILABLE",
+          message: "Banco de dados indisponível",
+        });
+      }
+
+      const currentUser = await db.getUserByOpenId(ctx.user.openId);
+      if (!currentUser) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Usuário não autenticado.",
+        });
+      }
+
+      const now = Date.now();
+      const expiryTime = currentUser.planExpiry?.getTime() ?? null;
+      const isGracePeriod =
+        currentUser.planStatus === "past_due" &&
+        expiryTime !== null &&
+        now - expiryTime <= BILLING_GRACE_PERIOD_MS;
+
+      const canUsePaidFeatures =
+        currentUser.planStatus === "active" ||
+        currentUser.planStatus === "trial" ||
+        isGracePeriod;
+
+      return {
+        plan: currentUser.plan,
+        planStatus: currentUser.planStatus,
+        planExpiry: currentUser.planExpiry,
+        asaasCustomerId: currentUser.asaasCustomerId,
+        asaasSubscriptionId: currentUser.asaasSubscriptionId,
+        isGracePeriod,
+        canUsePaidFeatures,
+      } as const;
+    }),
   }),
   clients: clientsRouter,
   campaigns: campaignsRouter,

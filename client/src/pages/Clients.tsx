@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AppLayout from "@/components/AppLayout";
+import { PlanGate } from "@/components/PlanGate";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,7 @@ export default function Clients() {
 
   return (
     <AppLayout>
+      <PlanGate feature="clients">
       <div className="page-content space-y-6">
         <div className="page-header">
           <div className="page-title-block">
@@ -210,6 +212,7 @@ export default function Clients() {
           </div>
         )}
       </div>
+      </PlanGate>
     </AppLayout>
   );
 }

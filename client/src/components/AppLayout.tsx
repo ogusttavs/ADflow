@@ -3,6 +3,8 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
+import { emitUpgradeRequired } from "@/lib/upgradePlan";
+import { canUseFeature, type PlanFeature } from "@shared/planAccess";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -104,6 +106,12 @@ const ALL_NAV_SECTIONS: NavSection[] = [
   },
 ];
 
+const NAV_FEATURES_BY_HREF: Partial<Record<string, PlanFeature>> = {
+  "/clients": "clients",
+  "/crm": "crm",
+  "/prospecting": "prospecting",
+};
+
 function loadHiddenItems(): Set<string> {
   try {
     return new Set(JSON.parse(localStorage.getItem(HIDDEN_KEY) ?? "[]"));
@@ -163,6 +171,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
     setShowEmailVerificationPopup(false);
   }, [requiresEmailVerification, user?.id]);
 
+  const canAccessFeature = (feature: PlanFeature) =>
+    canUseFeature({
+      plan: user?.plan,
+      planStatus: user?.planStatus,
+      planExpiry: user?.planExpiry,
+      feature,
+    });
+
   if (loading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -186,11 +202,23 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   const visibleSections = ALL_NAV_SECTIONS.map((section) => ({
     ...section,
-    items: section.items.filter((item) => !item.disabled && !hiddenItems.has(item.href)),
+    items: section.items.filter((item) => {
+      if (item.disabled || hiddenItems.has(item.href)) return false;
+      const gatedFeature = NAV_FEATURES_BY_HREF[item.href];
+      if (!gatedFeature) return true;
+      return canAccessFeature(gatedFeature);
+    }),
   })).filter((section) => section.items.length > 0);
 
   const customizableItems = ALL_NAV_SECTIONS.flatMap((section) =>
-    section.items.filter((item) => !item.disabled).map((item) => ({ ...item, section: section.title }))
+    section.items
+      .filter((item) => {
+        if (item.disabled) return false;
+        const gatedFeature = NAV_FEATURES_BY_HREF[item.href];
+        if (!gatedFeature) return true;
+        return canAccessFeature(gatedFeature);
+      })
+      .map((item) => ({ ...item, section: section.title }))
   );
 
   const currentNav = ALL_NAV_SECTIONS.flatMap((section) => section.items).find(
@@ -255,17 +283,27 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <div className="space-y-1">
               {section.items.map(({ href, icon: Icon, label }) => {
                 const isActive = location === href || (href !== "/dashboard" && location.startsWith(href));
+                const gatedFeature = NAV_FEATURES_BY_HREF[href];
+                const blockedByPlan = Boolean(gatedFeature && !canAccessFeature(gatedFeature));
 
                 return (
                   <Link
                     key={href}
                     href={href}
-                    onClick={() => setMobileOpen(false)}
+                    onClick={(event) => {
+                      if (blockedByPlan) {
+                        event.preventDefault();
+                        emitUpgradeRequired({ feature: gatedFeature, source: "nav" });
+                        setMobileOpen(false);
+                        return;
+                      }
+                      setMobileOpen(false);
+                    }}
                     className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-150 ${
                       isActive
                         ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm shadow-primary/20"
                         : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                    } ${collapsed && !mobile ? "justify-center" : ""}`}
+                    } ${collapsed && !mobile ? "justify-center" : ""} ${blockedByPlan ? "opacity-60" : ""}`}
                   >
                     <span
                       className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
@@ -276,7 +314,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
                     >
                       <Icon className="h-4 w-4" />
                     </span>
-                    {(!collapsed || mobile) && <span className="text-sm font-medium truncate">{label}</span>}
+                    {(!collapsed || mobile) && (
+                      <span className="text-sm font-medium truncate">{label}</span>
+                    )}
                   </Link>
                 );
               })}

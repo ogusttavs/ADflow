@@ -27,6 +27,39 @@ function createQueryChain(rows: unknown[]): QueryChain {
 }
 
 vi.mock("./db", () => ({
+  getUserByOpenId: vi.fn(async (openId: string) => {
+    const now = new Date();
+    return {
+      id: 1,
+      openId,
+      role: "admin",
+      loginMethod: "email",
+      name: "Owner",
+      email: "owner@example.com",
+      firstName: null,
+      lastName: null,
+      whatsapp: null,
+      city: null,
+      address: null,
+      acquisitionSource: null,
+      preferredLanguage: null,
+      marketingOptIn: false,
+      emailVerified: true,
+      emailVerifiedAt: now,
+      taxIdType: null,
+      taxIdEncrypted: null,
+      taxIdLast4: null,
+      passwordHash: "hash",
+      plan: "business_standard",
+      planStatus: "active",
+      planExpiry: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+      asaasCustomerId: null,
+      asaasSubscriptionId: null,
+      createdAt: now,
+      updatedAt: now,
+      lastSignedIn: now,
+    };
+  }),
   getDb: vi.fn(async () => ({
     select: () => ({
       from: () => createQueryChain(mockState.selectQueue.shift() ?? []),

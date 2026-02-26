@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import AppLayout from "@/components/AppLayout";
+import { PlanGate } from "@/components/PlanGate";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -128,6 +129,7 @@ export function ProspectingGoals() {
 export default function Prospecting() {
   return (
     <AppLayout>
+      <PlanGate feature="prospecting">
       <div className="page-content space-y-6">
         <div className="flex items-center gap-3">
           <TrendingUp className="h-6 w-6 text-primary" />
@@ -140,6 +142,7 @@ export default function Prospecting() {
           <ProspectingGoals />
         </div>
       </div>
+      </PlanGate>
     </AppLayout>
   );
 }

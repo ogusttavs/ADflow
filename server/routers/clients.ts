@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { planProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { clients, clientConfigs, campaigns } from "../../drizzle/schema";
 import { eq, and, desc, count } from "drizzle-orm";
@@ -37,7 +37,7 @@ const configSchema = z.object({
 });
 
 export const clientsRouter = router({
-  list: protectedProcedure.query(async ({ ctx }) => {
+  list: planProcedure("clients").query(async ({ ctx }) => {
     const db = await getDb();
     if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     const rows = await db
@@ -48,7 +48,7 @@ export const clientsRouter = router({
     return rows;
   }),
 
-  get: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
+  get: planProcedure("clients").input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
     const db = await getDb();
     if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     const [client] = await db
@@ -69,14 +69,14 @@ export const clientsRouter = router({
     return { ...client, config: config ?? null, campaignCount: campaignCount?.count ?? 0 };
   }),
 
-  create: protectedProcedure.input(clientSchema).mutation(async ({ ctx, input }) => {
+  create: planProcedure("clients").input(clientSchema).mutation(async ({ ctx, input }) => {
     const db = await getDb();
     if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     const [result] = await db.insert(clients).values({ ...input, userId: ctx.user.id });
     return { id: (result as any).insertId };
   }),
 
-  update: protectedProcedure
+  update: planProcedure("clients")
     .input(z.object({ id: z.number(), data: clientSchema.partial() }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -88,7 +88,7 @@ export const clientsRouter = router({
       return { success: true };
     }),
 
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+  delete: planProcedure("clients").input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
     const db = await getDb();
     if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     await db
@@ -97,7 +97,7 @@ export const clientsRouter = router({
     return { success: true };
   }),
 
-  saveConfig: protectedProcedure
+  saveConfig: planProcedure("clients")
     .input(z.object({ clientId: z.number(), config: configSchema }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -132,7 +132,7 @@ export const clientsRouter = router({
       return { success: true };
     }),
 
-  getConfig: protectedProcedure
+  getConfig: planProcedure("clients")
     .input(z.object({ clientId: z.number() }))
     .query(async ({ ctx, input }) => {
       const db = await getDb();

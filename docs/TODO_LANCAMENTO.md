@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 19:37:36 -0300
+Atualizado em: 2026-02-25 21:40:37 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -88,10 +88,26 @@ Status atual: concluido em codigo. Envio de email de verificacao no cadastro foi
 
 ### Sprint 4 - Pagamentos e Planos
 
-- [ ] 12. Integrar Asaas + webhooks
-- [ ] 13. Migration: `plan`, `planExpiry`, `planStatus` em `users`
-- [ ] 14. Guards frontend por plano
-- [ ] 15. Guards backend por plano (middleware tRPC)
+- [x] 12a. Plano tecnico da Sprint 4 aprovado e documentado
+Status atual: concluido. Documento `docs/PLANO_EXECUCAO_FASE_4.md` criado com ordem de implementacao, hard gates de seguranca e validacao em sandbox antes de producao.
+
+- [x] 12. Integrar Asaas + webhooks
+Status atual: concluido em codigo (sandbox-ready). Cliente Asaas (`server/_core/asaas.ts`), webhook seguro com token (`/api/webhooks/asaas`), idempotencia (`processed_webhook_events`), `auth.createSubscription` e `auth.getSubscriptionStatus` implementados; fallback de checkout via `GET /subscriptions/{id}/payments` ativo para quando a URL nao vier no payload inicial, com mensagem amigavel para falha de conexao com gateway; falta validacao manual no sandbox do Asaas (A6).
+- [ ] 12c. Definir estrategia de checkout da Orbita (hosted Asaas vs checkout proprio)
+Status atual: decisao tomada. Manter checkout hospedado da Asaas no lancamento; checkout visual proprio (com cobranca via API Asaas) fica agendado para depois do ultimo sprint e apos o lancamento.
+- [x] 13. Migration: `plan`, `planExpiry`, `planStatus` em `users`
+Status atual: concluido em codigo. Campos de plano adicionados no `drizzle/schema.ts`, migration `drizzle/0010_secret_stature.sql` gerada e `auth.me` passando `plan/planStatus/planExpiry`.
+- [ ] 13b. Aplicar migration da Sprint 4 no banco de producao (`pnpm db:push`) e validar colunas em `users`
+- [x] 14. Guards frontend por plano
+Status atual: concluido em codigo. Criados `usePlanAccess`, `PlanGate` e `UpgradePlanModal`, com bloqueio visual em rotas modulares (`Clients`, `ClientDetail`, `CRM`, `Prospecting`) e abertura de CTA de upgrade tambem em erro `UPGRADE_REQUIRED` da API.
+- [x] 14b. Upsell interno ao clicar em "Ver planos"
+Status atual: concluido em codigo. Botao do `UpgradePlanModal` agora abre `Settings` na aba `Planos` (`/settings?tab=plans`), com cards de oferta por plano e CTA de contratacao dentro do app.
+- [x] 14c. Refinar UX de planos para conta pessoal (sem sinalizacao Business no menu) + corrigir abas de Configuracoes
+Status atual: concluido em codigo. Itens business agora ficam ocultos para plano pessoal na sidebar/customizacao, mensagens de bloqueio removem rótulo "Business" e as abas de `Settings` foram corrigidas para trocar conteudo corretamente (sincronizacao por `window.location.search`).
+- [ ] 14d. Remover destaque visual de "plano recomendado" na tela de Planos
+Status atual: pendente (pedido aprovado pelo dono). Enquanto nao houver segmentacao por perfil, nenhum plano deve aparecer em destaque.
+- [x] 15. Guards backend por plano (middleware tRPC)
+Status atual: concluido em codigo. Middleware `planProcedure` criado no tRPC com regra compartilhada (`shared/planAccess.ts`) e aplicado em `clientsRouter` e `crmRouter`, retornando `FORBIDDEN` com `UPGRADE_REQUIRED` para plano sem acesso.
 
 ### Sprint 5 - Features novas
 
@@ -208,3 +224,11 @@ Status atual: concluido. Chave dedicada configurada na VPS com tamanho valido (3
 
 3. Rotacao recorrente de segredos (operacional)
 - Definir periodicidade para rotacao de credenciais sensiveis do servidor (`JWT_SECRET`, OAuth client secret e demais chaves operacionais).
+
+### Checklist de retomada (proximo dia)
+
+1. Validar no browser local o checkout abrindo link Asaas para pelo menos 2 planos diferentes.
+2. Configurar/confirmar webhook sandbox do Asaas e disparar evento real para validar mudanca de `planStatus`.
+3. Implementar item `14d` (remover "recomendado" dos cards de planos) e validar UX.
+4. Decidir item `12c` (checkout proprio vs hosted) e registrar decisao em `docs/DECISOES_PRODUTO.md`.
+5. Se tudo OK em sandbox, preparar roteiro de migracao controlada para producao (sem virar chave ainda).

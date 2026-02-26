@@ -1,6 +1,12 @@
 # Log Continuo de Agentes
 
 Atualizado em: 2026-02-25 19:41:11 -0300
+Atualizado em: 2026-02-25 20:05:48 -0300
+Atualizado em: 2026-02-25 20:12:42 -0300
+Atualizado em: 2026-02-25 21:40:37 -0300
+Atualizado em: 2026-02-25 23:49:54 -0300
+Atualizado em: 2026-02-25 23:56:16 -0300
+Atualizado em: 2026-02-26 00:01:57 -0300
 
 ## Regra
 - Este arquivo e append-only.
@@ -31,6 +37,100 @@ Arquivos alterados:
 ```
 
 ## Historico ativo
+
+[2026-02-25 20:12:42 -0300] [Codex]
+Contexto:
+- Dono reforcou foco no Orbita (`MeuSoftware`) e autorizou iniciar a Sprint 4.
+
+Feito:
+- Implementado Item 13 (migration de planos) em codigo:
+  - `drizzle/schema.ts` atualizado com campos `plan`, `planStatus`, `planExpiry`, `asaasCustomerId`, `asaasSubscriptionId`;
+  - tabela `processed_webhook_events` adicionada para idempotencia de webhook;
+  - migration gerada via Drizzle: `drizzle/0010_secret_stature.sql`;
+  - `server/db.ts` ajustado para persistir novos campos de plano;
+  - `server/routers.ts` (`auth.me`) atualizado para retornar `plan`, `planStatus` e `planExpiry`.
+- Validacao tecnica executada e aprovada:
+  - `pnpm check`
+  - `pnpm test` (66/66)
+  - `pnpm build`
+- Documentacao sincronizada:
+  - plano da Sprint 4 atualizado para `EM ANDAMENTO`;
+  - backlog oficial atualizado com Item 13 concluido em codigo e tarefa operacional `13b` (aplicar migration em producao).
+
+Proximo:
+- Aplicar migration no ambiente alvo (`pnpm db:push`) e seguir para Item 12 (Asaas webhook seguro).
+
+Bloqueios/Riscos:
+- Pendente aplicacao da migration no banco de producao para materializar as colunas novas.
+
+Arquivos alterados:
+- drizzle/schema.ts
+- drizzle/0010_secret_stature.sql
+- drizzle/meta/_journal.json
+- drizzle/meta/0010_snapshot.json
+- server/db.ts
+- server/routers.ts
+- docs/PLANO_EXECUCAO_FASE_4.md
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 21:15:07 -0300] [Codex]
+Contexto:
+- Dono solicitou dois ajustes: (1) upsell interno ao clicar em "Ver planos"; (2) criacao de usuarios locais ficticios (um por plano) com documento de credenciais para teste local.
+
+Feito:
+- Frontend (upsell no app):
+  - `UpgradePlanModal` alterado para abrir `Settings` diretamente na aba de planos (`/settings?tab=plans`);
+  - `Settings` recebeu nova aba `Planos` com cards de oferta, plano atual e CTA de contratacao (`auth.createSubscription`).
+- QA local (dados de teste):
+  - schema local alinhado com `pnpm db:push` para suportar campos de plano mais recentes;
+  - 4 usuarios ficticios criados no banco local (1 por plano), todos com `emailVerified=1` e `planStatus=active`;
+  - logins validados via API local (`auth.login`) com sucesso para os quatro usuarios.
+- Documento local de credenciais:
+  - criado `docs/LOCAL_TEST_USERS.md` com emails/senhas e log de criacao;
+  - arquivo marcado em `.git/info/exclude` para evitar commit acidental (local only).
+- Validacoes:
+  - `pnpm check` OK;
+  - `pnpm build` OK.
+
+Proximo:
+- Se aprovado, posso preparar commit apenas das mudancas de codigo/docs oficiais (sem incluir arquivo local de credenciais).
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico no local; checkout real depende de chave/config Asaas no ambiente alvo.
+
+Arquivos alterados:
+- client/src/components/UpgradePlanModal.tsx
+- client/src/pages/Settings.tsx
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+- docs/LOCAL_TEST_USERS.md (local only, excluido do git)
+
+[2026-02-25 20:05:48 -0300] [Codex]
+Contexto:
+- Dono reforcou foco total no repositorio `MeuSoftware` (Orbita) e pediu continuidade da Sprint 4.
+
+Feito:
+- Criado plano tecnico da Sprint 4 em `docs/PLANO_EXECUCAO_FASE_4.md`, consolidando decisoes Gemini/Claude com estrategia propria:
+  - Asaas em sandbox primeiro;
+  - ordem de execucao por itens 13 -> 12 -> 15 -> 14;
+  - hard gates de seguranca como bloqueio de release.
+- Backlog oficial atualizado em `docs/TODO_LANCAMENTO.md` com item de aprovacao do plano da Sprint 4 (`12a`).
+- Centro operacional sincronizado para incluir a Sprint 4 na fonte de verdade e no snapshot atual.
+
+Proximo:
+- Implementar Item 13 no codigo (`drizzle/schema.ts` + migration + exposicao no `auth.me`) e validar com `pnpm check/test/build`.
+
+Bloqueios/Riscos:
+- Nenhum bloqueio tecnico neste momento.
+
+Arquivos alterados:
+- docs/PLANO_EXECUCAO_FASE_4.md
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
 
 [2026-02-25 19:41:11 -0300] [Codex]
 Contexto:
@@ -167,6 +267,64 @@ Bloqueios/Riscos:
 
 Arquivos alterados:
 - docs/PLANO_EXECUCAO_FASE_3.md
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 20:35:01 -0300] [Codex]
+Contexto:
+- Dono pediu para prosseguir no repositório Orbita (`MeuSoftware`) e fechar Sprint 4 com foco em segurança.
+
+Feito:
+- Sprint 4 - backend:
+  - criada regra compartilhada de acesso por plano em `shared/planAccess.ts`;
+  - criado `planProcedure(feature)` em `server/_core/trpc.ts`;
+  - aplicado guard por plano em `clientsRouter` e `crmRouter`;
+  - padronizado bloqueio com `FORBIDDEN` + `UPGRADE_REQUIRED`;
+  - adicionados testes de guard em `server/plan.guard.test.ts`.
+- Sprint 4 - frontend:
+  - criado `usePlanAccess` (`client/src/hooks/usePlanAccess.ts`);
+  - criado `PlanGate` (`client/src/components/PlanGate.tsx`);
+  - criado `UpgradePlanModal` global (`client/src/components/UpgradePlanModal.tsx`);
+  - tratamento global de erro `UPGRADE_REQUIRED` em `client/src/main.tsx`;
+  - bloqueio visual/CTA de upgrade no menu lateral em `AppLayout`;
+  - rotas business protegidas com `PlanGate` (`Clients`, `ClientDetail`, `CRM`, `Prospecting`).
+- Cliente Asaas/webhook da Sprint 4 mantidos e consolidados como concluídos em código (sandbox-ready).
+- Validacoes executadas:
+  - `pnpm check` OK;
+  - `pnpm test` OK (73 testes passando);
+  - `pnpm build` OK;
+  - `bash scripts/check-docs-sync.sh` OK.
+- Documentacao sincronizada:
+  - `docs/TODO_LANCAMENTO.md` atualizado (itens 12, 14, 15);
+  - `docs/PLANO_EXECUCAO_FASE_4.md` atualizado;
+  - `docs/CENTRO_DE_OPERACAO.md` atualizado.
+
+Proximo:
+- Aplicar migration da Sprint 4 em producao (`13b`) e validar ciclo real de webhook no Asaas sandbox (A6).
+
+Bloqueios/Riscos:
+- Falta validacao manual do Asaas sandbox para marcar Sprint 4 como operacionalmente concluida.
+
+Arquivos alterados:
+- shared/const.ts
+- shared/planAccess.ts
+- server/_core/trpc.ts
+- server/routers/clients.ts
+- server/routers/crm.ts
+- server/plan.guard.test.ts
+- client/src/lib/upgradePlan.ts
+- client/src/hooks/usePlanAccess.ts
+- client/src/components/PlanGate.tsx
+- client/src/components/UpgradePlanModal.tsx
+- client/src/components/AppLayout.tsx
+- client/src/App.tsx
+- client/src/main.tsx
+- client/src/pages/Clients.tsx
+- client/src/pages/ClientDetail.tsx
+- client/src/pages/CRM.tsx
+- client/src/pages/Prospecting.tsx
+- docs/PLANO_EXECUCAO_FASE_4.md
 - docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
@@ -1035,6 +1193,126 @@ Arquivos alterados:
 - client/src/pages/Settings.tsx
 - server/auth.change-password.test.ts
 - docs/PLANO_EXECUCAO_FASE_3.md
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 21:40:37 -0300] [Codex]
+Contexto:
+- Dono reportou tres problemas de UX em plano pessoal: modal/texto com "Business", exibicao de funcoes business na navegacao pessoal e tabs de `Settings` alterando URL sem trocar conteudo.
+
+Feito:
+- Corrigida navegacao por abas em `Settings`:
+  - leitura/escrita da tab ativa via `window.location.search`;
+  - sincronizacao com `popstate`;
+  - troca de tab agora altera conteudo e URL de forma consistente.
+- Ajustado gating visual para plano pessoal:
+  - modulos business ocultados da sidebar e da lista de customizacao quando sem acesso;
+  - remocao do sufixo textual `· Business` na navegacao.
+- Ajustadas mensagens de bloqueio para linguagem neutra:
+  - `UpgradePlanModal` e `PlanGate` sem rotulo "Business", mantendo CTA de upgrade.
+- Validacao executada:
+  - `pnpm check` OK;
+  - `pnpm build` OK.
+
+Proximo:
+- Validacao manual rapida no browser com usuario `personal_standard` para confirmar:
+  - tabs de `Settings` trocando conteudo normalmente;
+  - ausencia de modulos business na sidebar;
+  - modal de upgrade com texto neutro.
+
+Bloqueios/Riscos:
+- Sem bloqueio de codigo.
+- Deploy em producao ainda nao executado nesta etapa.
+
+Arquivos alterados:
+- client/src/pages/Settings.tsx
+- client/src/components/AppLayout.tsx
+- client/src/components/UpgradePlanModal.tsx
+- client/src/components/PlanGate.tsx
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 23:49:54 -0300] [Codex]
+Contexto:
+- Dono reportou erro no checkout (`fetch failed`) apos clicar para assinar plano no ambiente local sandbox.
+
+Feito:
+- Backend Asaas robustecido em `server/_core/asaas.ts`:
+  - tratamento explicito de falha de rede com mensagem amigavel (`Falha de conexao com o gateway...`) em vez de propagar erro cru;
+  - parsing resiliente de resposta JSON;
+  - novo fallback para checkout: busca em `GET /subscriptions/{id}/payments` com ate 3 tentativas curtas e extracao de `invoiceUrl/bankSlipUrl`.
+- Fluxo de assinatura ajustado em `server/routers.ts`:
+  - `auth.createSubscription` agora tenta `resolveCheckoutUrlFromSubscriptionPayments` quando o payload inicial da Asaas vier sem `checkoutUrl`.
+- UX de erro ajustada em `client/src/pages/Settings.tsx`:
+  - mensagem especifica para `fetch failed`;
+  - sucesso diferenciado quando checkout URL ainda nao ficou disponivel.
+- Testes/validacoes executadas:
+  - `pnpm check` OK;
+  - `pnpm test server/auth.subscription.test.ts` OK (4/4);
+  - `pnpm build` OK;
+  - smoke local via cURL em `auth.createSubscription`: retorno com `checkoutUrl` real apos reinicio do server.
+
+Proximo:
+- Dono validar no browser local o clique em "Assinar plano" e confirmar abertura da URL de checkout em nova aba.
+
+Bloqueios/Riscos:
+- Asaas pode eventualmente atrasar alguns segundos para materializar URL de pagamento em sandbox; fallback reduz, mas nao elimina 100% dessa latencia.
+
+Arquivos alterados:
+- server/_core/asaas.ts
+- server/routers.ts
+- server/auth.subscription.test.ts
+- client/src/pages/Settings.tsx
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+[2026-02-25 23:56:16 -0300] [Codex]
+Contexto:
+- Dono confirmou que checkout abriu e pediu conversa de produto sem codar feature nesta etapa.
+- Novas diretrizes do dono:
+  - avaliar possibilidade de checkout proprio Orbita no futuro;
+  - remover destaque de "plano recomendado" (nenhum plano em evidência por enquanto);
+  - registrar encerramento do dia com ponto de parada e passo a passo de retomada.
+
+Feito:
+- Documentacao operacional atualizada sem alteracao de codigo funcional:
+  - backlog Sprint 4 atualizado com novas pendencias `12c` (decisao checkout proprio vs hosted) e `14d` (remover destaque de plano recomendado);
+  - checklist objetivo de retomada incluido no TODO;
+  - centro operacional atualizado com ponto de parada do dia e nova ordem de prioridade;
+  - plano tecnico da Sprint 4 atualizado com checkpoint do dia e roteiro de retomada para o proximo dia.
+
+Proximo:
+- Retomar pela validacao manual completa do webhook sandbox (A6), seguida do ajuste de UX `14d` e decisao de produto `12c`.
+
+Bloqueios/Riscos:
+- Checkout proprio aumenta escopo de PCI/compliance e risco de seguranca; decisao deve considerar tempo e governanca antes de implementar.
+
+Arquivos alterados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/PLANO_EXECUCAO_FASE_4.md
+- docs/LOG_AGENTES.md
+
+[2026-02-26 00:01:57 -0300] [Codex]
+Contexto:
+- Dono decidiu estrategicamente manter checkout hospedado da Asaas no lancamento e postergar checkout visual proprio Orbita.
+
+Feito:
+- `docs/TODO_LANCAMENTO.md` atualizado no item `12c` com decisao fechada:
+  - hosted Asaas no lancamento;
+  - checkout visual proprio via API Asaas apenas apos ultimo sprint e pos-lancamento.
+- `docs/CENTRO_DE_OPERACAO.md` sincronizado com a mesma decisao.
+
+Proximo:
+- Seguir Sprint 4 com foco em validacao de webhook sandbox (A6) e ajuste UX `14d` (remover destaque de plano recomendado).
+
+Bloqueios/Riscos:
+- Nenhum bloqueio novo; decisao reduz risco de compliance/seguranca para o lancamento.
+
+Arquivos alterados:
 - docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md

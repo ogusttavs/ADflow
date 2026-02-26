@@ -1,6 +1,13 @@
 import { and, count, desc, eq, gt, inArray, isNotNull, isNull, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertAuthToken, InsertUser, authTokens, users } from "../drizzle/schema";
+import {
+  InsertAuthToken,
+  InsertProcessedWebhookEvent,
+  InsertUser,
+  authTokens,
+  processedWebhookEvents,
+  users,
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -49,6 +56,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       "taxIdLast4",
       "loginMethod",
       "passwordHash",
+      "asaasCustomerId",
+      "asaasSubscriptionId",
     ] as const;
     type TextField = (typeof textFields)[number];
 
@@ -65,6 +74,18 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     if (user.taxIdType !== undefined) {
       values.taxIdType = user.taxIdType;
       updateSet.taxIdType = user.taxIdType;
+    }
+    if (user.plan !== undefined) {
+      values.plan = user.plan;
+      updateSet.plan = user.plan;
+    }
+    if (user.planStatus !== undefined) {
+      values.planStatus = user.planStatus;
+      updateSet.planStatus = user.planStatus;
+    }
+    if (user.planExpiry !== undefined) {
+      values.planExpiry = user.planExpiry;
+      updateSet.planExpiry = user.planExpiry;
     }
 
     if (user.emailVerified !== undefined) {
@@ -168,6 +189,36 @@ export async function getUserById(id: number) {
   }
 
   const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserByAsaasCustomerId(asaasCustomerId: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user by asaas customer id: database not available");
+    return undefined;
+  }
+
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.asaasCustomerId, asaasCustomerId))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserByAsaasSubscriptionId(asaasSubscriptionId: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user by asaas subscription id: database not available");
+    return undefined;
+  }
+
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.asaasSubscriptionId, asaasSubscriptionId))
+    .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -295,4 +346,43 @@ export async function markAuthTokenUsed(id: number, usedAt: Date = new Date()) {
   }
 
   await db.update(authTokens).set({ usedAt }).where(eq(authTokens.id, id));
+}
+
+export async function getProcessedWebhookEventByEventId(eventId: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get webhook event: database not available");
+    return undefined;
+  }
+
+  const result = await db
+    .select()
+    .from(processedWebhookEvents)
+    .where(eq(processedWebhookEvents.eventId, eventId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+type CreateProcessedWebhookEventInput = Pick<
+  InsertProcessedWebhookEvent,
+  "provider" | "eventId" | "eventType"
+> & {
+  processedAt?: Date;
+};
+
+export async function createProcessedWebhookEvent(input: CreateProcessedWebhookEventInput) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create webhook event: database not available");
+    return undefined;
+  }
+
+  const [result] = await db.insert(processedWebhookEvents).values({
+    provider: input.provider,
+    eventId: input.eventId,
+    eventType: input.eventType,
+    processedAt: input.processedAt ?? new Date(),
+  });
+  return Number((result as { insertId?: number }).insertId ?? 0) || undefined;
 }

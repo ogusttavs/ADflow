@@ -22,6 +22,8 @@ import {
   MoonStar,
   Sun,
   Settings as SettingsIcon,
+  BadgeDollarSign,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
@@ -37,6 +39,7 @@ import {
 } from "@/lib/user-settings";
 import { getPasswordPolicyError } from "@shared/passwordPolicy";
 import { isValidTaxId } from "@shared/taxId";
+import type { OrbitaPlan } from "@shared/planAccess";
 
 const THEME_OPTIONS: Array<{
   id: Theme;
@@ -94,10 +97,88 @@ const THEME_OPTIONS: Array<{
   },
 ];
 
+const SETTINGS_TABS = [
+  "general",
+  "security",
+  "notifications",
+  "productivity",
+  "appearance",
+  "plans",
+] as const;
+
+type SettingsTab = (typeof SETTINGS_TABS)[number];
+
+type PlanCard = {
+  id: OrbitaPlan;
+  label: string;
+  audience: string;
+  monthlyPrice: string;
+  highlights: string[];
+  featured?: boolean;
+};
+
+const PLAN_CARDS: PlanCard[] = [
+  {
+    id: "personal_standard",
+    label: "Pessoal Standard",
+    audience: "Profissional autônomo iniciando",
+    monthlyPrice: "R$ 29/mês",
+    highlights: ["Rotina e tarefas", "Diário e sonhos", "Painel pessoal"],
+  },
+  {
+    id: "personal_pro",
+    label: "Pessoal Pro",
+    audience: "Uso pessoal com mais recursos",
+    monthlyPrice: "R$ 49/mês",
+    highlights: ["Tudo do Standard", "Fluxos avançados", "Prioridade de suporte"],
+  },
+  {
+    id: "business_standard",
+    label: "Business Standard",
+    audience: "Operação comercial ativa",
+    monthlyPrice: "R$ 99/mês",
+    highlights: ["Clientes", "CRM", "Prospecção"],
+    featured: true,
+  },
+  {
+    id: "business_pro",
+    label: "Business Pro",
+    audience: "Equipe com demanda alta",
+    monthlyPrice: "R$ 149/mês",
+    highlights: ["Tudo do Business Standard", "Maior escala", "Prioridade máxima"],
+  },
+];
+
+function normalizeSettingsTab(value: string | null): SettingsTab {
+  if (!value) return "general";
+  if (SETTINGS_TABS.includes(value as SettingsTab)) {
+    return value as SettingsTab;
+  }
+  return "general";
+}
+
+function getSettingsTabFromSearch(search: string): SettingsTab {
+  const params = new URLSearchParams(search);
+  return normalizeSettingsTab(params.get("tab"));
+}
+
+function getCheckoutErrorMessage(rawMessage: string) {
+  const normalized = rawMessage.trim().toLowerCase();
+  if (!normalized) return "Nao foi possivel iniciar o checkout. Tente novamente.";
+  if (normalized.includes("fetch failed")) {
+    return "Nao foi possivel conectar ao gateway de pagamento. Tente novamente em instantes.";
+  }
+  return rawMessage;
+}
+
 export default function Settings() {
   const { user } = useAuth();
   const utils = trpc.useUtils();
   const { theme, setTheme, toggleTheme, switchable } = useTheme();
+  const [activeTab, setActiveTab] = useState<SettingsTab>(() => {
+    if (typeof window === "undefined") return "general";
+    return getSettingsTabFromSearch(window.location.search);
+  });
   const userLoginMethod = (user?.loginMethod ?? "").toLowerCase();
   const canChangePassword = userLoginMethod.includes("email");
   const [isEditingAccount, setIsEditingAccount] = useState(false);
@@ -145,6 +226,28 @@ export default function Settings() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+
+  const { data: subscriptionStatus } = trpc.auth.getSubscriptionStatus.useQuery(undefined, {
+    enabled: Boolean(user),
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const createSubscriptionMutation = trpc.auth.createSubscription.useMutation({
+    onSuccess: (result) => {
+      void utils.auth.me.invalidate();
+      void utils.auth.getSubscriptionStatus.invalidate();
+      if (result.checkoutUrl) {
+        toast.success("Plano atualizado. Redirecionando para checkout...");
+        window.open(result.checkoutUrl, "_blank", "noopener,noreferrer");
+        return;
+      }
+      toast.success("Plano atualizado. O link de pagamento esta sendo preparado, tente novamente em alguns segundos.");
+    },
+    onError: (error) => {
+      toast.error(getCheckoutErrorMessage(error.message));
+    },
+  });
 
   const resendVerificationMutation = trpc.auth.resendVerification.useMutation({
     onSuccess: (result) => {
@@ -226,6 +329,33 @@ export default function Settings() {
     user?.preferredLanguage,
     user?.whatsapp,
   ]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const syncActiveTabFromUrl = () => {
+      setActiveTab(getSettingsTabFromSearch(window.location.search));
+    };
+
+    syncActiveTabFromUrl();
+    window.addEventListener("popstate", syncActiveTabFromUrl);
+    return () => {
+      window.removeEventListener("popstate", syncActiveTabFromUrl);
+    };
+  }, []);
+
+  const handleTabChange = (tabValue: string) => {
+    const nextTab = normalizeSettingsTab(tabValue);
+    setActiveTab(nextTab);
+    if (typeof window === "undefined") {
+      return;
+    }
+    const nextUrl = nextTab === "general" ? "/settings" : `/settings?tab=${nextTab}`;
+    window.history.replaceState(window.history.state, "", nextUrl);
+  };
+
+  const currentPlan = subscriptionStatus?.plan ?? user?.plan ?? null;
+  const currentPlanStatus = subscriptionStatus?.planStatus ?? user?.planStatus ?? null;
+  const currentPlanExpiry = subscriptionStatus?.planExpiry ?? user?.planExpiry ?? null;
 
   const handleCancelAccountEdit = () => {
     if (!user) return;
@@ -371,7 +501,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <Tabs defaultValue="general">
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="w-full justify-start overflow-x-auto [&>button]:flex-none [&>button]:shrink-0">
             <TabsTrigger value="general" className="flex items-center gap-2">
               <UserRound className="w-4 h-4" />Conta
@@ -387,6 +517,9 @@ export default function Settings() {
             </TabsTrigger>
             <TabsTrigger value="appearance" className="flex items-center gap-2">
               <Palette className="w-4 h-4" />Aparência
+            </TabsTrigger>
+            <TabsTrigger value="plans" className="flex items-center gap-2">
+              <BadgeDollarSign className="w-4 h-4" />Planos
             </TabsTrigger>
           </TabsList>
 
@@ -963,6 +1096,88 @@ export default function Settings() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="plans">
+            <div className="space-y-4">
+              <Card className="bg-card border-border">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                    <BadgeDollarSign className="w-4 h-4" />
+                    Plano Atual
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <p>
+                    <strong>
+                      {currentPlan
+                        ? PLAN_CARDS.find((plan) => plan.id === currentPlan)?.label ?? currentPlan
+                        : "Sem plano definido"}
+                    </strong>
+                  </p>
+                  <p className="text-muted-foreground">
+                    Status: <strong>{currentPlanStatus ?? "indefinido"}</strong>
+                  </p>
+                  <p className="text-muted-foreground">
+                    Expira em:{" "}
+                    <strong>
+                      {currentPlanExpiry
+                        ? new Date(currentPlanExpiry).toLocaleDateString("pt-BR")
+                        : "não definido"}
+                    </strong>
+                  </p>
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {PLAN_CARDS.map((plan) => {
+                  const isCurrentPlan = currentPlan === plan.id;
+                  return (
+                    <Card
+                      key={plan.id}
+                      className={`bg-card border-border ${plan.featured ? "ring-2 ring-primary/30" : ""}`}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <CardTitle className="text-base">{plan.label}</CardTitle>
+                          {plan.featured ? <Badge>Recomendado</Badge> : null}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{plan.audience}</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <p className="text-xl font-bold">{plan.monthlyPrice}</p>
+                        <div className="space-y-2">
+                          {plan.highlights.map((highlight) => (
+                            <p key={highlight} className="text-sm text-muted-foreground flex items-center gap-2">
+                              <CheckCircle2 className="w-4 h-4 text-primary" />
+                              {highlight}
+                            </p>
+                          ))}
+                        </div>
+                        <Button
+                          className="w-full"
+                          variant={plan.featured ? "default" : "outline"}
+                          disabled={isCurrentPlan || createSubscriptionMutation.isPending}
+                          onClick={() => {
+                            if (isCurrentPlan) return;
+                            createSubscriptionMutation.mutate({
+                              plan: plan.id,
+                              billingType: "PIX",
+                            });
+                          }}
+                        >
+                          {isCurrentPlan
+                            ? "Plano atual"
+                            : createSubscriptionMutation.isPending
+                              ? "Gerando checkout..."
+                              : `Escolher ${plan.label}`}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

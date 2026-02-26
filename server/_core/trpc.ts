@@ -1,7 +1,9 @@
-import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG } from '@shared/const';
+import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG, UPGRADE_REQUIRED_ERR_MSG } from '@shared/const';
+import { canUseFeature, type PlanFeature } from "@shared/planAccess";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TrpcContext } from "./context";
+import * as db from "../db";
 
 const t = initTRPC.context<TrpcContext>().create({
   transformer: superjson,
@@ -26,6 +28,43 @@ const requireUser = t.middleware(async opts => {
 });
 
 export const protectedProcedure = t.procedure.use(requireUser);
+
+export const planProcedure = (feature: PlanFeature) =>
+  protectedProcedure.use(
+    t.middleware(async opts => {
+      const { ctx, next } = opts;
+      if (!ctx.user) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
+      }
+
+      const currentUser = await db.getUserByOpenId(ctx.user.openId);
+
+      if (!currentUser) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
+      }
+
+      const allowed = canUseFeature({
+        plan: currentUser.plan,
+        planStatus: currentUser.planStatus,
+        planExpiry: currentUser.planExpiry,
+        feature,
+      });
+
+      if (!allowed) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: UPGRADE_REQUIRED_ERR_MSG,
+        });
+      }
+
+      return next({
+        ctx: {
+          ...ctx,
+          user: currentUser,
+        },
+      });
+    }),
+  );
 
 export const adminProcedure = t.procedure.use(
   t.middleware(async opts => {

@@ -13,6 +13,10 @@ export const ENV = {
   emailProvider: process.env.EMAIL_PROVIDER ?? "mock",
   emailFrom: process.env.EMAIL_FROM ?? "",
   resendApiKey: process.env.RESEND_API_KEY ?? "",
+  asaasEnv: process.env.ASAAS_ENV ?? "sandbox",
+  asaasApiBaseUrl: process.env.ASAAS_API_BASE_URL ?? "",
+  asaasApiKey: process.env.ASAAS_API_KEY ?? "",
+  asaasWebhookToken: process.env.ASAAS_WEBHOOK_TOKEN ?? "",
   // AI providers (configure at least one to enable AI features)
   openaiApiKey: process.env.OPENAI_API_KEY ?? "",
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",

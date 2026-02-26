@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { planProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { leads, pipelineStages, leadActivities, clients } from "../../drizzle/schema";
 import { eq, and, desc, sql, asc } from "drizzle-orm";
@@ -8,7 +8,7 @@ import { invokeLLM } from "../_core/llm";
 
 export const crmRouter = router({
   // ─── Pipeline Stages ─────────────────────────────────────────────────────
-  getStages: protectedProcedure.query(async ({ ctx }) => {
+  getStages: planProcedure("crm").query(async ({ ctx }) => {
     const db = await getDb();
     if (!db) return [];
     const rows = await db.select().from(pipelineStages)
@@ -37,7 +37,7 @@ export const crmRouter = router({
   }),
 
   // ─── Leads CRUD ──────────────────────────────────────────────────────────
-  listLeads: protectedProcedure
+  listLeads: planProcedure("crm")
     .input(z.object({
       stage: z.string().optional(),
       search: z.string().optional(),
@@ -61,7 +61,7 @@ export const crmRouter = router({
       return rows;
     }),
 
-  getLead: protectedProcedure
+  getLead: planProcedure("crm")
     .input(z.object({ id: z.number() }))
     .query(async ({ ctx, input }) => {
       const db = await getDb();
@@ -72,7 +72,7 @@ export const crmRouter = router({
       return rows[0];
     }),
 
-  createLead: protectedProcedure
+  createLead: planProcedure("crm")
     .input(z.object({
       name: z.string().min(1),
       email: z.string().optional(),
@@ -98,7 +98,7 @@ export const crmRouter = router({
       return { id: result[0].insertId };
     }),
 
-  updateLead: protectedProcedure
+  updateLead: planProcedure("crm")
     .input(z.object({
       id: z.number(),
       name: z.string().optional(),
@@ -122,7 +122,7 @@ export const crmRouter = router({
       return { success: true };
     }),
 
-  moveLead: protectedProcedure
+  moveLead: planProcedure("crm")
     .input(z.object({ id: z.number(), stage: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -132,7 +132,7 @@ export const crmRouter = router({
       return { success: true };
     }),
 
-  markFollowUp: protectedProcedure
+  markFollowUp: planProcedure("crm")
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -173,7 +173,7 @@ export const crmRouter = router({
       return { success: true, followUpCount: currentCount };
     }),
 
-  deleteLead: protectedProcedure
+  deleteLead: planProcedure("crm")
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -184,7 +184,7 @@ export const crmRouter = router({
     }),
 
   // ─── Lead Activities ─────────────────────────────────────────────────────
-  getActivities: protectedProcedure
+  getActivities: planProcedure("crm")
     .input(z.object({ leadId: z.number() }))
     .query(async ({ ctx, input }) => {
       const db = await getDb();
@@ -194,7 +194,7 @@ export const crmRouter = router({
         .orderBy(desc(leadActivities.createdAt));
     }),
 
-  addActivity: protectedProcedure
+  addActivity: planProcedure("crm")
     .input(z.object({
       leadId: z.number(),
       type: z.string(),
@@ -225,7 +225,7 @@ export const crmRouter = router({
     }),
 
   // ─── Lead Stats ──────────────────────────────────────────────────────────
-  stats: protectedProcedure.query(async ({ ctx }) => {
+  stats: planProcedure("crm").query(async ({ ctx }) => {
     const db = await getDb();
     if (!db) return { total: 0, new: 0, qualified: 0, closed: 0, totalValue: 0 };
     const allLeads = await db.select().from(leads)
@@ -240,7 +240,7 @@ export const crmRouter = router({
   }),
 
   // ─── AI: Generate Ideal Lead List ────────────────────────────────────────
-  generateIdealLeads: protectedProcedure
+  generateIdealLeads: planProcedure("crm")
     .input(z.object({
       clientId: z.number().optional(),
       industry: z.string(),

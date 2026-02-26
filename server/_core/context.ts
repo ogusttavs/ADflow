@@ -2,16 +2,25 @@ import type { CreateExpressContextOptions } from "@trpc/server/adapters/express"
 import type { User } from "../../drizzle/schema";
 import { sdk } from "./sdk";
 
+type OptionalSubscriptionFields = Partial<
+  Pick<User, "plan" | "planStatus" | "planExpiry" | "asaasCustomerId" | "asaasSubscriptionId">
+>;
+export type SessionUser = Omit<
+  User,
+  "plan" | "planStatus" | "planExpiry" | "asaasCustomerId" | "asaasSubscriptionId"
+> &
+  OptionalSubscriptionFields;
+
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
   res: CreateExpressContextOptions["res"];
-  user: User | null;
+  user: SessionUser | null;
 };
 
 export async function createContext(
   opts: CreateExpressContextOptions
 ): Promise<TrpcContext> {
-  let user: User | null = null;
+  let user: SessionUser | null = null;
 
   try {
     user = await sdk.authenticateRequest(opts.req);

@@ -32,6 +32,16 @@ export const users = mysqlTable("users", {
   emailVerifiedAt: timestamp("emailVerifiedAt"),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  plan: mysqlEnum("plan", [
+    "personal_standard",
+    "personal_pro",
+    "business_standard",
+    "business_pro",
+  ]),
+  planStatus: mysqlEnum("planStatus", ["trial", "active", "past_due", "expired", "canceled"]),
+  planExpiry: timestamp("planExpiry"),
+  asaasCustomerId: varchar("asaasCustomerId", { length: 64 }),
+  asaasSubscriptionId: varchar("asaasSubscriptionId", { length: 64 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -52,6 +62,18 @@ export const authTokens = mysqlTable("auth_tokens", {
 
 export type AuthToken = typeof authTokens.$inferSelect;
 export type InsertAuthToken = typeof authTokens.$inferInsert;
+
+export const processedWebhookEvents = mysqlTable("processed_webhook_events", {
+  id: int("id").autoincrement().primaryKey(),
+  provider: mysqlEnum("provider", ["asaas"]).notNull().default("asaas"),
+  eventId: varchar("eventId", { length: 128 }).notNull().unique(),
+  eventType: varchar("eventType", { length: 120 }).notNull(),
+  processedAt: timestamp("processedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProcessedWebhookEvent = typeof processedWebhookEvents.$inferSelect;
+export type InsertProcessedWebhookEvent = typeof processedWebhookEvents.$inferInsert;
 
 // ─── Clients ───────────────────────────────────────────────────────────────────
 export const clients = mysqlTable("clients", {

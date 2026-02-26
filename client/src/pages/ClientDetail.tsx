@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import AppLayout from "@/components/AppLayout";
+import { PlanGate } from "@/components/PlanGate";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -456,15 +457,18 @@ export default function ClientDetail() {
   if (!clientData) {
     return (
       <AppLayout>
+        <PlanGate feature="clients">
         <div className="flex items-center justify-center h-64">
           <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
         </div>
+        </PlanGate>
       </AppLayout>
     );
   }
 
   return (
     <AppLayout>
+      <PlanGate feature="clients">
       <div className="page-content space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
@@ -718,6 +722,7 @@ export default function ClientDetail() {
           </TabsContent>
         </Tabs>
       </div>
+      </PlanGate>
     </AppLayout>
   );
 }

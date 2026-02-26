@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 19:41:11 -0300
+Atualizado em: 2026-02-25 21:40:37 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -49,6 +49,7 @@ Comandos operacionais:
 - `docs/DECISOES_PRODUTO.md`: decisoes de produto vigentes (priorizacao e escopo).
 - `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md`: base de pesquisa e criterios estrategicos.
 - `docs/PLANO_EXECUCAO_FASE_3.md`: plano de implementacao da Sprint 3 (Auth e Email).
+- `docs/PLANO_EXECUCAO_FASE_4.md`: plano de implementacao da Sprint 4 (Pagamentos e Planos).
 - `docs/IDEIAS_PRODUTO.md`: banco de ideias de produto (nao substitui o backlog oficial).
 - `docs/LEIA_PRIMEIRO.md`: mapa rapido da documentacao.
 - `docs/ARQUIVO/*`: historico antigo (nao usar como regra operacional diaria).
@@ -95,6 +96,15 @@ Pendencias tecnicas objetivas:
 - Pendencias atuais do dono no backlog: A1, A2 e A6 (A3 concluido).
 - A9 concluido operacionalmente: `USER_PII_ENCRYPTION_KEY` dedicada configurada na VPS com tamanho valido e sem erro de runtime.
 - Sprint 3 (Auth e Email) concluida e deployada em producao (`5efe746`): itens 09, 10 e 11 ativos.
+- Sprint 4 planejada oficialmente com documento tecnico aprovado e fluxo `security-first` travado (sandbox antes de producao).
+- Sprint 4 em execucao: itens 12, 14 e 15 concluidos em codigo (Asaas/webhook/idempotencia + guards backend/frontend por plano), com pendencia de validacao manual em Asaas sandbox e aplicacao da migration no banco de producao.
+- Checkout sandbox estabilizado no local: fallback de URL de pagamento ativo quando a Asaas nao retorna `checkoutUrl` no payload inicial, com tratamento amigavel para erro de rede (`fetch failed`).
+- Upsell interno de planos publicado na tela de `Settings` (aba `Planos`) e fluxo do modal conectado para abrir diretamente essa aba (`/settings?tab=plans`).
+- Pedido de UX aprovado pelo dono para proxima iteracao: remover qualquer destaque de "plano recomendado" nos cards de planos (nenhum plano em evidência por enquanto).
+- Decisao de produto registrada: manter checkout hospedado Asaas para o lancamento; checkout visual proprio Orbita (via API Asaas) fica para pos-lancamento, apos o ultimo sprint.
+- Refinamento de UX por plano aplicado: contas pessoais nao visualizam modulos business na sidebar/customizacao e mensagens de bloqueio nao exibem mais rotulo "Business".
+- Correcao da navegacao interna de abas em `Settings`: troca de tab funcionando com sincronizacao via query string.
+- Base local de QA com 4 usuarios ficticios (1 por plano) criada para validacao funcional de acesso por assinatura.
 - Sprint 10 criado no backlog para encerramento de fase com auditoria final de seguranca, velocidade e SEO.
 - Refinamentos de seguranca/conta adicionados na Sprint 3:
   - cadastro ampliado com dados completos de perfil e consentimento;
@@ -117,9 +127,11 @@ Pendencias tecnicas objetivas:
 ## 7) Prioridade recomendada (curto prazo)
 
 1. A6 (Asaas + webhook) para destravar Sprint 4 de pagamentos.
-2. A1 + A2 (Google OAuth em producao), mais perto do fechamento da fase.
-3. Rotacao recorrente de segredos operacionais.
-4. Ao final das entregas funcionais, executar Sprint 10 (hardening final de seguranca + performance + SEO).
+2. Ajuste rapido de UX da Sprint 4: remover destaque visual de plano recomendado.
+3. Definir estrategia de checkout (proprio vs hosted) com foco em seguranca/compliance e tempo de entrega.
+4. A1 + A2 (Google OAuth em producao), mais perto do fechamento da fase.
+5. Rotacao recorrente de segredos operacionais.
+6. Ao final das entregas funcionais, executar Sprint 10 (hardening final de seguranca + performance + SEO).
 
 ## 8) Marcos recentes
 
@@ -148,4 +160,10 @@ Pendencias tecnicas objetivas:
 - 2026-02-25: release `5efe746` (Sprint 3 final) deployado via `quick-deploy` em `root@167.88.32.1` com build+db:push+restart PM2, HEAD remoto confirmado em `5efe746`, `pm2 status adflow` online e `https://getorbita.com.br` retornando `200 OK`.
 - 2026-02-25: dono confirmou validacao manual fim-a-fim dos fluxos de email em producao; A8 marcado como concluido e Sprint 3 encerrada operacionalmente.
 - 2026-02-25: dono confirmou A3 concluido (rotacao de credenciais no servidor) e A6 em andamento com conta Asaas criada, faltando configuracao de webhook.
+- 2026-02-25: Sprint 4 planejada em `docs/PLANO_EXECUCAO_FASE_4.md` com hard gates de seguranca, ordem de implementacao e validacao obrigatoria em Asaas sandbox.
+- 2026-02-25: Sprint 4 Item 13 implementado em codigo (`drizzle/schema.ts`, migration `0010_secret_stature.sql`, retorno de `plan/planStatus/planExpiry` em `auth.me`) com `pnpm check`, `pnpm test` e `pnpm build` verdes.
+- 2026-02-25: Sprint 4 avancou com implementacao em codigo dos itens 12, 14 e 15: cliente Asaas + webhook seguro com idempotencia, `createSubscription/getSubscriptionStatus`, middleware `planProcedure` (erro `UPGRADE_REQUIRED`) aplicado em Clients/CRM e paywall frontend (`usePlanAccess`, `PlanGate`, `UpgradePlanModal`), validado em `pnpm check`, `pnpm test` e `pnpm build`.
+- 2026-02-25: fluxo de upsell refinado no app: `UpgradePlanModal` agora direciona para `Settings` na aba `Planos`, com cards comerciais e CTA de contratacao por plano; usuarios locais de QA por plano criados para testes manuais (local only).
+- 2026-02-25: ajustes de UX da Sprint 4 aplicados apos feedback do dono: itens business ocultados para contas pessoais na navegacao, textos de bloqueio tornados neutros e correção da troca de abas em `Settings`.
 - 2026-02-25: dono solicitou incluir Sprint final de fechamento para revisao completa de seguranca, velocidade e SEO; backlog atualizado com Sprint 10.
+- 2026-02-25: hotfix de checkout sandbox aplicado na Sprint 4: `auth.createSubscription` agora busca URL em fallback por `GET /subscriptions/{id}/payments` quando a resposta inicial vier sem `checkoutUrl`; `Settings` passou a tratar `fetch failed` com mensagem amigavel de conexao com gateway. Validado em `pnpm check`, `pnpm test server/auth.subscription.test.ts` e `pnpm build`.

@@ -10,6 +10,8 @@ import { UNVERIFIED_ACCOUNT_MAX_AGE_MS } from "@shared/const";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import { ENV } from "./env";
+import { processAsaasWebhookPayload } from "./asaasWebhook";
 import * as db from "../db";
 import { serveStatic, setupVite } from "./vite";
 
@@ -168,6 +170,29 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  app.post("/api/webhooks/asaas", async (req, res) => {
+    const expectedToken = ENV.asaasWebhookToken.trim();
+    const incomingToken = String(req.header("asaas-access-token") ?? "").trim();
+
+    if (!expectedToken) {
+      console.error("[Asaas webhook] Missing ASAAS_WEBHOOK_TOKEN configuration");
+      return res.status(503).json({ ok: false });
+    }
+
+    if (!incomingToken || incomingToken !== expectedToken) {
+      return res.status(401).json({ ok: false });
+    }
+
+    try {
+      const result = await processAsaasWebhookPayload(req.body);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("[Asaas webhook] Unexpected processing error", error);
+      return res.status(200).json({ ok: true });
+    }
+  });
+
   app.use("/api", globalApiRateLimiter);
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);

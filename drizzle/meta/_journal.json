@@ -71,6 +71,13 @@
       "when": 1772050076260,
       "tag": "0009_giant_blacklash",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1772061106646,
+      "tag": "0010_secret_stature",
+      "breakpoints": true
     }
   ]
 }
