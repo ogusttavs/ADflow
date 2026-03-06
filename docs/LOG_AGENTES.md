@@ -1775,3 +1775,43 @@ Proximo:
 
 Evidencias:
 - Backlog, centro operacional e decisoes de produto atualizados em 2026-03-06 09:25 -0300
+
+
+[2026-03-06 09:49:29 -0300] [autor:Codex] [perfil:ia] [acao:produto.decisao] [id:LOG-20260306-094929-produto-decisao]
+[2026-03-06 09:49:29 -0300] [autor:Codex] [perfil:ia] [acao:frontend.feature] [id:LOG-20260306-094929-frontend-feature]
+Contexto:
+Contexto:
+- Reinicio oficial do ciclo de sprints a partir do antigo Sprint 6, deixando validacao real da Kiwify por ultimo.
+- Execucao do Sprint 1 atual (antigo Sprint 6) com foco em primeiro acesso, persistencia do onboarding e ajuda interna.
+
+
+Mudancas:
+Mudancas:
+- Backlog oficial reindexado para o ciclo atual com Sprint 1=onboarding/ajuda, Sprint 2=operacional, Sprint 3=admin/retencao, Sprint 4=marca+auditoria, Sprint 5=validacao real e Sprint 6=ideias novas.
+- Onboarding passou a respeitar o plano do usuario, o estado ficou persistido por usuario no navegador, o briefing diario so abre apos onboarding concluido/dispensado e a nova Central de Ajuda foi publicada em /help com atalhos por funcionalidade.
+
+
+Arquivos afetados:
+Arquivos afetados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/DECISOES_PRODUTO.md
+
+- client/src/components/Onboarding.tsx
+Proximo:
+- client/src/lib/onboarding.ts
+- client/src/components/DailyBriefingPopup.tsx
+- client/src/components/AppLayout.tsx
+- Executar e validar o novo Sprint 1 no app, depois publicar e fechar QA interno em producao.
+- client/src/pages/Dashboard.tsx
+
+- client/src/pages/HelpCenter.tsx
+Evidencias:
+- client/src/App.tsx
+
+Proximo:
+- Topologia do backlog e prioridade oficial atualizadas em 2026-03-06.
+- Publicar em producao, provisionar usuarios QA por plano e validar rotas novas no dominio oficial.
+
+Evidencias:
+- pnpm test => 89/89 verde; pnpm check verde; pnpm build verde no espelho limpo /private/tmp/ADflow-local-run.

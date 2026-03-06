@@ -1,7 +1,9 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import Onboarding from "@/components/Onboarding";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { clearOnboardingReopenRequest, shouldAutoOpenOnboarding } from "@/lib/onboarding";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +14,7 @@ import { localDateKey, localMonthKey, toLocalDateKey } from "@/lib/date";
 import {
   Users, TrendingUp, Plus, ArrowRight, Zap, Clock,
   BarChart3, Target, Timer, ListTodo, Contact, Wallet, Settings2,
-  Eye, EyeOff, CheckCircle2, Circle, AlertTriangle, UserPlus,
+  Eye, EyeOff, CheckCircle2, Circle, AlertTriangle, LifeBuoy, UserPlus,
 } from "lucide-react";
 
 // ─── Widget Registry ─────────────────────────────────────────────────────────
@@ -400,11 +402,15 @@ const FULL_WIDTH_WIDGETS = new Set<WidgetId>(["stats"]);
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const [showOnboarding, setShowOnboarding] = useState(() =>
-    localStorage.getItem("orbita_onboarding_complete") !== "true"
-  );
+  const { user } = useAuth();
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [hiddenWidgets, setHiddenWidgets] = useState<Set<WidgetId>>(loadHiddenWidgets);
   const [showCustomize, setShowCustomize] = useState(false);
+
+  useEffect(() => {
+    if (!user?.openId) return;
+    setShowOnboarding(shouldAutoOpenOnboarding(user.openId));
+  }, [user?.openId]);
 
   const toggleWidget = (id: WidgetId) => {
     setHiddenWidgets(prev => {
@@ -436,6 +442,11 @@ export default function Dashboard() {
             <Button asChild size="sm">
               <Link href="/clients">
                 <Plus className="w-4 h-4 mr-1" />Novo Cliente
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/help">
+                <LifeBuoy className="w-4 h-4 mr-1" />Ajuda
               </Link>
             </Button>
           </div>
@@ -487,8 +498,16 @@ export default function Dashboard() {
         {/* Onboarding */}
         {showOnboarding && (
           <Onboarding
-            onComplete={() => { localStorage.setItem("orbita_onboarding_complete", "true"); setShowOnboarding(false); }}
-            onDismiss={() => { localStorage.setItem("orbita_onboarding_complete", "true"); setShowOnboarding(false); }}
+            openId={user?.openId}
+            plan={user?.plan ?? null}
+            onComplete={() => {
+              clearOnboardingReopenRequest(user?.openId);
+              setShowOnboarding(false);
+            }}
+            onDismiss={() => {
+              clearOnboardingReopenRequest(user?.openId);
+              setShowOnboarding(false);
+            }}
           />
         )}
 

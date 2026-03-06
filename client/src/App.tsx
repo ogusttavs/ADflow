@@ -29,6 +29,7 @@ import Referrals from "./pages/Referrals";
 import Routine from "./pages/Routine";
 import Prospecting from "./pages/Prospecting";
 import Financeiro from "./pages/Financeiro";
+import HelpCenter from "./pages/HelpCenter";
 import IntakeForm from "./pages/IntakeForm";
 import Diary from "./pages/Diary";
 import Dreams from "./pages/Dreams";
@@ -100,6 +101,7 @@ function Router() {
         <Route path="/routine" component={Routine} />
         <Route path="/prospecting" component={Prospecting} />
         <Route path="/financeiro" component={Financeiro} />
+        <Route path="/help" component={HelpCenter} />
         <Route path="/intake/:token" component={IntakeForm} />
         <Route path="/diary" component={Diary} />
         <Route path="/dreams" component={Dreams} />

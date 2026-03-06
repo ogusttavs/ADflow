@@ -10,26 +10,118 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase atual: fechamento operacional de lancamento.
+- Fase atual: ciclo reiniciado apos o funil Kiwify.
 - Release atual em producao: `ada6583`.
-- Gatilho para sair da fase atual: pagamento real validado na Kiwify com webhook confirmado, OAuth Google pronto em producao, ambiente local saneado e auditoria final executada.
+- Gatilho para sair da fase atual: Sprint 1 a Sprint 5 do ciclo atual concluidas e validacao real da Kiwify fechada por ultimo.
 
 ## Ordem oficial de execucao daqui pra frente
-1. Fechar Sprint 4 (Kiwify + webhook real + validacao de retorno e acesso).
-2. Fechar pendencias operacionais de lancamento (`A1`, `A2`, `A6`, item `49`).
-3. Executar Sprint 6 (primeiro acesso, onboarding guiado e ajuda minima).
-4. Executar Sprint 10 (revisao final de seguranca, performance e SEO).
-5. Pos-lancamento estruturado: Sprint 7 e demais melhorias operacionais/comerciais.
-6. Ultima fila: Sprint 11 (ideias novas e expansao).
+1. Sprint 1: onboarding, primeiro acesso e ajuda minima.
+2. Sprint 2: operacional de lancamento (`A1`, `A2`, item `49` e QA interno controlado).
+3. Sprint 3: admin, retencao e email marketing.
+4. Sprint 4: marca, LP e revisao final de release.
+5. Sprint 5: validacao real em producao (Kiwify + webhook + pagamentos reais).
+6. Sprint 6: ideias novas e expansao.
 
 Regra oficial:
 - Nova ideia nao entra na fila principal.
 - Nova ideia entra primeiro em `docs/IDEIAS_PRODUTO.md`.
-- So vira backlog executavel quando for promovida explicitamente para a Sprint 11.
+- So vira backlog executavel quando for promovida explicitamente para a Sprint 6 do ciclo atual.
 
 ---
 
-## FASE A - Base e fechamento de lancamento
+## Ciclo atual - reiniciado em 2026-03-06
+
+### Sprint 1 - Onboarding e Ajuda
+
+- [ ] 22. Mensagem de primeiro acesso + tutorial guiado
+- [ ] 23. Central de ajuda por funcionalidade
+
+### Sprint 2 - Operacional de lancamento
+
+- [ ] 49. Sanear ambiente local fora de pasta sincronizada e reinstalar dependencias da arvore principal
+Status esperado: remover a dependencia do espelho temporario `/private/tmp/ADflow-local-run`, garantir `node_modules` integro na copia principal e manter `pnpm dev`/`pnpm dev:web`/`pnpm dev:api` operacionais sem corrupcao de arquivos.
+
+- [ ] A1. Google Cloud: adicionar redirect URIs de producao
+- [ ] A2. Google Cloud: publicar app OAuth (sair de Testing)
+
+### Sprint 3 - Admin e Email marketing
+
+- [ ] 24. Dashboard admin (usuarios, planos, vencimentos)
+- [ ] 25. Fluxo de email marketing (D1/D3/D7, expiracao, retencao)
+- [ ] 26. Configurar ferramenta de email (Brevo ou Resend)
+
+### Sprint 4 - Marca, LP e revisao final
+
+- [x] 27. Logo + favicon Orbita
+Status atual: concluido. `client/public/favicon.svg` e `client/public/logo-icon.svg` criados (orbital ring, azul #1741C6). Favicon linkado no index.html. Icone Zap substituido pelo logo SVG na sidebar e mobile header.
+
+- [x] 28. Rename completo AdFlow -> Orbita
+Status atual: concluido. 13 substituicoes em codigo ativo (localStorage keys, UI, AI prompt, Google Calendar events, OAuth cookies, env default, package.json name, analytics). grep -r AdFlow|adflow client/src server/ = zero resultados.
+
+- [x] 28b. Remocao de codigo morto e deps sem uso
+Status atual: concluido. Deletados: ComponentShowcase.tsx (155 linhas), ManusDialog.tsx (89 linhas), Map.tsx (155 linhas). Deps axios e @aws-sdk ja ausentes do package.json.
+
+- [ ] 29. Design overhaul (sem cara de template generico)
+- [ ] 30. Cards compartilhaveis para redes sociais
+
+- [x] 31. Landing page Orbita com pricing dos 4 planos
+Status atual: concluido em codigo. A home agora mostra os 4 planos com CTA por plano; o usuario escolhe na LP, segue para cadastro com plano preselecionado e vai direto ao checkout Kiwify antes de acessar a plataforma.
+
+- [ ] 37. Revisao final de seguranca de dados sensiveis (PII)
+Status esperado: criptografia em repouso para PII critica (incluindo endereco), minimizacao de dados retornados por endpoint e checklist de risco residual.
+
+- [ ] 38. Revisao de sessao/cookies/CSRF/CSP para producao
+Status esperado: politica final de cookie e CSP revisada para reduzir superficie de ataque sem quebrar fluxo do app.
+
+- [ ] 39. Auditoria de logs e segredos
+Status esperado: ausencia de segredos/tokens/PII em logs, `env` saneado e plano de rotacao recorrente de chaves validado.
+
+- [ ] 40. Baseline de performance frontend (Core Web Vitals)
+Status esperado: metas de LCP/INP/CLS definidas e atingidas para a home e telas criticas.
+
+- [ ] 41. Otimizacao de bundle e carregamento inicial
+Status esperado: reducao do JS inicial (code splitting/manual chunks) e queda no tempo de carregamento percebido.
+
+- [ ] 42. Auditoria de consultas e latencia de API
+Status esperado: endpoints criticos com latencia monitorada e sem gargalos evidentes de banco.
+
+- [ ] 43. SEO tecnico base (sitemap, robots, canonicals)
+Status esperado: indexacao controlada e estrutura tecnica SEO pronta para crescimento organico.
+
+- [ ] 44. Metatags sociais (Open Graph/Twitter) e snippets
+Status esperado: compartilhamento com preview correto e consistente nas paginas publicas.
+
+- [ ] 45. Dados estruturados (Schema.org) para paginas publicas
+Status esperado: markup estruturado valido para melhorar entendimento em buscadores.
+
+- [ ] 46. Auditoria final de release (seguranca + performance + SEO)
+Status esperado: checklist final assinado antes de declarar encerramento geral da fase.
+
+### Sprint 5 - Validacao real em producao
+
+- [ ] 12r. Validar compra real Kiwify, webhook oficial e liberacao automatica do acesso
+Status esperado: compra aprovada em producao atualizando `plan`, `planStatus` e retorno do fluxo `/obrigado`, com registro do IP observado no webhook.
+
+- [ ] A6. Configurar Kiwify e webhook oficial
+Status atual: em andamento. Links dos 4 planos e token webhook ja definidos para operacao local e release `ada6583` ja publicado em producao; falta validar evento real da Kiwify no endpoint oficial e fechar controle de IP observado para opcional `KIWIFY_WEBHOOK_ALLOWED_IPS`. Nao foi localizada documentacao oficial de sandbox publico para checkout, entao a validacao final deve usar compra real controlada.
+
+### Sprint 6 - Ideias novas e expansao (sempre por ultimo)
+
+Regra desta sprint:
+- Esta sprint nao entra na frente das sprints de lancamento.
+- Toda nova ideia aprovada entra aqui.
+- Enquanto Sprint 1, Sprint 2, Sprint 3, Sprint 4 e Sprint 5 estiverem abertas, esta sprint fica congelada.
+
+- [ ] 16. Registro de ideias (texto + audio)
+- [ ] 17. Categorias em tarefas
+- [ ] 18. Categorias em agenda
+- [ ] 19. Integracao API de tempo
+- [ ] 20. Integracao Spotify no Pomodoro
+- [ ] 21. Personalizacao de notificacoes/popups
+
+---
+
+## Arquivo do ciclo anterior - base e fechamento inicial de lancamento
 
 ### Sprint 1 - Limpeza
 
@@ -111,8 +203,8 @@ Status atual: concluido em codigo. Popup diario foi condicionado ao onboarding c
 - [x] 12a. Plano tecnico da Sprint 4 aprovado e documentado
 Status atual: concluido. Documento `docs/PLANO_EXECUCAO_FASE_4.md` criado com ordem de implementacao, hard gates de seguranca e validacao em sandbox antes de producao.
 
-- [ ] 12. Integrar Kiwify + webhooks
-Status atual: parcialmente concluido em codigo + producao (2026-03-06). Links reais de checkout por plano e token de webhook foram definidos no ambiente local; backend com token + idempotencia ja ativo; fluxo publico `auth.registerForCheckout` passou a criar conta com plano pendente e devolver checkout Kiwify para a landing; checkout agora sai com prefill automatico de `name/email/phone/cpf` usando os dados ja coletados no Orbita; funil tambem ganhou `checkoutCompletionToken` + pagina publica `/obrigado` para coletar dados complementares depois do pagamento; a tela `/obrigado` agora possui preview via `/obrigado?preview=1` para QA sem compra; validacao local fechada com `pnpm test` (89 testes), `pnpm exec tsc --noEmit`, `pnpm exec vite build` e smoke HTTP em `localhost:3000`; release `ada6583` ja esta em producao com PM2 online; pendente validar evento real no painel Kiwify e confirmar mudanca de status via webhook em um pagamento aprovado.
+- [x] 12. Integrar Kiwify + webhooks (base tecnica)
+Status atual: concluido em codigo + producao para a base tecnica. Links reais de checkout por plano e token de webhook foram definidos no ambiente local; backend com token + idempotencia ja ativo; fluxo publico `auth.registerForCheckout` passou a criar conta com plano pendente e devolver checkout Kiwify para a landing; checkout agora sai com prefill automatico de `name/email/phone/cpf` usando os dados ja coletados no Orbita; funil tambem ganhou `checkoutCompletionToken` + pagina publica `/obrigado` para coletar dados complementares depois do pagamento; a tela `/obrigado` agora possui preview via `/obrigado?preview=1` para QA sem compra; validacao local fechada com `pnpm test` (89 testes), `pnpm exec tsc --noEmit`, `pnpm exec vite build` e smoke HTTP em `localhost:3000`; release `ada6583` ja esta em producao com PM2 online. A validacao real com compra aprovada foi migrada para a Sprint 5 do ciclo atual.
 - [x] 12c. Definir estrategia de checkout da Orbita (hosted Kiwify vs checkout proprio)
 Status atual: decisao tomada. Manter checkout hospedado da Kiwify no lancamento; checkout visual proprio fica para pos-lancamento, apenas se continuar valendo a pena.
 - [x] 13. Migration: `plan`, `planExpiry`, `planStatus` em `users`
@@ -130,81 +222,12 @@ Status atual: concluido em codigo. Cards de planos em `Settings` nao exibem mais
 - [x] 15. Guards backend por plano (middleware tRPC)
 Status atual: concluido em codigo. Middleware `planProcedure` criado no tRPC com regra compartilhada (`shared/planAccess.ts`) e aplicado em `clientsRouter` e `crmRouter`, retornando `FORBIDDEN` com `UPGRADE_REQUIRED` para plano sem acesso.
 
-### Sprint 6 - Onboarding e Ajuda
+### Itens migrados para o ciclo atual
 
-- [ ] 22. Mensagem de primeiro acesso + tutorial guiado
-- [ ] 23. Central de ajuda por funcionalidade
-
-### Sprint 7 - Admin e Email marketing
-
-- [ ] 24. Dashboard admin (usuarios, planos, vencimentos)
-- [ ] 25. Fluxo de email marketing (D1/D3/D7, expiracao, retencao)
-- [ ] 26. Configurar ferramenta de email (Brevo ou Resend)
-
-### Sprint 8 - Branding e Design
-
-- [x] 27. Logo + favicon Orbita
-Status atual: concluido. `client/public/favicon.svg` e `client/public/logo-icon.svg` criados (orbital ring, azul #1741C6). Favicon linkado no index.html. Icone Zap substituido pelo logo SVG na sidebar e mobile header.
-
-- [x] 28. Rename completo AdFlow -> Orbita
-Status atual: concluido. 13 substituicoes em codigo ativo (localStorage keys, UI, AI prompt, Google Calendar events, OAuth cookies, env default, package.json name, analytics). grep -r AdFlow|adflow client/src server/ = zero resultados.
-
-- [x] 28b. Remocao de codigo morto e deps sem uso
-Status atual: concluido. Deletados: ComponentShowcase.tsx (155 linhas), ManusDialog.tsx (89 linhas), Map.tsx (155 linhas). Deps axios e @aws-sdk ja ausentes do package.json.
-
-- [ ] 29. Design overhaul (sem cara de template generico)
-- [ ] 30. Cards compartilhaveis para redes sociais
-
-### Sprint 9 - LP
-
-- [x] 31. Landing page Orbita com pricing dos 4 planos
-Status atual: concluido em codigo. A home agora mostra os 4 planos com CTA por plano; o usuario escolhe na LP, segue para cadastro com plano preselecionado e vai direto ao checkout Kiwify antes de acessar a plataforma.
-
-### Sprint 10 - Revisao final (Seguranca, Velocidade e SEO)
-
-- [ ] 37. Revisao final de seguranca de dados sensiveis (PII)
-Status esperado: criptografia em repouso para PII critica (incluindo endereco), minimizacao de dados retornados por endpoint e checklist de risco residual.
-
-- [ ] 38. Revisao de sessao/cookies/CSRF/CSP para producao
-Status esperado: politica final de cookie e CSP revisada para reduzir superficie de ataque sem quebrar fluxo do app.
-
-- [ ] 39. Auditoria de logs e segredos
-Status esperado: ausencia de segredos/tokens/PII em logs, `env` saneado e plano de rotacao recorrente de chaves validado.
-
-- [ ] 40. Baseline de performance frontend (Core Web Vitals)
-Status esperado: metas de LCP/INP/CLS definidas e atingidas para a home e telas criticas.
-
-- [ ] 41. Otimizacao de bundle e carregamento inicial
-Status esperado: reducao do JS inicial (code splitting/manual chunks) e queda no tempo de carregamento percebido.
-
-- [ ] 42. Auditoria de consultas e latencia de API
-Status esperado: endpoints criticos com latencia monitorada e sem gargalos evidentes de banco.
-
-- [ ] 43. SEO tecnico base (sitemap, robots, canonicals)
-Status esperado: indexacao controlada e estrutura tecnica SEO pronta para crescimento organico.
-
-- [ ] 44. Metatags sociais (Open Graph/Twitter) e snippets
-Status esperado: compartilhamento com preview correto e consistente nas paginas publicas.
-
-- [ ] 45. Dados estruturados (Schema.org) para paginas publicas
-Status esperado: markup estruturado valido para melhorar entendimento em buscadores.
-
-- [ ] 46. Auditoria final de release (seguranca + performance + SEO)
-Status esperado: checklist final assinado antes de declarar encerramento geral da fase.
-
-### Sprint 11 - Ideias novas e expansao (sempre por ultimo)
-
-Regra desta sprint:
-- Esta sprint nao entra na frente das sprints de lancamento.
-- Toda nova ideia aprovada entra aqui.
-- Enquanto Sprint 4, Sprint 6, Sprint 10 e pendencias operacionais estiverem abertas, esta sprint fica congelada.
-
-- [ ] 16. Registro de ideias (texto + audio)
-- [ ] 17. Categorias em tarefas
-- [ ] 18. Categorias em agenda
-- [ ] 19. Integracao API de tempo
-- [ ] 20. Integracao Spotify no Pomodoro
-- [ ] 21. Personalizacao de notificacoes/popups
+- Sprint 6 antiga (onboarding e ajuda) -> Sprint 1 do ciclo atual.
+- Sprint 7 antiga (admin e email marketing) -> Sprint 3 do ciclo atual.
+- Sprint 8, Sprint 9 e Sprint 10 antigas (marca, LP e auditoria final) -> Sprint 4 do ciclo atual.
+- Sprint 11 antiga (ideias novas) -> Sprint 6 do ciclo atual.
 
 ### Operacional - Documentacao e governanca
 
@@ -264,12 +287,12 @@ Status atual: concluido. Chave dedicada configurada na VPS com tamanho valido (3
 
 ### Checklist de retomada (proximo dia)
 
-1. Executar 1 pagamento real controlado na Kiwify para validar o webhook e a liberacao do acesso.
+1. Fechar Sprint 1 do ciclo atual (onboarding guiado e ajuda minima) com validacao final em producao.
+2. Fechar Sprint 2 (`A1`, `A2` e item `49`).
+3. Executar Sprint 3 (admin e email marketing).
+4. Executar Sprint 4 (marca, LP e auditoria final).
+5. Executar 1 pagamento real controlado na Kiwify para fechar a Sprint 5.
    Confirmar se `name/email/phone/cpf` chegam preenchidos no checkout.
    Confirmar se o retorno para `/obrigado` funciona no mesmo navegador e se a sessao so libera apos o webhook marcar o plano como ativo.
-2. Registrar IP de origem recebido no primeiro webhook real e decidir se ativa `KIWIFY_WEBHOOK_ALLOWED_IPS`.
-3. Fechar `A1` e `A2` no Google Cloud para o OAuth de producao.
-4. Sanear a copia principal local do repo fora de `Documents`/File Provider ou reinstalar dependencias de forma definitiva, para aposentar o espelho temporario `/private/tmp/ADflow-local-run`.
-5. Executar Sprint 6 (onboarding guiado e ajuda minima).
-6. Executar Sprint 10 (auditoria final de seguranca, performance e SEO).
-7. Manter qualquer nova ideia apenas em `docs/IDEIAS_PRODUTO.md` ate a abertura da Sprint 11.
+6. Registrar IP de origem recebido no primeiro webhook real e decidir se ativa `KIWIFY_WEBHOOK_ALLOWED_IPS`.
+7. Manter qualquer nova ideia apenas em `docs/IDEIAS_PRODUTO.md` ate a abertura da Sprint 6.

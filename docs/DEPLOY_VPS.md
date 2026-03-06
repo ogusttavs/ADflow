@@ -128,6 +128,18 @@ Esse script valida:
 - health HTTPS;
 - varredura inicial de erros de email em log.
 
+Provisionar contas QA por plano (quando necessario):
+
+```bash
+cd /var/www/adflow
+QA_USERS_BASE_EMAIL=nome@dominio.com QA_USERS_PASSWORD='SENHA_FORTE' pnpm provision:qa-users
+```
+
+Uso:
+- cria/atualiza 4 contas QA, uma por plano;
+- marcar apenas para validacao interna controlada;
+- nao substituir usuarios reais.
+
 ## 6) Regras operacionais
 
 - Nao editar codigo direto na VPS.

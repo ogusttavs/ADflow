@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-03-06 09:25:23 -0300
+Atualizado em: 2026-03-06 09:55:00 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -81,15 +81,15 @@ Producao:
 ## 6) Situacao real (agora)
 
 Estado atual de desenvolvimento:
-- Fase atual oficial: fechamento operacional de lancamento.
-- Ordem oficial de trabalho restaurada:
-  - 1) Sprint 4 e webhook Kiwify real;
-  - 2) pendencias operacionais (`A1`, `A2`, `A6`, item `49`);
-  - 3) Sprint 6 (primeiro acesso e ajuda minima);
-  - 4) Sprint 10 (auditoria final);
-  - 5) pos-lancamento estruturado;
-  - 6) Sprint 11 para ideias novas e expansao.
-- Regra oficial de backlog: nova ideia nao entra na fila principal; primeiro vai para `docs/IDEIAS_PRODUTO.md` e so pode subir para execucao quando promovida explicitamente para a Sprint 11.
+- Fase atual oficial: ciclo reiniciado apos o funil Kiwify.
+- Ordem oficial de trabalho reindexada a partir do estado atual:
+  - 1) Sprint 1: onboarding, primeiro acesso e ajuda minima;
+  - 2) Sprint 2: pendencias operacionais de lancamento (`A1`, `A2`, item `49` e QA interno controlado);
+  - 3) Sprint 3: admin, retencao e email marketing;
+  - 4) Sprint 4: marca, LP e auditoria final;
+  - 5) Sprint 5: validacao real em producao (Kiwify + webhook + pagamentos reais);
+  - 6) Sprint 6: ideias novas e expansao.
+- Regra oficial de backlog: nova ideia nao entra na fila principal; primeiro vai para `docs/IDEIAS_PRODUTO.md` e so pode subir para execucao quando promovida explicitamente para a Sprint 6 do ciclo atual.
 - A transicao para o plano `Orbita - Fase A` segue ativa com Sprint 1 e Sprint 2 concluidas.
 - Modulo Familia & Equipe esta oculto na interface por decisao de produto, com backend preservado para reativacao futura.
 - Modulo Campanhas/IA de campanhas esta oculto no frontend (rotas, CTAs, onboarding e atalhos), mantendo backend para reativacao futura.
@@ -145,7 +145,8 @@ Pendencias tecnicas objetivas:
   - selecao guiada de origem (`Onde conheceu a Orbita?`) com opcao `Outro`;
   - formatacao de CPF/CNPJ no blur;
   - confirmacao obrigatoria de senha no cadastro.
-- Primeiro acesso ajustado: popup de briefing diario (resumo de ontem) nao abre enquanto onboarding nao estiver concluido.
+- Primeiro acesso ajustado: popup de briefing diario (resumo de ontem) nao abre enquanto onboarding nao estiver concluido ou explicitamente dispensado.
+- Sprint 1 atual em execucao: onboarding agora ficou sensivel ao plano do usuario, com estado persistido por conta no navegador e central de ajuda dedicada por funcionalidade em `/help`.
 - Sprint 10 criado no backlog para encerramento de fase com auditoria final de seguranca, velocidade e SEO.
 - Refinamentos de seguranca/conta adicionados na Sprint 3:
   - cadastro ampliado com dados completos de perfil e consentimento;
@@ -167,13 +168,13 @@ Pendencias tecnicas objetivas:
 
 ## 7) Prioridade recomendada (curto prazo)
 
-1. A6 (Kiwify + webhook) para destravar Sprint 4 de pagamentos.
-2. Validar o fluxo fim-a-fim da Kiwify com compra real controlada e reembolsavel; nao foi localizada documentacao oficial de sandbox publico para este checkout.
-3. Registrar IP real do primeiro webhook recebido e decidir ativacao do bloqueio `KIWIFY_WEBHOOK_ALLOWED_IPS`.
-4. Fechar A1 + A2 (Google OAuth em producao) e o item 49 (ambiente local).
-5. Executar Sprint 6 (primeiro acesso e ajuda minima).
-6. Executar Sprint 10 (hardening final de seguranca + performance + SEO).
-7. Manter novas ideias congeladas ate a abertura da Sprint 11.
+1. Fechar Sprint 1 atual com validacao final em producao do novo onboarding e da central de ajuda.
+2. Fechar Sprint 2 (`A1`, `A2` e item `49`).
+3. Executar Sprint 3 (admin e email marketing).
+4. Executar Sprint 4 (marca, LP e auditoria final).
+5. Executar Sprint 5 por ultimo com compra real controlada na Kiwify; nao foi localizada documentacao oficial de sandbox publico para este checkout.
+6. Registrar IP real do primeiro webhook recebido e decidir ativacao do bloqueio `KIWIFY_WEBHOOK_ALLOWED_IPS`.
+7. Manter novas ideias congeladas ate a abertura da Sprint 6.
 
 ## 8) Marcos recentes
 
@@ -189,6 +190,7 @@ Pendencias tecnicas objetivas:
 - 2026-03-06: checkout Kiwify passou a abrir com prefill automatico de `name/email/phone/cpf` a partir dos dados do Orbita, reduzindo digitacao duplicada no funil `cadastro/login -> pagamento`.
 - 2026-03-06: funil de checkout foi reestruturado com cadastro minimo pre-pagamento, `checkoutCompletionToken` assinado no backend e nova pagina publica `/obrigado` para completar perfil e liberar acesso so apos `planStatus=active|trial`.
 - 2026-03-06: pagina `/obrigado` foi refinada visualmente, ganhou modo `preview=1` para QA sem compra e passou por validacao completa local (`pnpm test` com 89 testes, `pnpm exec tsc --noEmit`, `pnpm exec vite build` e smoke em `localhost:3000`).
+- 2026-03-06: ciclo de sprints foi reiniciado a partir do estado atual; o antigo Sprint 6 virou Sprint 1 do ciclo novo, com onboarding por plano, persistencia por usuario no navegador e nova central de ajuda em `/help`.
 - 2026-03-06: deploy de producao executado com sucesso via `quick-deploy`; VPS atualizada para `5cded29`, migracao aplicada (`plan`, `planStatus`, `planExpiry` confirmados em `users`), PM2 online e `https://getorbita.com.br` + `https://getorbita.com.br/obrigado?preview=1` respondendo `200 OK`.
 - 2026-02-24: deploy publico concluido em `https://metrizy.com.br`.
 - 2026-02-24: guardrails de documentacao implantados (hooks + CI).

@@ -7,9 +7,9 @@ import { CheckCircle2, AlertTriangle, Target, Sun, ArrowRight, Wallet, Check, X 
 import { toast } from "sonner";
 import { localDateKey } from "@/lib/date";
 import { USER_SETTINGS_KEYS, getSettingBoolean } from "@/lib/user-settings";
+import { isOnboardingSettled } from "@/lib/onboarding";
 
 const STORAGE_KEY = "orbita_briefing_date";
-const ONBOARDING_KEY = "orbita_onboarding_complete";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -18,15 +18,14 @@ function getGreeting() {
   return "Boa noite";
 }
 
-export function DailyBriefingPopup() {
+export function DailyBriefingPopup({ userOpenId }: { userOpenId?: string | null }) {
   const today = localDateKey();
   const [open, setOpen] = useState(false);
   const [postponed, setPostponed] = useState(false);
 
   // Only show once per day
   useEffect(() => {
-    const onboardingComplete = localStorage.getItem(ONBOARDING_KEY) === "true";
-    if (!onboardingComplete) return;
+    if (!isOnboardingSettled(userOpenId)) return;
 
     const showOnLogin = getSettingBoolean(USER_SETTINGS_KEYS.showDailyBriefingOnLogin, true);
     if (!showOnLogin) return;
@@ -36,7 +35,7 @@ export function DailyBriefingPopup() {
       const t = setTimeout(() => setOpen(true), 1200);
       return () => clearTimeout(t);
     }
-  }, [today]);
+  }, [today, userOpenId]);
 
   const { data: briefing, isLoading } = trpc.productivity.morningBriefing.useQuery(undefined, {
     enabled: open,

@@ -36,6 +36,7 @@ import {
   Sun,
   BookOpen,
   Star,
+  LifeBuoy,
   MailCheck,
   Loader2,
   type LucideIcon,
@@ -99,6 +100,7 @@ const ALL_NAV_SECTIONS: NavSection[] = [
   {
     title: "Conta",
     items: [
+      { href: "/help", icon: LifeBuoy, label: "Ajuda" },
       { href: "/whatsapp", icon: MessageSquare, label: "WhatsApp Bot", disabled: true },
       { href: "/integrations", icon: Plug, label: "Integrações", disabled: true },
       { href: "/settings", icon: Settings, label: "Configurações" },
@@ -392,7 +394,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="flex min-h-[100dvh] bg-background overflow-hidden">
-      <DailyBriefingPopup />
+      <DailyBriefingPopup userOpenId={user?.openId} />
 
       <Dialog open={showEmailVerificationPopup} onOpenChange={setShowEmailVerificationPopup}>
         <DialogContent className="max-w-md">
