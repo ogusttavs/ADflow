@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-03-06 09:55:00 -0300
+Atualizado em: 2026-03-06 09:54:39 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -110,7 +110,7 @@ Pendencias tecnicas objetivas:
 - Acesso SSH remoto local liberado e `quick-deploy` validado com sucesso em producao (A7 concluido).
 - Pendencias atuais do dono no backlog: A1, A2 e A6 (A3 concluido).
 - A9 concluido operacionalmente: `USER_PII_ENCRYPTION_KEY` dedicada configurada na VPS com tamanho valido e sem erro de runtime.
-- Producao atualizada em 2026-03-06 para o release `5cded29`, com funil Kiwify, pagina publica `/obrigado`, preview `?preview=1` e migracao de plano aplicada na VPS.
+- Producao atualizada em 2026-03-06 para o release `e48d1c4`, com Sprint 1 atual publicada (`/help`, onboarding por plano e persistencia de primeiro acesso), funil Kiwify, pagina publica `/obrigado`, preview `?preview=1` e migracao de plano aplicada na VPS.
 - Sprint 4 planejada oficialmente com documento tecnico aprovado e fluxo `security-first` travado (sandbox antes de producao).
 - Sprint 4 em execucao: itens 14 e 15 concluidos em codigo; frente de pagamentos (item 12) pivotada oficialmente para Kiwify em 2026-03-05.
 - Integracao Asaas existente continua registrada como legado tecnico, mas nao e mais o caminho oficial de lancamento.
@@ -132,7 +132,8 @@ Pendencias tecnicas objetivas:
 - Decisao de produto vigente: manter checkout hospedado Kiwify para o lancamento; checkout proprio Orbita fica para pos-lancamento (somente se necessario).
 - Refinamento de UX por plano aplicado: contas pessoais nao visualizam modulos business na sidebar/customizacao e mensagens de bloqueio nao exibem mais rotulo "Business".
 - Correcao da navegacao interna de abas em `Settings`: troca de tab funcionando com sincronizacao via query string.
-- Base local de QA foi limpa em 2026-03-05; nao ha usuarios ficticios ativos no banco local/producao neste momento.
+- Base local de QA foi limpa em 2026-03-05.
+- Em 2026-03-06 foram provisionadas 4 contas QA internas em producao, uma por plano, todas com `planStatus=active`, para validacao manual controlada antes do pagamento real final.
 - Cadastro local restaurado em 2026-03-05 apos ajuste de `DATABASE_URL` + `pnpm db:push`; fluxo `auth.register` validado com sucesso via API local.
 - Conta local do dono `gustavosilva585@gmail.com` foi confirmada manualmente no banco em 2026-03-06 para continuar o QA sem dependencia de envio de email no ambiente local.
 - Modo local estavel para QA completo definido em 2026-03-06: frontend Vite standalone em `localhost:3000` com proxy `/api` para backend local em `localhost:3001`; o middleware Vite integrado ao `pnpm dev` segue instavel neste ambiente.
@@ -146,7 +147,7 @@ Pendencias tecnicas objetivas:
   - formatacao de CPF/CNPJ no blur;
   - confirmacao obrigatoria de senha no cadastro.
 - Primeiro acesso ajustado: popup de briefing diario (resumo de ontem) nao abre enquanto onboarding nao estiver concluido ou explicitamente dispensado.
-- Sprint 1 atual em execucao: onboarding agora ficou sensivel ao plano do usuario, com estado persistido por conta no navegador e central de ajuda dedicada por funcionalidade em `/help`.
+- Sprint 1 atual concluida em codigo + producao: onboarding agora ficou sensivel ao plano do usuario, com estado persistido por conta no navegador e central de ajuda dedicada por funcionalidade em `/help`.
 - Sprint 10 criado no backlog para encerramento de fase com auditoria final de seguranca, velocidade e SEO.
 - Refinamentos de seguranca/conta adicionados na Sprint 3:
   - cadastro ampliado com dados completos de perfil e consentimento;
@@ -168,8 +169,8 @@ Pendencias tecnicas objetivas:
 
 ## 7) Prioridade recomendada (curto prazo)
 
-1. Fechar Sprint 1 atual com validacao final em producao do novo onboarding e da central de ajuda.
-2. Fechar Sprint 2 (`A1`, `A2` e item `49`).
+1. Fechar Sprint 2 (`A1`, `A2` e item `49`).
+2. Usar as 4 contas QA internas para validar navegacao e diferencas por plano sem compra real.
 3. Executar Sprint 3 (admin e email marketing).
 4. Executar Sprint 4 (marca, LP e auditoria final).
 5. Executar Sprint 5 por ultimo com compra real controlada na Kiwify; nao foi localizada documentacao oficial de sandbox publico para este checkout.
@@ -191,7 +192,8 @@ Pendencias tecnicas objetivas:
 - 2026-03-06: funil de checkout foi reestruturado com cadastro minimo pre-pagamento, `checkoutCompletionToken` assinado no backend e nova pagina publica `/obrigado` para completar perfil e liberar acesso so apos `planStatus=active|trial`.
 - 2026-03-06: pagina `/obrigado` foi refinada visualmente, ganhou modo `preview=1` para QA sem compra e passou por validacao completa local (`pnpm test` com 89 testes, `pnpm exec tsc --noEmit`, `pnpm exec vite build` e smoke em `localhost:3000`).
 - 2026-03-06: ciclo de sprints foi reiniciado a partir do estado atual; o antigo Sprint 6 virou Sprint 1 do ciclo novo, com onboarding por plano, persistencia por usuario no navegador e nova central de ajuda em `/help`.
-- 2026-03-06: deploy de producao executado com sucesso via `quick-deploy`; VPS atualizada para `5cded29`, migracao aplicada (`plan`, `planStatus`, `planExpiry` confirmados em `users`), PM2 online e `https://getorbita.com.br` + `https://getorbita.com.br/obrigado?preview=1` respondendo `200 OK`.
+- 2026-03-06: deploy de producao executado com sucesso via `quick-deploy`; VPS atualizada para `e48d1c4`, PM2 online, `/` e `/help` respondendo `200 OK` no app interno (`127.0.0.1:3000`) e `auth.me` publico respondendo JSON.
+- 2026-03-06: 4 contas QA internas foram provisionadas em producao com aliases do email do dono, uma por plano, todas com `planStatus=active` e `emailVerified=1`.
 - 2026-02-24: deploy publico concluido em `https://metrizy.com.br`.
 - 2026-02-24: guardrails de documentacao implantados (hooks + CI).
 - 2026-02-25: documentacao consolidada para modelo definitivo (Codex principal, Claude consultor, Gemini fora).

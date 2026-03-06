@@ -1815,3 +1815,41 @@ Proximo:
 
 Evidencias:
 - pnpm test => 89/89 verde; pnpm check verde; pnpm build verde no espelho limpo /private/tmp/ADflow-local-run.
+
+[2026-03-06 09:54:39 -0300] [autor:Codex] [perfil:ia] [acao:infra.db] [id:LOG-20260306-095439-infra-db]
+Contexto:
+- Provisionamento de contas QA internas em producao para validar os quatro planos sem depender do pagamento real final neste momento.
+
+Mudancas:
+- Quatro usuarios QA foram criados/atualizados na base de producao, um por plano, todos com email verificado e planStatus=active.
+
+Arquivos afetados:
+- docs/CENTRO_DE_OPERACAO.md
+- docs/TODO_LANCAMENTO.md
+- docs/LOG_AGENTES.md
+- docs/DEPLOY_VPS.md
+
+Proximo:
+- Executar QA manual com esses acessos e deixar a compra real Kiwify para a Sprint 5.
+
+Evidencias:
+- QA_USERS_BASE_EMAIL=g... QA_USERS_PASSWORD=*** pnpm provision:qa-users => 4 contas criadas
+
+- SELECT email, plan, planStatus, emailVerified FROM users WHERE email LIKE 'gustavosilva585+orbita-%@gmail.com' => 4 rows active/verified
+[2026-03-06 09:54:39 -0300] [autor:Codex] [perfil:ia] [acao:infra.deploy] [id:LOG-20260306-095439-infra-deploy]
+Contexto:
+- Fechamento do deploy de producao do ciclo reiniciado com Sprint 1 atual (onboarding e help center) ja publicada na VPS.
+
+Mudancas:
+- Estado oficial de producao consolidado no release e48d1c4 com PM2 online, smoke interno verde e documentos centrais alinhados ao ciclo novo.
+
+Arquivos afetados:
+- docs/CENTRO_DE_OPERACAO.md
+- docs/TODO_LANCAMENTO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Usar as contas QA internas para validar navegacao por plano antes da validacao real da Kiwify.
+
+Evidencias:
+- ssh root@167.88.32.1 'cd /var/www/adflow && git rev-parse --short HEAD && pm2 status adflow --no-color && curl -I http://127.0.0.1:3000 && curl -I http://127.0.0.1:3000/help && curl -sS "http://127.0.0.1:3000/api/trpc/auth.me?batch=1&input=%7B%7D"' => e48d1c4 / online / 200 / 200 / JSON

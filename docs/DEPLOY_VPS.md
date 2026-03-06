@@ -1,6 +1,6 @@
 # Deploy VPS - Operacao Oficial
 
-Atualizado em: 2026-03-06 07:40:00 -0300
+Atualizado em: 2026-03-06 09:54:39 -0300
 
 Objetivo: publicar e manter o app em VPS com PM2 + Nginx + SSL.
 

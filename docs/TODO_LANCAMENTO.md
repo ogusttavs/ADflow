@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-03-06 09:25:23 -0300
+Atualizado em: 2026-03-06 09:54:39 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -11,7 +11,7 @@ Este e o backlog oficial do projeto.
 
 ## Status geral
 - Fase atual: ciclo reiniciado apos o funil Kiwify.
-- Release atual em producao: `ada6583`.
+- Release atual em producao: `e48d1c4`.
 - Gatilho para sair da fase atual: Sprint 1 a Sprint 5 do ciclo atual concluidas e validacao real da Kiwify fechada por ultimo.
 
 ## Ordem oficial de execucao daqui pra frente
@@ -33,8 +33,11 @@ Regra oficial:
 
 ### Sprint 1 - Onboarding e Ajuda
 
-- [ ] 22. Mensagem de primeiro acesso + tutorial guiado
-- [ ] 23. Central de ajuda por funcionalidade
+- [x] 22. Mensagem de primeiro acesso + tutorial guiado
+Status atual: concluido em codigo + producao. O onboarding foi refeito para respeitar o plano do usuario, ganhou persistencia por usuario no navegador, CTA de reabertura e prioridade absoluta no primeiro acesso antes de qualquer resumo diario.
+
+- [x] 23. Central de ajuda por funcionalidade
+Status atual: concluido em codigo + producao. Nova rota `/help` publicada com atalhos por modulo, FAQ operacional, reabertura do tutorial e orientacao por funcionalidade sem depender de memoria de conversa.
 
 ### Sprint 2 - Operacional de lancamento
 
@@ -43,6 +46,8 @@ Status esperado: remover a dependencia do espelho temporario `/private/tmp/ADflo
 
 - [ ] A1. Google Cloud: adicionar redirect URIs de producao
 - [ ] A2. Google Cloud: publicar app OAuth (sair de Testing)
+- [x] 50. Provisionar contas QA internas por plano em producao
+Status atual: concluido em 2026-03-06. Quatro contas QA com email alias do dono foram criadas em producao, uma por plano, todas com `planStatus=active` e `emailVerified=1`, para validacao manual sem depender de compra real neste momento.
 
 ### Sprint 3 - Admin e Email marketing
 
@@ -103,7 +108,7 @@ Status esperado: checklist final assinado antes de declarar encerramento geral d
 Status esperado: compra aprovada em producao atualizando `plan`, `planStatus` e retorno do fluxo `/obrigado`, com registro do IP observado no webhook.
 
 - [ ] A6. Configurar Kiwify e webhook oficial
-Status atual: em andamento. Links dos 4 planos e token webhook ja definidos para operacao local e release `ada6583` ja publicado em producao; falta validar evento real da Kiwify no endpoint oficial e fechar controle de IP observado para opcional `KIWIFY_WEBHOOK_ALLOWED_IPS`. Nao foi localizada documentacao oficial de sandbox publico para checkout, entao a validacao final deve usar compra real controlada.
+Status atual: em andamento. Links dos 4 planos e token webhook ja definidos para operacao local e release `e48d1c4` ja publicado em producao; falta validar evento real da Kiwify no endpoint oficial e fechar controle de IP observado para opcional `KIWIFY_WEBHOOK_ALLOWED_IPS`. Nao foi localizada documentacao oficial de sandbox publico para checkout, entao a validacao final deve usar compra real controlada.
 
 ### Sprint 6 - Ideias novas e expansao (sempre por ultimo)
 
@@ -204,7 +209,7 @@ Status atual: concluido em codigo. Popup diario foi condicionado ao onboarding c
 Status atual: concluido. Documento `docs/PLANO_EXECUCAO_FASE_4.md` criado com ordem de implementacao, hard gates de seguranca e validacao em sandbox antes de producao.
 
 - [x] 12. Integrar Kiwify + webhooks (base tecnica)
-Status atual: concluido em codigo + producao para a base tecnica. Links reais de checkout por plano e token de webhook foram definidos no ambiente local; backend com token + idempotencia ja ativo; fluxo publico `auth.registerForCheckout` passou a criar conta com plano pendente e devolver checkout Kiwify para a landing; checkout agora sai com prefill automatico de `name/email/phone/cpf` usando os dados ja coletados no Orbita; funil tambem ganhou `checkoutCompletionToken` + pagina publica `/obrigado` para coletar dados complementares depois do pagamento; a tela `/obrigado` agora possui preview via `/obrigado?preview=1` para QA sem compra; validacao local fechada com `pnpm test` (89 testes), `pnpm exec tsc --noEmit`, `pnpm exec vite build` e smoke HTTP em `localhost:3000`; release `ada6583` ja esta em producao com PM2 online. A validacao real com compra aprovada foi migrada para a Sprint 5 do ciclo atual.
+Status atual: concluido em codigo + producao para a base tecnica. Links reais de checkout por plano e token de webhook foram definidos no ambiente local; backend com token + idempotencia ja ativo; fluxo publico `auth.registerForCheckout` passou a criar conta com plano pendente e devolver checkout Kiwify para a landing; checkout agora sai com prefill automatico de `name/email/phone/cpf` usando os dados ja coletados no Orbita; funil tambem ganhou `checkoutCompletionToken` + pagina publica `/obrigado` para coletar dados complementares depois do pagamento; a tela `/obrigado` agora possui preview via `/obrigado?preview=1` para QA sem compra; validacao local fechada com `pnpm test` (89 testes), `pnpm exec tsc --noEmit`, `pnpm exec vite build` e smoke HTTP em `localhost:3000`; release `e48d1c4` ja esta em producao com PM2 online. A validacao real com compra aprovada foi migrada para a Sprint 5 do ciclo atual.
 - [x] 12c. Definir estrategia de checkout da Orbita (hosted Kiwify vs checkout proprio)
 Status atual: decisao tomada. Manter checkout hospedado da Kiwify no lancamento; checkout visual proprio fica para pos-lancamento, apenas se continuar valendo a pena.
 - [x] 13. Migration: `plan`, `planExpiry`, `planStatus` em `users`
