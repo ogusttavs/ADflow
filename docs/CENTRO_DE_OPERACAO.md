@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-03-06 09:14:54 -0300
+Atualizado em: 2026-03-06 09:25:23 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -81,6 +81,15 @@ Producao:
 ## 6) Situacao real (agora)
 
 Estado atual de desenvolvimento:
+- Fase atual oficial: fechamento operacional de lancamento.
+- Ordem oficial de trabalho restaurada:
+  - 1) Sprint 4 e webhook Kiwify real;
+  - 2) pendencias operacionais (`A1`, `A2`, `A6`, item `49`);
+  - 3) Sprint 6 (primeiro acesso e ajuda minima);
+  - 4) Sprint 10 (auditoria final);
+  - 5) pos-lancamento estruturado;
+  - 6) Sprint 11 para ideias novas e expansao.
+- Regra oficial de backlog: nova ideia nao entra na fila principal; primeiro vai para `docs/IDEIAS_PRODUTO.md` e so pode subir para execucao quando promovida explicitamente para a Sprint 11.
 - A transicao para o plano `Orbita - Fase A` segue ativa com Sprint 1 e Sprint 2 concluidas.
 - Modulo Familia & Equipe esta oculto na interface por decisao de produto, com backend preservado para reativacao futura.
 - Modulo Campanhas/IA de campanhas esta oculto no frontend (rotas, CTAs, onboarding e atalhos), mantendo backend para reativacao futura.
@@ -159,12 +168,12 @@ Pendencias tecnicas objetivas:
 ## 7) Prioridade recomendada (curto prazo)
 
 1. A6 (Kiwify + webhook) para destravar Sprint 4 de pagamentos.
-2. Validar o fluxo fim-a-fim da Kiwify com compra real controlada e reembolsavel antes de virar a chave em producao; nao foi localizada documentacao oficial de sandbox publico para este checkout.
+2. Validar o fluxo fim-a-fim da Kiwify com compra real controlada e reembolsavel; nao foi localizada documentacao oficial de sandbox publico para este checkout.
 3. Registrar IP real do primeiro webhook recebido e decidir ativacao do bloqueio `KIWIFY_WEBHOOK_ALLOWED_IPS`.
-4. Executar o pivot de pagamentos com foco em entrega rapida e risco operacional baixo.
-5. A1 + A2 (Google OAuth em producao), mais perto do fechamento da fase.
-6. Rotacao recorrente de segredos operacionais.
-7. Ao final das entregas funcionais, executar Sprint 10 (hardening final de seguranca + performance + SEO).
+4. Fechar A1 + A2 (Google OAuth em producao) e o item 49 (ambiente local).
+5. Executar Sprint 6 (primeiro acesso e ajuda minima).
+6. Executar Sprint 10 (hardening final de seguranca + performance + SEO).
+7. Manter novas ideias congeladas ate a abertura da Sprint 11.
 
 ## 8) Marcos recentes
 

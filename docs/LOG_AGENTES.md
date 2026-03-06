@@ -1757,3 +1757,21 @@ Evidencias:
 - ssh root@167.88.32.1 'git rev-parse --short HEAD' => 5cded29
 - curl -I https://getorbita.com.br && curl -I https://getorbita.com.br/obrigado?preview=1 => 200 OK
 - SHOW COLUMNS FROM users => plan, planStatus, planExpiry
+
+[2026-03-06 09:26:47 -0300] [autor:Codex] [perfil:ia] [acao:produto.decisao] [id:LOG-20260306-092647-produto-decisao]
+Contexto:
+- Reorganizacao oficial da fila de sprints para retomar ordem de trabalho apos deploy do funil Kiwify.
+
+Mudancas:
+- Definida a fase atual como fechamento operacional de lancamento, criada ordem oficial de execucao e travada a regra de que novas ideias ficam somente na Sprint 11 apos passarem por docs/IDEIAS_PRODUTO.md.
+
+Arquivos afetados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/DECISOES_PRODUTO.md
+
+Proximo:
+- Executar a fila oficial: Sprint 4 -> pendencias operacionais -> Sprint 6 -> Sprint 10 -> Sprint 11.
+
+Evidencias:
+- Backlog, centro operacional e decisoes de produto atualizados em 2026-03-06 09:25 -0300

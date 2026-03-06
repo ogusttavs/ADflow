@@ -1,7 +1,7 @@
 # Decisões do Produto — Orbita
 
 > Documento vivo. Atualizar sempre que uma decisão de produto for tomada ou revisada.
-> Última atualização: 2026-03-06 08:04:50 -0300
+> Última atualização: 2026-03-06 09:25:23 -0300
 > Baseado nas conversas de planejamento entre dono e Claude.
 > Status: oficializado como referência de decisão para os agentes do projeto.
 
@@ -79,6 +79,17 @@
 - Autenticação segura (email + Google OAuth funcional)
 - Cadastro com confirmação de email
 - Recuperação de senha
+
+### 3.1 Regra de priorização operacional
+
+- Enquanto a Fase A nao estiver fechada, a fila principal segue esta ordem:
+  1. pagamentos e webhook real;
+  2. pendencias operacionais de lancamento;
+  3. onboarding/ajuda minima;
+  4. auditoria final de release.
+- Nova ideia nao entra no fluxo principal por impulso.
+- Nova ideia entra primeiro em `docs/IDEIAS_PRODUTO.md`.
+- Ideias aprovadas para execucao devem ficar agrupadas no sprint final de expansao, depois do fechamento da fase principal.
 
 ### Fase B — Planos Pro (após Fase A estável)
 
