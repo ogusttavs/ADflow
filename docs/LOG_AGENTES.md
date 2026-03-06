@@ -1853,3 +1853,96 @@ Proximo:
 
 Evidencias:
 - ssh root@167.88.32.1 'cd /var/www/adflow && git rev-parse --short HEAD && pm2 status adflow --no-color && curl -I http://127.0.0.1:3000 && curl -I http://127.0.0.1:3000/help && curl -sS "http://127.0.0.1:3000/api/trpc/auth.me?batch=1&input=%7B%7D"' => e48d1c4 / online / 200 / 200 / JSON
+
+[2026-03-06 10:04:40 -0300] [autor:Codex] [perfil:ia] [acao:infra.db] [id:LOG-20260306-100440-infra-db]
+Contexto:
+- Reprovisionamento das contas QA de producao para alinhar a credencial de teste conhecida apos duvida operacional do dono.
+
+Mudancas:
+- As 4 contas QA por plano foram atualizadas novamente em producao mantendo planStatus=active e emailVerified=1, com senha de teste reaplicada de forma consistente.
+
+Arquivos afetados:
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Seguir com QA manual por plano usando login por email/senha, sem Google OAuth.
+
+Evidencias:
+- ssh root@167.88.32.1 'cd /var/www/adflow && QA_USERS_BASE_EMAIL=... QA_USERS_PASSWORD=*** pnpm provision:qa-users' => 4 contas updated
+
+[2026-03-06 10:08:34 -0300] [autor:Codex] [perfil:ia] [acao:infra.env] [id:LOG-20260306-100834-infra-env]
+Contexto:
+- Correcao da configuracao de pagamentos Kiwify em producao apos erro de checkout nao configurado ao tentar contratar plano no app.
+
+Mudancas:
+- A .env da VPS recebeu PAYMENT_PROVIDER=kiwify, token do webhook e as 4 URLs de checkout da Kiwify; PM2 foi reiniciado e o fluxo createSubscription voltou a retornar URLs validas para todos os planos.
+
+Arquivos afetados:
+- docs/LOG_AGENTES.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/TODO_LANCAMENTO.md
+
+Proximo:
+- Manter a validacao real da Kiwify na Sprint 5, agora limitada a pagamento aprovado + webhook real.
+
+Evidencias:
+- PM2 restart com update-env executado na VPS apos corrigir .env de producao.
+- Teste funcional via tRPC publico com 4 contas QA => checkoutUrl valido em pay.kiwify.com.br para os 4 planos.
+
+
+[2026-03-06 10:21:08 -0300] [autor:Codex] [perfil:ia] [acao:infra.local] [id:LOG-20260306-102108-infra-local]
+Contexto:
+- Encerramento do item 49 da Sprint 2 apos corrupcao da arvore node_modules na copia principal bloquear build local.
+
+Mudancas:
+- node_modules da arvore principal foi reinstalado limpo; check, test, build e os fluxos dev:api/dev:web passaram a responder na pasta oficial, removendo a dependencia do espelho em /private/tmp.
+
+Arquivos afetados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Manter QA local usando a pasta oficial e seguir com pendencias A1/A2 do Google.
+
+Evidencias:
+- pnpm check => ok
+- pnpm test => 89/89
+- pnpm build => ok
+- pnpm dev:api + pnpm dev:web => localhost:3001 e localhost:3000 respondendo pela arvore oficial
+
+[2026-03-06 10:21:08 -0300] [autor:Codex] [perfil:ia] [acao:qa.validacao] [id:LOG-20260306-102108-qa-validacao]
+Contexto:
+- QA tecnico por plano executado em producao com as 4 contas internas da Sprint 2.
+
+Mudancas:
+- Planos Personal confirmados sem acesso a Clients/CRM/Prospecting (UPGRADE_REQUIRED) e planos Business confirmados com acesso ativo a clients.list, crm.getStages e crm.listLeads; inicio do Google OAuth em producao tambem foi prevalidado por HTTP.
+
+Arquivos afetados:
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Fechar A1/A2 no Google Cloud Console e depois seguir para a Sprint 3.
+
+Evidencias:
+- Login QA + auth.me + clients.list/crm.getStages/crm.listLeads => Personal bloqueado / Business liberado
+- curl -I https://getorbita.com.br/api/oauth/google/login => 302 accounts.google.com com redirect_uri=https://getorbita.com.br/api/oauth/google/login/callback
+
+[2026-03-06 10:22:17 -0300] [autor:Codex] [perfil:ia] [acao:docs.procedimento] [id:LOG-20260306-102217-docs-procedimento]
+Contexto:
+- Formalizacao do handoff operacional de A1/A2 do Google OAuth para execucao futura sem perda de contexto.
+
+Mudancas:
+- Novo checklist de Google OAuth em producao criado com URIs exatas, origem autorizada, passos de console e validacao pos-publicacao.
+
+Arquivos afetados:
+- docs/CHECKLIST_GOOGLE_OAUTH_PRODUCAO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Usar este checklist quando o dono abrir o Google Cloud Console para concluir A1/A2.
+
+Evidencias:
+- GET /api/oauth/google/login validado com 302 e redirect_uri de producao correto.

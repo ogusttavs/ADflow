@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-03-06 09:54:39 -0300
+Atualizado em: 2026-03-06 10:19:29 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -41,11 +41,13 @@ Status atual: concluido em codigo + producao. Nova rota `/help` publicada com at
 
 ### Sprint 2 - Operacional de lancamento
 
-- [ ] 49. Sanear ambiente local fora de pasta sincronizada e reinstalar dependencias da arvore principal
-Status esperado: remover a dependencia do espelho temporario `/private/tmp/ADflow-local-run`, garantir `node_modules` integro na copia principal e manter `pnpm dev`/`pnpm dev:web`/`pnpm dev:api` operacionais sem corrupcao de arquivos.
+- [x] 49. Sanear ambiente local fora de pasta sincronizada e reinstalar dependencias da arvore principal
+Status atual: concluido em 2026-03-06. A arvore principal em `/Users/gustavosilva/Documents/Trabalho/Saas/ADflow` recebeu reinstalacao limpa de `node_modules`; `pnpm check`, `pnpm test`, `pnpm build`, `pnpm dev:api` e `pnpm dev:web` foram validados com sucesso na pasta oficial, sem depender mais do espelho `/private/tmp/ADflow-local-run`.
 
 - [ ] A1. Google Cloud: adicionar redirect URIs de producao
+Status atual: pendente no console do Google Cloud. O app em producao ja inicia OAuth corretamente e foi validado retornando `302` para o Google com `redirect_uri=https://getorbita.com.br/api/oauth/google/login/callback`; faltam cadastrar/confirmar no painel as URIs `https://getorbita.com.br/api/oauth/google/login/callback` e `https://getorbita.com.br/api/oauth/google/callback`, com origem `https://getorbita.com.br`.
 - [ ] A2. Google Cloud: publicar app OAuth (sair de Testing)
+Status atual: pendente no console do Google Cloud. O codigo e o ambiente de producao estao aptos; falta promover a tela de consentimento/app OAuth para uso publico para remover a restricao operacional do modo `Testing`.
 - [x] 50. Provisionar contas QA internas por plano em producao
 Status atual: concluido em 2026-03-06. Quatro contas QA com email alias do dono foram criadas em producao, uma por plano, todas com `planStatus=active` e `emailVerified=1`, para validacao manual sem depender de compra real neste momento.
 
@@ -108,7 +110,7 @@ Status esperado: checklist final assinado antes de declarar encerramento geral d
 Status esperado: compra aprovada em producao atualizando `plan`, `planStatus` e retorno do fluxo `/obrigado`, com registro do IP observado no webhook.
 
 - [ ] A6. Configurar Kiwify e webhook oficial
-Status atual: em andamento. Links dos 4 planos e token webhook ja definidos para operacao local e release `e48d1c4` ja publicado em producao; falta validar evento real da Kiwify no endpoint oficial e fechar controle de IP observado para opcional `KIWIFY_WEBHOOK_ALLOWED_IPS`. Nao foi localizada documentacao oficial de sandbox publico para checkout, entao a validacao final deve usar compra real controlada.
+Status atual: em andamento. Links dos 4 planos, `PAYMENT_PROVIDER=kiwify` e token webhook estao configurados em producao no release `e48d1c4`; o fluxo `auth.createSubscription` foi revalidado com 4 contas QA e os 4 planos ja voltaram a abrir checkout valido em `pay.kiwify.com.br`. Falta validar evento real da Kiwify no endpoint oficial e fechar controle de IP observado para opcional `KIWIFY_WEBHOOK_ALLOWED_IPS`. Nao foi localizada documentacao oficial de sandbox publico para checkout, entao a validacao final deve usar compra real controlada.
 
 ### Sprint 6 - Ideias novas e expansao (sempre por ultimo)
 

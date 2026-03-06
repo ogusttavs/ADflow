@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-03-06 09:54:39 -0300
+Atualizado em: 2026-03-06 10:19:29 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -127,6 +127,7 @@ Pendencias tecnicas objetivas:
 - Pagina publica `/obrigado` agora tambem possui modo de pre-visualizacao via `?preview=1`, permitindo revisar UI e copy sem depender de pagamento aprovado.
 - Tela `Login` agora suporta funil comercial por query string (`plan` + `checkout=1`), com cadastro sem sessao para novos leads e login com redirecionamento direto ao checkout para contas existentes.
 - Configuracao operacional local da Kiwify atualizada com links reais dos 4 planos e token webhook; controle opcional de allowlist por IP habilitado via `KIWIFY_WEBHOOK_ALLOWED_IPS`.
+- Configuracao operacional de producao da Kiwify corrigida em 2026-03-06: `.env` da VPS agora contem `PAYMENT_PROVIDER=kiwify`, token webhook e as 4 URLs de checkout; `auth.createSubscription` foi revalidado com as 4 contas QA retornando checkout valido em `pay.kiwify.com.br`.
 - Registro privado de credenciais e checkpoint de IPs criado em `docs/CREDENCIAIS_PRIVADAS.md` (arquivo local ignorado no Git).
 - Ajuste UX da Sprint 4 aplicado: removido destaque de "plano recomendado" nos cards de planos em `Settings`.
 - Decisao de produto vigente: manter checkout hospedado Kiwify para o lancamento; checkout proprio Orbita fica para pos-lancamento (somente se necessario).
@@ -138,8 +139,9 @@ Pendencias tecnicas objetivas:
 - Conta local do dono `gustavosilva585@gmail.com` foi confirmada manualmente no banco em 2026-03-06 para continuar o QA sem dependencia de envio de email no ambiente local.
 - Modo local estavel para QA completo definido em 2026-03-06: frontend Vite standalone em `localhost:3000` com proxy `/api` para backend local em `localhost:3001`; o middleware Vite integrado ao `pnpm dev` segue instavel neste ambiente.
 - Hardening adicional do runtime local aplicado em 2026-03-06: backend agora suporta modo `DISABLE_INTERNAL_VITE=1` e `pnpm dev` foi redirecionado para orquestrar `dev:api` + `dev:web`, sem usar o Vite embutido no processo `tsx`.
-- Dependencias da arvore original em `Documents/.../ADflow/node_modules` foram diagnosticadas como corrompidas/incompletas (`react`/`lucide-react` com arquivos faltando); QA imediato ficou destravado por um espelho limpo em `/private/tmp/ADflow-local-run`.
+- Dependencias da arvore original em `Documents/.../ADflow/node_modules` foram diagnosticadas como corrompidas/incompletas (`react`/`lucide-react` com arquivos faltando); o incidente foi encerrado em 2026-03-06 com reinstalacao limpa de `node_modules` e validacao completa de `check/test/build/dev` diretamente na arvore principal.
 - Hardening de disponibilidade aplicado no backend: startup agora testa conexao com banco e, em producao, encerra processo imediatamente se DB estiver indisponivel.
+- Precheck operacional do Google OAuth concluido em 2026-03-06: `GET /api/oauth/google/login` em producao responde `302` para `accounts.google.com` com `client_id` valido e `redirect_uri=https://getorbita.com.br/api/oauth/google/login/callback`; o restante do Sprint 2 no Google depende do painel Google Cloud (URIs/autorizacao publica).
 - UX de cadastro reforcada no login:
   - pais + DDI automatico para WhatsApp (usuario digita sem `+55`);
   - CEP (Brasil) com busca automatica de endereco para completar apenas complemento;
@@ -194,6 +196,9 @@ Pendencias tecnicas objetivas:
 - 2026-03-06: ciclo de sprints foi reiniciado a partir do estado atual; o antigo Sprint 6 virou Sprint 1 do ciclo novo, com onboarding por plano, persistencia por usuario no navegador e nova central de ajuda em `/help`.
 - 2026-03-06: deploy de producao executado com sucesso via `quick-deploy`; VPS atualizada para `e48d1c4`, PM2 online, `/` e `/help` respondendo `200 OK` no app interno (`127.0.0.1:3000`) e `auth.me` publico respondendo JSON.
 - 2026-03-06: 4 contas QA internas foram provisionadas em producao com aliases do email do dono, uma por plano, todas com `planStatus=active` e `emailVerified=1`.
+- 2026-03-06: incidente de checkout "plano nao configurado" em producao foi resolvido corrigindo a `.env` da VPS; `PAYMENT_PROVIDER`, token webhook e as 4 URLs da Kiwify foram aplicados e revalidados via login QA + `auth.createSubscription` em todos os planos.
+- 2026-03-06: Sprint 2 avancou com saneamento completo da arvore local principal (`pnpm check`, `pnpm test`, `pnpm build`, `pnpm dev:api` e `pnpm dev:web` verdes no repo oficial) e com QA tecnico por plano em producao: planos Personal retornam `UPGRADE_REQUIRED` em `clients/crm`, enquanto planos Business acessam `clients.list`, `crm.getStages` e `crm.listLeads` normalmente.
+- 2026-03-06: Google OAuth em producao foi prevalidado por HTTP; inicio do fluxo retorna `302` para o Google com `client_id` e `redirect_uri` corretos, deixando `A1` e `A2` como pendencias exclusivamente de console Google Cloud.
 - 2026-02-24: deploy publico concluido em `https://metrizy.com.br`.
 - 2026-02-24: guardrails de documentacao implantados (hooks + CI).
 - 2026-02-25: documentacao consolidada para modelo definitivo (Codex principal, Claude consultor, Gemini fora).
