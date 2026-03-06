@@ -10,15 +10,17 @@ import {
 import { getPasswordPolicyError } from "@shared/passwordPolicy";
 import { normalizeTaxId } from "@shared/taxId";
 import { createRawAuthToken, hashAuthToken } from "./_core/authToken";
+import {
+  createCheckoutCompletionToken,
+  verifyCheckoutCompletionToken,
+} from "./_core/checkoutCompletion";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { sendTransactionalEmail } from "./_core/email";
 import { ENV } from "./_core/env";
 import {
-  createAsaasCustomer,
-  createAsaasSubscription,
-  resolveCheckoutUrlFromSubscriptionPayments,
-  resolveSubscriptionCheckoutUrl,
-} from "./_core/asaas";
+  resolveKiwifyCheckoutUrl,
+  type KiwifyCheckoutPrefill,
+} from "./_core/kiwify";
 import {
   decryptProfileSensitiveValue,
   encryptProfileSensitiveValue,
@@ -77,7 +79,7 @@ const ORBITA_PLANS = [
   "business_standard",
   "business_pro",
 ] as const;
-const ASAAS_BILLING_TYPES = ["PIX", "BOLETO", "CREDIT_CARD"] as const;
+const BILLING_TYPES = ["PIX", "BOLETO", "CREDIT_CARD"] as const;
 
 const registerInputSchema = z.object({
   firstName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres").max(120),
@@ -85,11 +87,18 @@ const registerInputSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(1).max(128),
   whatsapp: z.string().min(8, "WhatsApp inválido").max(32),
+  taxId: z.string().min(11, "CPF/CNPJ inválido").max(18),
+});
+
+const registerForCheckoutInputSchema = registerInputSchema.extend({
+  plan: z.enum(ORBITA_PLANS),
+});
+
+const checkoutProfileCompletionInputSchema = z.object({
   city: z.string().min(2, "Cidade inválida").max(120),
   address: z.string().min(5, "Endereço inválido").max(255),
   acquisitionSource: z.string().min(2, "Informe onde conheceu a Orbita").max(255),
   preferredLanguage: z.string().min(2, "Idioma inválido").max(80),
-  taxId: z.string().min(11, "CPF/CNPJ inválido").max(18),
   marketingOptIn: z.boolean(),
 });
 
@@ -147,6 +156,49 @@ function maskTaxId(
     return `**.***.***/****-${taxIdLast4}`;
   }
   return `***.***.***-${taxIdLast4}`;
+}
+
+function buildFullName(
+  firstName: string | null | undefined,
+  lastName: string | null | undefined,
+  fallbackName?: string | null,
+) {
+  const joinedName = [firstName?.trim(), lastName?.trim()].filter(Boolean).join(" ").trim();
+  if (joinedName) return joinedName;
+  return String(fallbackName ?? "").trim();
+}
+
+function buildKiwifyCheckoutPrefill(input: {
+  name?: string | null;
+  email?: string | null;
+  whatsapp?: string | null;
+  taxId?: string | null;
+}): KiwifyCheckoutPrefill {
+  return {
+    name: input.name,
+    email: input.email,
+    phone: input.whatsapp,
+    taxId: input.taxId,
+    region: "br",
+  };
+}
+
+function isCheckoutProfileComplete(
+  user: Pick<
+    User,
+    "city" | "address" | "acquisitionSource" | "preferredLanguage"
+  >,
+) {
+  return Boolean(
+    user.city?.trim() &&
+      user.address?.trim() &&
+      user.acquisitionSource?.trim() &&
+      user.preferredLanguage?.trim(),
+  );
+}
+
+function canActivateCheckoutAccess(user: Pick<User, "planStatus">) {
+  return user.planStatus === "active" || user.planStatus === "trial";
 }
 
 function toPublicUser(user: SessionUser) {
@@ -208,6 +260,108 @@ async function createAndSendEmailVerification(params: {
     ].join(""),
     text: `Confirme seu email em: ${verifyUrl}`,
   });
+}
+
+async function createEmailPasswordUser(params: {
+  input: z.infer<typeof registerInputSchema>;
+  initialPlan?: (typeof ORBITA_PLANS)[number];
+}) {
+  const normalizedEmail = params.input.email.trim().toLowerCase();
+  const firstName = params.input.firstName.trim();
+  const lastName = params.input.lastName.trim();
+  const fullName = `${firstName} ${lastName}`.trim();
+  const normalizedTaxId = normalizeTaxIdOrThrow(params.input.taxId.trim());
+  ensureStrongPasswordOrThrow(params.input.password);
+
+  let encryptedTaxId: string;
+  try {
+    encryptedTaxId = encryptProfileSensitiveValue(normalizedTaxId.digits);
+  } catch (error) {
+    console.error("[Auth] Failed to encrypt taxId during register", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Não foi possível proteger seus dados agora. Tente novamente em instantes.",
+    });
+  }
+
+  const existing = await db.getUserByEmail(normalizedEmail);
+  if (existing) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "Este email já está cadastrado",
+    });
+  }
+
+  const userCount = await db.getUserCount();
+  const isFirstUser = userCount === 0;
+  const passwordHash = await bcrypt.hash(params.input.password, 10);
+  const openId = `local_${nanoid()}`;
+
+  await db.upsertUser({
+    openId,
+    name: fullName,
+    firstName,
+    lastName,
+    email: normalizedEmail,
+    whatsapp: params.input.whatsapp.trim(),
+    taxIdType: normalizedTaxId.type,
+    taxIdEncrypted: encryptedTaxId,
+    taxIdLast4: normalizedTaxId.digits.slice(-4),
+    passwordHash,
+    emailVerified: false,
+    emailVerifiedAt: null,
+    loginMethod: "email",
+    role: isFirstUser ? "admin" : "user",
+    lastSignedIn: new Date(),
+    plan: params.initialPlan,
+    planStatus: params.initialPlan ? "past_due" : undefined,
+    planExpiry: params.initialPlan ? null : undefined,
+  });
+
+  const createdUser = await db.getUserByOpenId(openId);
+  if (!createdUser) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Não foi possível concluir o cadastro agora. Tente novamente.",
+    });
+  }
+
+  return {
+    createdUser,
+    fullName,
+    openId,
+    normalizedEmail,
+    normalizedTaxIdDigits: normalizedTaxId.digits,
+    normalizedWhatsapp: params.input.whatsapp.trim(),
+  };
+}
+
+async function getCheckoutUserOrThrow(token: string) {
+  const payload = await verifyCheckoutCompletionToken(token);
+  if (!payload) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Sessão de checkout inválida ou expirada. Faça login para continuar.",
+    });
+  }
+
+  const user = await db.getUserByOpenId(payload.openId);
+  if (!user) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Não foi possível localizar a conta deste checkout.",
+    });
+  }
+
+  if (await expireUnverifiedAccountIfNeeded(user)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message:
+        "Sua conta expirou por falta de verificação de email. Faça um novo cadastro.",
+    });
+  }
+
+  return { payload, user };
 }
 
 export const appRouter = router({
@@ -294,62 +448,9 @@ export const appRouter = router({
           });
         }
 
-        const normalizedEmail = input.email.trim().toLowerCase();
-        const firstName = input.firstName.trim();
-        const lastName = input.lastName.trim();
-        const fullName = `${firstName} ${lastName}`.trim();
-        const normalizedTaxId = normalizeTaxIdOrThrow(input.taxId.trim());
-        ensureStrongPasswordOrThrow(input.password);
-
-        let encryptedTaxId: string;
-        try {
-          encryptedTaxId = encryptProfileSensitiveValue(normalizedTaxId.digits);
-        } catch (error) {
-          console.error("[Auth] Failed to encrypt taxId during register", error);
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Não foi possível proteger seus dados agora. Tente novamente em instantes.",
-          });
-        }
-
-        const existing = await db.getUserByEmail(normalizedEmail);
-        if (existing) {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "Este email já está cadastrado",
-          });
-        }
-
-        const userCount = await db.getUserCount();
-        const isFirstUser = userCount === 0;
-
-        const passwordHash = await bcrypt.hash(input.password, 10);
-        const openId = `local_${nanoid()}`;
-
-        await db.upsertUser({
-          openId,
-          name: fullName,
-          firstName,
-          lastName,
-          email: normalizedEmail,
-          whatsapp: input.whatsapp.trim(),
-          city: input.city.trim(),
-          address: input.address.trim(),
-          acquisitionSource: input.acquisitionSource.trim(),
-          preferredLanguage: input.preferredLanguage.trim(),
-          marketingOptIn: input.marketingOptIn,
-          taxIdType: normalizedTaxId.type,
-          taxIdEncrypted: encryptedTaxId,
-          taxIdLast4: normalizedTaxId.digits.slice(-4),
-          passwordHash,
-          emailVerified: false,
-          emailVerifiedAt: null,
-          loginMethod: "email",
-          role: isFirstUser ? "admin" : "user",
-          lastSignedIn: new Date(),
+        const { createdUser, fullName, openId } = await createEmailPasswordUser({
+          input,
         });
-
-        const createdUser = await db.getUserByOpenId(openId);
         if (createdUser?.email) {
           // Do not block register response waiting for external email provider latency.
           void createAndSendEmailVerification({
@@ -375,6 +476,201 @@ export const appRouter = router({
         });
 
         return { success: true } as const;
+      }),
+
+    registerForCheckout: publicProcedure
+      .input(registerForCheckoutInputSchema)
+      .mutation(async ({ input, ctx }) => {
+        const database = await db.getDb();
+        if (!database) {
+          throw new TRPCError({
+            code: "SERVICE_UNAVAILABLE",
+            message: "Banco de dados indisponível",
+          });
+        }
+
+        if (ENV.paymentProvider !== "kiwify") {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message:
+              "PAYMENT_PROVIDER inválido para este fluxo. Configure PAYMENT_PROVIDER=kiwify.",
+          });
+        }
+
+        const { createdUser, fullName, normalizedEmail, normalizedTaxIdDigits, normalizedWhatsapp } =
+          await createEmailPasswordUser({
+          input,
+          initialPlan: input.plan,
+        });
+
+        const checkoutCompletionToken = await createCheckoutCompletionToken({
+          openId: createdUser.openId,
+          email: normalizedEmail,
+          plan: input.plan,
+        });
+
+        const checkoutUrl = resolveKiwifyCheckoutUrl(
+          input.plan,
+          buildKiwifyCheckoutPrefill({
+            name: fullName,
+            email: normalizedEmail,
+            whatsapp: normalizedWhatsapp,
+            taxId: normalizedTaxIdDigits,
+          }),
+        );
+        if (!checkoutUrl) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message:
+              "Checkout deste plano não configurado na Kiwify. Defina as URLs de checkout no .env.",
+          });
+        }
+
+        if (createdUser?.email) {
+          void createAndSendEmailVerification({
+            userId: createdUser.id,
+            email: createdUser.email,
+            name: createdUser.name,
+            req: ctx.req,
+          }).catch((error) => {
+            console.error("[Auth] Failed to send email verification during checkout register", error);
+          });
+        }
+
+        return {
+          success: true,
+          plan: input.plan,
+          planStatus: "past_due" as const,
+          checkoutUrl,
+          checkoutCompletionToken,
+          emailVerificationRequired: true,
+        };
+      }),
+
+    getCheckoutCompletionContext: publicProcedure
+      .input(z.object({
+        token: z.string().min(20),
+      }))
+      .query(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) {
+          throw new TRPCError({
+            code: "SERVICE_UNAVAILABLE",
+            message: "Banco de dados indisponível",
+          });
+        }
+
+        const { user, payload } = await getCheckoutUserOrThrow(input.token);
+
+        return {
+          firstName: user.firstName ?? "",
+          lastName: user.lastName ?? "",
+          name: buildFullName(user.firstName, user.lastName, user.name),
+          email: user.email ?? payload.email,
+          whatsapp: user.whatsapp ?? "",
+          city: user.city ?? "",
+          address: user.address ?? "",
+          acquisitionSource: user.acquisitionSource ?? "",
+          preferredLanguage: user.preferredLanguage ?? "Português (Brasil)",
+          marketingOptIn: Boolean(user.marketingOptIn),
+          plan: user.plan ?? payload.plan,
+          planStatus: user.planStatus ?? "past_due",
+          profileCompleted: isCheckoutProfileComplete(user),
+          canAccessPlatform: canActivateCheckoutAccess(user),
+          emailVerified: Boolean(user.emailVerified),
+        } as const;
+      }),
+
+    completeCheckoutProfile: publicProcedure
+      .input(
+        z.object({
+          token: z.string().min(20),
+          profile: checkoutProfileCompletionInputSchema,
+        }),
+      )
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) {
+          throw new TRPCError({
+            code: "SERVICE_UNAVAILABLE",
+            message: "Banco de dados indisponível",
+          });
+        }
+
+        const { user } = await getCheckoutUserOrThrow(input.token);
+        const profile = input.profile;
+
+        const updatedUser = await db.updateUserById(user.id, {
+          city: profile.city.trim(),
+          address: profile.address.trim(),
+          acquisitionSource: profile.acquisitionSource.trim(),
+          preferredLanguage: profile.preferredLanguage.trim(),
+          marketingOptIn: profile.marketingOptIn,
+        });
+
+        return {
+          success: true,
+          profileCompleted: isCheckoutProfileComplete(
+            updatedUser ?? {
+              ...user,
+              city: profile.city.trim(),
+              address: profile.address.trim(),
+              acquisitionSource: profile.acquisitionSource.trim(),
+              preferredLanguage: profile.preferredLanguage.trim(),
+            },
+          ),
+          canAccessPlatform: canActivateCheckoutAccess(updatedUser ?? user),
+        } as const;
+      }),
+
+    activateCheckoutAccess: publicProcedure
+      .input(z.object({
+        token: z.string().min(20),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const database = await db.getDb();
+        if (!database) {
+          throw new TRPCError({
+            code: "SERVICE_UNAVAILABLE",
+            message: "Banco de dados indisponível",
+          });
+        }
+
+        const { user } = await getCheckoutUserOrThrow(input.token);
+        if (!isCheckoutProfileComplete(user)) {
+          return {
+            success: false,
+            canAccessPlatform: false,
+            planStatus: user.planStatus ?? "past_due",
+            profileCompleted: false,
+          } as const;
+        }
+        if (!canActivateCheckoutAccess(user)) {
+          return {
+            success: false,
+            canAccessPlatform: false,
+            planStatus: user.planStatus ?? "past_due",
+            profileCompleted: true,
+          } as const;
+        }
+
+        const sessionToken = await sdk.createSessionToken(user.openId, {
+          name: buildFullName(user.firstName, user.lastName, user.name),
+          expiresInMs: SESSION_DURATION_MS,
+        });
+
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, {
+          ...cookieOptions,
+          maxAge: SESSION_DURATION_MS,
+        });
+
+        return {
+          success: true,
+          canAccessPlatform: true,
+          planStatus: user.planStatus,
+          profileCompleted: true,
+        } as const;
       }),
 
     verifyEmail: publicProcedure
@@ -830,7 +1126,7 @@ export const appRouter = router({
       .input(
         z.object({
           plan: z.enum(ORBITA_PLANS),
-          billingType: z.enum(ASAAS_BILLING_TYPES).default("PIX"),
+          billingType: z.enum(BILLING_TYPES).default("PIX"),
         }),
       )
       .mutation(async ({ ctx, input }) => {
@@ -868,62 +1164,61 @@ export const appRouter = router({
             message: "Seu usuário precisa ter email para contratar um plano.",
           });
         }
-
-        let asaasCustomerId = currentUser.asaasCustomerId ?? null;
-        if (!asaasCustomerId) {
-          let cpfCnpj: string | null = null;
-          if (currentUser.taxIdEncrypted) {
-            try {
-              cpfCnpj = decryptProfileSensitiveValue(currentUser.taxIdEncrypted);
-            } catch (error) {
-              console.warn("[Asaas] Could not decrypt taxId for customer creation", error);
-            }
-          }
-
-          const customer = await createAsaasCustomer({
-            name: currentUser.name || `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim(),
-            email: currentUser.email,
-            cpfCnpj,
-            mobilePhone: currentUser.whatsapp || null,
-            externalReference: `orbita_user_${currentUser.id}`,
+        if (ENV.paymentProvider !== "kiwify") {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message:
+              "PAYMENT_PROVIDER inválido para este fluxo. Configure PAYMENT_PROVIDER=kiwify.",
           });
-          asaasCustomerId = customer.id;
         }
 
-        const nextDueDate = new Date();
-        nextDueDate.setDate(nextDueDate.getDate() + 1);
-        const nextDueDateStr = nextDueDate.toISOString().slice(0, 10);
-
-        const subscription = await createAsaasSubscription({
-          customer: asaasCustomerId,
-          plan: input.plan,
-          billingType: input.billingType,
-          nextDueDate: nextDueDateStr,
-        });
-        let checkoutUrl = resolveSubscriptionCheckoutUrl(subscription);
-        if (!checkoutUrl && subscription.id) {
+        const fullName = buildFullName(
+          currentUser.firstName,
+          currentUser.lastName,
+          currentUser.name,
+        );
+        let taxIdDigits: string | null = null;
+        if (currentUser.taxIdEncrypted) {
           try {
-            checkoutUrl = await resolveCheckoutUrlFromSubscriptionPayments(subscription.id);
-          } catch (error) {
-            console.warn("[Asaas] Could not resolve checkout URL from subscription payments", error);
+            taxIdDigits = decryptProfileSensitiveValue(currentUser.taxIdEncrypted);
+          } catch {
+            console.warn("[Billing] Failed to decrypt taxId for Kiwify prefill");
           }
         }
 
-        const subscriptionId = subscription.id;
-        await db.updateUserById(currentUser.id, {
-          plan: input.plan,
-          planStatus: "trial",
-          planExpiry: nextDueDate,
-          asaasCustomerId,
-          asaasSubscriptionId: subscriptionId,
-        });
+        const checkoutUrl = resolveKiwifyCheckoutUrl(
+          input.plan,
+          buildKiwifyCheckoutPrefill({
+            name: fullName,
+            email: currentUser.email,
+            whatsapp: currentUser.whatsapp,
+            taxId: taxIdDigits,
+          }),
+        );
+        if (!checkoutUrl) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message:
+              "Checkout deste plano não configurado na Kiwify. Defina as URLs de checkout no .env.",
+          });
+        }
+
+        const shouldPersistPendingSelection =
+          currentUser.planStatus !== "active" && currentUser.planStatus !== "trial";
+        if (shouldPersistPendingSelection) {
+          await db.updateUserById(currentUser.id, {
+            plan: input.plan,
+            planStatus: "past_due",
+            planExpiry: null,
+          });
+        }
 
         return {
           success: true,
           plan: input.plan,
-          planStatus: "trial",
-          asaasCustomerId,
-          asaasSubscriptionId: subscriptionId,
+          planStatus: shouldPersistPendingSelection ? "past_due" : currentUser.planStatus ?? null,
+          asaasCustomerId: currentUser.asaasCustomerId ?? null,
+          asaasSubscriptionId: currentUser.asaasSubscriptionId ?? null,
           checkoutUrl,
         } as const;
       }),

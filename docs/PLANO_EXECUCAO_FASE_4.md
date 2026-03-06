@@ -1,15 +1,15 @@
 # PLANO DE EXECUCAO - FASE 4 (PAGAMENTOS E PLANOS)
 
-Atualizado em: 2026-02-25 20:35:01 -0300
+Atualizado em: 2026-03-05 21:11:00 -0300
 Status da fase: `EM ANDAMENTO`
 
 ## Objetivo
 
-Implementar cobranca recorrente com Asaas e controle de acesso por plano no Orbita, com prioridade absoluta para seguranca de dados e confiabilidade operacional.
+Implementar cobranca recorrente com Kiwify e controle de acesso por plano no Orbita, com prioridade absoluta para seguranca de dados e confiabilidade operacional.
 
 ## Decisoes travadas desta fase
 
-- Gateway: `Asaas`.
+- Gateway: `Kiwify`.
 - Ambiente inicial obrigatorio: `Sandbox` (sem cobranca real) ate validacao completa.
 - Entrada em producao: somente apos checklist de seguranca aprovado.
 - Persistencia: campos de assinatura na tabela `users` (fase A) + tabela de idempotencia para webhook.
@@ -29,12 +29,12 @@ Adicionar campos em `users`:
 - `plan` (`personal_standard | personal_pro | business_standard | business_pro | null`)
 - `planStatus` (`trial | active | past_due | expired | canceled | null`)
 - `planExpiry` (`datetime | null`)
-- `asaasCustomerId` (`varchar | null`)
-- `asaasSubscriptionId` (`varchar | null`)
+- `billingCustomerId` (`varchar | null`)
+- `billingSubscriptionId` (`varchar | null`)
 
 Criar tabela de idempotencia:
 - `processed_webhook_events`
-  - `provider` (`asaas`)
+  - `provider` (`kiwify`)
   - `eventId` (unique)
   - `eventType`
   - `processedAt`
@@ -51,28 +51,29 @@ Status de execucao atual:
 - [x] `auth.me` atualizado para expor `plan`, `planStatus`, `planExpiry`.
 - [ ] Aplicar migration em ambiente alvo (`pnpm db:push`) e validar no banco.
 
-### Item 12 - Integracao Asaas + webhook
+### Item 12 - Integracao Kiwify + webhook
 
 Backend:
-- Criar cliente `server/_core/asaas.ts`.
-- Implementar endpoint de webhook em Express: `POST /api/webhooks/asaas` (fora do tRPC).
-- Validar header de seguranca do Asaas (`asaas-access-token`) contra `ASAAS_WEBHOOK_TOKEN`.
+- Criar cliente `server/_core/kiwify.ts` (se a integracao exigir chamada de API).
+- Implementar endpoint de webhook em Express: `POST /api/webhooks/kiwify` (fora do tRPC).
+- Validar assinatura/token de seguranca da Kiwify contra segredo local.
 - Usar idempotencia para ignorar replay.
 
 Eventos minimos:
-- `PAYMENT_CONFIRMED` / `PAYMENT_RECEIVED` -> `planStatus=active` e atualizar `planExpiry`.
-- `PAYMENT_OVERDUE` -> `planStatus=past_due`.
-- `SUBSCRIPTION_DELETED` / `PAYMENT_REFUNDED` -> `planStatus=canceled`.
+- Pagamento aprovado -> `planStatus=active` e atualizar `planExpiry`.
+- Pagamento em atraso -> `planStatus=past_due`.
+- Assinatura cancelada/reembolso -> `planStatus=canceled`.
 
 Observacao:
-- Sempre preferir data de expiracao vinda do payload da Asaas (`dueDate`/`nextDueDate`) em vez de `now + 30`.
+- Sempre preferir data de expiracao vinda do payload oficial do provedor em vez de `now + 30`.
 
 Status de execucao atual:
-- [x] Cliente Asaas implementado em `server/_core/asaas.ts`.
-- [x] Webhook `POST /api/webhooks/asaas` implementado e validando `asaas-access-token`.
-- [x] Idempotencia implementada via `processed_webhook_events`.
-- [x] Procedures `auth.createSubscription` e `auth.getSubscriptionStatus` implementadas.
-- [ ] Validar ciclo completo no Asaas Sandbox (evento real recebido e aplicado).
+- [x] Implementar cliente/servico Kiwify necessario para checkout hosted por plano (`server/_core/kiwify.ts` + ENVs por plano).
+- [x] Implementar webhook `POST /api/webhooks/kiwify` com validacao segura da origem (token).
+- [x] Reaproveitar/ajustar idempotencia via `processed_webhook_events`.
+- [x] Adaptar `auth.createSubscription` para fluxo Kiwify mantendo contrato de resposta do frontend.
+- [ ] Validar ciclo completo em ambiente de testes da Kiwify (evento real recebido e aplicado).
+- [x] Integracao Asaas anterior permanece apenas como legado tecnico (nao oficial para lancamento).
 
 ### Item 15 - Guards backend por plano
 
@@ -109,7 +110,7 @@ Status de execucao atual:
 ## Ordem de implementacao recomendada
 
 1. `Item 13` - Migration + backfill seguro.
-2. `Item 12` - Webhook Asaas seguro + idempotencia.
+2. `Item 12` - Webhook Kiwify seguro + idempotencia.
 3. `Item 15` - Guard backend.
 4. `Item 14` - Guard frontend.
 5. `Item 12` (checkout) - endpoint de criacao/consulta de assinatura.
@@ -118,7 +119,7 @@ Status de execucao atual:
 
 Sem todos os itens abaixo, nao vai para producao:
 
-- [ ] Segredos em ENV apenas (`ASAAS_API_KEY`, `ASAAS_WEBHOOK_TOKEN`), sem hardcode.
+- [ ] Segredos em ENV apenas (Kiwify), sem hardcode.
 - [ ] Webhook validando token de origem.
 - [ ] Idempotencia de webhook ativa e testada.
 - [ ] Logs sem PII sensivel e sem secrets.
@@ -129,10 +130,10 @@ Sem todos os itens abaixo, nao vai para producao:
 
 ## ENVs obrigatorias
 
-- `ASAAS_ENV` (`sandbox` ou `production`)
-- `ASAAS_API_BASE_URL`
-- `ASAAS_API_KEY`
-- `ASAAS_WEBHOOK_TOKEN`
+- `PAYMENT_PROVIDER` (`kiwify`)
+- `KIWIFY_API_BASE_URL` (se aplicavel)
+- `KIWIFY_API_KEY` (se aplicavel)
+- `KIWIFY_WEBHOOK_TOKEN` (ou segredo equivalente de assinatura)
 - `APP_BASE_URL`
 
 ## Checklist de validacao da sprint
@@ -155,13 +156,13 @@ A cada entrega:
 ## Checkpoint de encerramento do dia (2026-02-25)
 
 Estado atual:
-- Checkout de assinatura funcionando no local sandbox com fallback de URL por pagamentos da assinatura.
-- Erro de rede no checkout (`fetch failed`) tratado com mensagem amigavel no frontend.
-- Sprint 4 continua pendente de validacao manual completa do webhook sandbox (A6) e aplicacao de migration em producao (`13b`).
+- Pivot oficial para Kiwify aprovado; implementacao de pagamentos em curso na nova plataforma.
+- Integracao Asaas anterior mantida apenas como referencia tecnica ate a troca completar.
+- Sprint 4 continua pendente de validacao manual completa do webhook Kiwify (A6) e aplicacao da migration em producao (`13b`).
 
 Passo a passo de retomada (proximo dia):
-1. Validar no browser local duas contratacoes (planos diferentes) abrindo checkout Asaas.
+1. Validar no browser local duas contratacoes (planos diferentes) abrindo checkout Kiwify.
 2. Confirmar webhook sandbox recebendo e processando evento real (idempotencia + atualizacao de `planStatus`/`planExpiry`).
-3. Implementar ajuste de UX: remover destaque visual de plano recomendado (sem plano em evidência).
-4. Fechar decisao de produto sobre checkout (hosted Asaas agora vs checkout proprio em fase futura) e registrar em `docs/DECISOES_PRODUTO.md`.
+3. Validar ajuste de UX aplicado: nenhum plano com destaque visual de "recomendado".
+4. Garantir consistencia da decisao de checkout entre docs (`12c` = hosted Kiwify no lancamento).
 5. Com sandbox validado, preparar roteiro seguro para producao sem trocar chave/ambiente antes do checklist final.

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gt, inArray, isNotNull, isNull, lt } from "drizzle-orm";
+import { and, count, desc, eq, gt, inArray, isNotNull, isNull, lt, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertAuthToken,
@@ -23,6 +23,19 @@ export async function getDb() {
     }
   }
   return _db;
+}
+
+export async function isDatabaseAvailable(): Promise<boolean> {
+  const database = await getDb();
+  if (!database) return false;
+
+  try {
+    await database.execute(sql`select 1`);
+    return true;
+  } catch (error) {
+    console.warn("[Database] Health check failed:", error);
+    return false;
+  }
 }
 
 export async function upsertUser(user: InsertUser): Promise<void> {
@@ -378,11 +391,30 @@ export async function createProcessedWebhookEvent(input: CreateProcessedWebhookE
     return undefined;
   }
 
-  const [result] = await db.insert(processedWebhookEvents).values({
-    provider: input.provider,
-    eventId: input.eventId,
-    eventType: input.eventType,
-    processedAt: input.processedAt ?? new Date(),
-  });
-  return Number((result as { insertId?: number }).insertId ?? 0) || undefined;
+  try {
+    const [result] = await db.insert(processedWebhookEvents).values({
+      provider: input.provider,
+      eventId: input.eventId,
+      eventType: input.eventType,
+      processedAt: input.processedAt ?? new Date(),
+    });
+    return Number((result as { insertId?: number }).insertId ?? 0) || undefined;
+  } catch (error) {
+    // Backward compatibility: environments que ainda não atualizaram o enum de provider.
+    if (input.provider !== "kiwify") {
+      throw error;
+    }
+
+    console.warn(
+      "[Database] provider=kiwify rejected, retrying with legacy provider=asaas",
+      error,
+    );
+    const [fallbackResult] = await db.insert(processedWebhookEvents).values({
+      provider: "asaas",
+      eventId: input.eventId,
+      eventType: input.eventType,
+      processedAt: input.processedAt ?? new Date(),
+    });
+    return Number((fallbackResult as { insertId?: number }).insertId ?? 0) || undefined;
+  }
 }

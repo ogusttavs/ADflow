@@ -9,6 +9,7 @@ import { localDateKey } from "@/lib/date";
 import { USER_SETTINGS_KEYS, getSettingBoolean } from "@/lib/user-settings";
 
 const STORAGE_KEY = "orbita_briefing_date";
+const ONBOARDING_KEY = "orbita_onboarding_complete";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -24,6 +25,9 @@ export function DailyBriefingPopup() {
 
   // Only show once per day
   useEffect(() => {
+    const onboardingComplete = localStorage.getItem(ONBOARDING_KEY) === "true";
+    if (!onboardingComplete) return;
+
     const showOnLogin = getSettingBoolean(USER_SETTINGS_KEYS.showDailyBriefingOnLogin, true);
     if (!showOnLogin) return;
     const lastShown = localStorage.getItem(STORAGE_KEY);

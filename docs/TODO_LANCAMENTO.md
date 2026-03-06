@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-02-25 21:40:37 -0300
+Atualizado em: 2026-03-06 09:09:36 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -10,7 +10,7 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida, deployada em producao no release `5efe746` e validada manualmente em fluxo real de email; acoes do dono focadas agora em webhook Asaas).
+- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida, deployada em producao no release `5efe746` e validada manualmente em fluxo real de email; pagamentos da Sprint 4 agora com foco oficial em Kiwify).
 - Sprint final de fechamento criado no backlog: revisao completa de seguranca, performance e SEO antes do encerramento do ciclo.
 
 ---
@@ -86,15 +86,21 @@ Status atual: concluido em codigo. Nova rota `/forgot-email` e procedure `auth.r
 - [x] 11h. Cadastro mais rapido apos criar conta
 Status atual: concluido em codigo. Envio de email de verificacao no cadastro foi movido para fluxo assincrono (nao bloqueia resposta de criacao de conta).
 
+- [x] 11i. UX de cadastro reforcada (telefone/CEP/origem/CPF/senha)
+Status atual: concluido em codigo. Cadastro agora tem pais + DDI automatico no WhatsApp, CEP com busca de endereco (Brasil) para completar complemento, opcoes de origem da lead (`Onde conheceu a Orbita?`), formatacao de CPF/CNPJ no blur e confirmacao obrigatoria de senha.
+
+- [x] 11j. Primeiro acesso sem popup de resumo de ontem
+Status atual: concluido em codigo. Popup diario foi condicionado ao onboarding concluido; no primeiro acesso o foco fica no onboarding passo a passo de boas-vindas.
+
 ### Sprint 4 - Pagamentos e Planos
 
 - [x] 12a. Plano tecnico da Sprint 4 aprovado e documentado
 Status atual: concluido. Documento `docs/PLANO_EXECUCAO_FASE_4.md` criado com ordem de implementacao, hard gates de seguranca e validacao em sandbox antes de producao.
 
-- [x] 12. Integrar Asaas + webhooks
-Status atual: concluido em codigo (sandbox-ready). Cliente Asaas (`server/_core/asaas.ts`), webhook seguro com token (`/api/webhooks/asaas`), idempotencia (`processed_webhook_events`), `auth.createSubscription` e `auth.getSubscriptionStatus` implementados; fallback de checkout via `GET /subscriptions/{id}/payments` ativo para quando a URL nao vier no payload inicial, com mensagem amigavel para falha de conexao com gateway; falta validacao manual no sandbox do Asaas (A6).
-- [ ] 12c. Definir estrategia de checkout da Orbita (hosted Asaas vs checkout proprio)
-Status atual: decisao tomada. Manter checkout hospedado da Asaas no lancamento; checkout visual proprio (com cobranca via API Asaas) fica agendado para depois do ultimo sprint e apos o lancamento.
+- [ ] 12. Integrar Kiwify + webhooks
+Status atual: parcialmente concluido em codigo + configuracao local (2026-03-06). Links reais de checkout por plano e token de webhook foram definidos no ambiente local; backend com token + idempotencia ja ativo; fluxo publico `auth.registerForCheckout` passou a criar conta com plano pendente e devolver checkout Kiwify para a landing; checkout agora sai com prefill automatico de `name/email/phone/cpf` usando os dados ja coletados no Orbita; funil tambem ganhou `checkoutCompletionToken` + pagina publica `/obrigado` para coletar dados complementares depois do pagamento; a tela `/obrigado` agora possui preview via `/obrigado?preview=1` para QA sem compra; validacao local fechada com `pnpm test` (89 testes), `pnpm exec tsc --noEmit`, `pnpm exec vite build` e smoke HTTP em `localhost:3000`; pendente validar evento real no painel Kiwify, confirmar atualizacao de `planStatus`/`planExpiry` no ambiente externo e publicar o release em producao.
+- [x] 12c. Definir estrategia de checkout da Orbita (hosted Kiwify vs checkout proprio)
+Status atual: decisao tomada. Manter checkout hospedado da Kiwify no lancamento; checkout visual proprio fica para pos-lancamento, apenas se continuar valendo a pena.
 - [x] 13. Migration: `plan`, `planExpiry`, `planStatus` em `users`
 Status atual: concluido em codigo. Campos de plano adicionados no `drizzle/schema.ts`, migration `drizzle/0010_secret_stature.sql` gerada e `auth.me` passando `plan/planStatus/planExpiry`.
 - [ ] 13b. Aplicar migration da Sprint 4 no banco de producao (`pnpm db:push`) e validar colunas em `users`
@@ -104,8 +110,8 @@ Status atual: concluido em codigo. Criados `usePlanAccess`, `PlanGate` e `Upgrad
 Status atual: concluido em codigo. Botao do `UpgradePlanModal` agora abre `Settings` na aba `Planos` (`/settings?tab=plans`), com cards de oferta por plano e CTA de contratacao dentro do app.
 - [x] 14c. Refinar UX de planos para conta pessoal (sem sinalizacao Business no menu) + corrigir abas de Configuracoes
 Status atual: concluido em codigo. Itens business agora ficam ocultos para plano pessoal na sidebar/customizacao, mensagens de bloqueio removem rótulo "Business" e as abas de `Settings` foram corrigidas para trocar conteudo corretamente (sincronizacao por `window.location.search`).
-- [ ] 14d. Remover destaque visual de "plano recomendado" na tela de Planos
-Status atual: pendente (pedido aprovado pelo dono). Enquanto nao houver segmentacao por perfil, nenhum plano deve aparecer em destaque.
+- [x] 14d. Remover destaque visual de "plano recomendado" na tela de Planos
+Status atual: concluido em codigo. Cards de planos em `Settings` nao exibem mais badge/ring de destaque e todos os CTAs estao neutros (sem plano em evidência).
 - [x] 15. Guards backend por plano (middleware tRPC)
 Status atual: concluido em codigo. Middleware `planProcedure` criado no tRPC com regra compartilhada (`shared/planAccess.ts`) e aplicado em `clientsRouter` e `crmRouter`, retornando `FORBIDDEN` com `UPGRADE_REQUIRED` para plano sem acesso.
 
@@ -145,7 +151,8 @@ Status atual: concluido. Deletados: ComponentShowcase.tsx (155 linhas), ManusDia
 
 ### Sprint 9 - LP
 
-- [ ] 31. Landing page Orbita com pricing dos 4 planos
+- [x] 31. Landing page Orbita com pricing dos 4 planos
+Status atual: concluido em codigo. A home agora mostra os 4 planos com CTA por plano; o usuario escolhe na LP, segue para cadastro com plano preselecionado e vai direto ao checkout Kiwify antes de acessar a plataforma.
 
 ### Sprint 10 - Revisao final (Seguranca, Velocidade e SEO)
 
@@ -196,6 +203,15 @@ Status atual: concluido. Configuracoes com persistencia real (incluindo metas), 
 - [x] 36. Definir tema inicial escuro e alinhar LP ao que o app entrega hoje
 Status atual: concluido. `ThemeProvider` agora inicia em dark por padrao e a Home comunica apenas modulos ativos no Orbita.
 
+- [x] 47. Sistema de documentacao V2 com log por acao (autor humano/IA), template e guardrails
+Status atual: concluido em docs + scripts. Novo arquivo `docs/SISTEMA_DOCUMENTACAO.md`, template `docs/TEMPLATE_LOG_ACAO.md`, script `scripts/docs/log-action.sh` e validacao automatica do formato de log em hook/CI.
+
+- [x] 48. Restaurar cadastro local e hardening de startup para banco indisponivel
+Status atual: concluido em codigo + ambiente local. Cadastro local voltou a funcionar apos configurar `DATABASE_URL` e aplicar `pnpm db:push`; backend agora executa health check de banco no startup e falha rapido em producao se DB estiver indisponivel. Em 2026-03-06, a conta local do dono `gustavosilva585@gmail.com` tambem foi confirmada manualmente no banco para seguir o QA sem envio real de email. O modo full stack local estavel passou a usar `pnpm dev:web` (`localhost:3000`) + `pnpm dev:api` (`localhost:3001`) com proxy `/api`.
+
+- [ ] 49. Sanear ambiente local fora de pasta sincronizada e reinstalar dependencias da arvore principal
+Status esperado: remover a dependencia do espelho temporario `/private/tmp/ADflow-local-run`, garantir `node_modules` integro na copia principal e manter `pnpm dev`/`pnpm dev:web`/`pnpm dev:api` operacionais sem corrupcao de arquivos.
+
 ---
 
 ## Acoes do dono (fora do codigo)
@@ -206,8 +222,8 @@ Status atual: concluido. `ThemeProvider` agora inicia em dark por padrao e a Hom
 Status atual: concluido (confirmado pelo dono).
 - [x] A4. Configurar `CREDENTIAL_ENCRYPTION_KEY` em producao
 - [x] A5. Definir dominio final da marca Orbita
-- [ ] A6. Criar conta Asaas e configurar webhook
-Status atual: em andamento. Conta Asaas criada; falta configurar webhook e validar recepcao de eventos.
+- [ ] A6. Configurar Kiwify e webhook oficial
+Status atual: em andamento. Links dos 4 planos e token webhook ja definidos para operacao local; falta validar evento real da Kiwify no endpoint oficial de producao e fechar controle de IP observado para opcional `KIWIFY_WEBHOOK_ALLOWED_IPS`. Nao foi localizada documentacao oficial de sandbox publico para checkout, entao a validacao final deve usar compra real controlada.
 - [x] A7. Liberar acesso SSH de deploy (chave/usuario) para executar `quick-deploy` remoto
 - [x] A8. Configurar Resend em producao (dominio/DNS + `RESEND_API_KEY` + `EMAIL_FROM` + `EMAIL_PROVIDER=resend`)
 Status atual: concluido. ENV operacional aplicado na VPS (`APP_BASE_URL`, `EMAIL_PROVIDER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`), smoke executado e checklist manual de browser concluido (verificacao, reset, reenvio e rate limit).
@@ -216,8 +232,9 @@ Status atual: concluido. Chave dedicada configurada na VPS com tamanho valido (3
 
 ### Proximas tarefas do dono (ordem sugerida)
 
-1. A6 (Asaas)
-- Configurar webhook de producao no painel Asaas, validar entrega de eventos e confirmar atualizacao de status de pagamento/assinatura no backend.
+1. A6 (Kiwify)
+- Configurar checkout hospedado + webhook no painel Kiwify, validar entrega de eventos e confirmar atualizacao de status de pagamento/assinatura no backend.
+- Coletar IPs reais recebidos no webhook para decidir ativacao do bloqueio `KIWIFY_WEBHOOK_ALLOWED_IPS`.
 
 2. A1 + A2 (Google OAuth em producao)
 - Adicionar redirect URIs de producao e publicar o app fora de `Testing`.
@@ -227,8 +244,14 @@ Status atual: concluido. Chave dedicada configurada na VPS com tamanho valido (3
 
 ### Checklist de retomada (proximo dia)
 
-1. Validar no browser local o checkout abrindo link Asaas para pelo menos 2 planos diferentes.
-2. Configurar/confirmar webhook sandbox do Asaas e disparar evento real para validar mudanca de `planStatus`.
-3. Implementar item `14d` (remover "recomendado" dos cards de planos) e validar UX.
-4. Decidir item `12c` (checkout proprio vs hosted) e registrar decisao em `docs/DECISOES_PRODUTO.md`.
-5. Se tudo OK em sandbox, preparar roteiro de migracao controlada para producao (sem virar chave ainda).
+1. Validar no browser local o checkout abrindo link Kiwify para pelo menos 2 planos diferentes.
+   Confirmar se `name/email/phone/cpf` chegam preenchidos no checkout.
+   Confirmar se o retorno para `/obrigado` funciona no mesmo navegador e se a sessao so libera apos o webhook marcar o plano como ativo.
+   Revisar tambem o preview visual em `/obrigado?preview=1`.
+2. Configurar/confirmar webhook da Kiwify e disparar evento real para validar mudanca de `planStatus`.
+   Configurar no painel a pagina externa de obrigado para `https://getorbita.com.br/obrigado`.
+3. Registrar IP de origem recebido no primeiro webhook real e decidir se ativa `KIWIFY_WEBHOOK_ALLOWED_IPS`.
+4. Validar no browser a tela de planos sem destaque de "recomendado" em nenhum card.
+5. Confirmar decisao do item `12c` em todos os docs operacionais (hosted Kiwify no lancamento).
+6. Se tudo OK na validacao controlada, preparar roteiro de migracao controlada para producao (sem virar chave ainda).
+7. Sanear a copia principal local do repo fora de `Documents`/File Provider ou reinstalar dependencias de forma definitiva, para aposentar o espelho temporario `/private/tmp/ADflow-local-run`.

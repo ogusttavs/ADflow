@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { useEffect } from "react";
 import { Zap, Calendar, Wallet, BarChart3, ArrowRight, CheckCircle, Users, Target, BookOpen, Star } from "lucide-react";
 import { getStartPageRoute } from "@/lib/user-settings";
+import { PLAN_CARDS, getPlanCheckoutIntentUrl } from "@/lib/planCatalog";
 
 const features = [
   {
@@ -95,8 +96,12 @@ export default function Home() {
             </div>
             <span className="font-bold text-lg font-['Space_Grotesk']">Orbita</span>
           </div>
-          <Button onClick={() => navigate("/login")}>
-            Entrar na Plataforma <ArrowRight className="w-4 h-4 ml-2" />
+          <Button
+            onClick={() =>
+              document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            Ver Planos <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
       </nav>
@@ -118,17 +123,23 @@ export default function Home() {
             Hoje o app entrega: Dashboard, Clientes, Rotina, Agenda, CRM, Prospecção, Financeiro, Diário, Quadro dos Sonhos e Configurações.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" className="text-base px-8" onClick={() => navigate("/login")}>
+            <Button
+              size="lg"
+              className="text-base px-8"
+              onClick={() =>
+                document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })
+              }
+            >
               <Zap className="w-5 h-5 mr-2" />
-              Começar Agora
+              Escolher Meu Plano
             </Button>
             <Button
               size="lg"
               variant="outline"
               className="text-base px-8"
-              onClick={() => document.getElementById("como-funciona")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => navigate("/login")}
             >
-              Ver Demonstração
+              Já Tenho Conta
             </Button>
           </div>
         </div>
@@ -149,6 +160,58 @@ export default function Home() {
                 </div>
                 <h3 className="font-semibold mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="planos" className="px-4 py-16 sm:px-6 sm:py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold font-['Space_Grotesk'] mb-3">Escolha seu plano antes de entrar</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              A pessoa escolhe o plano aqui, cria a conta e segue direto para o pagamento antes de acessar a plataforma.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {PLAN_CARDS.map((plan) => (
+              <div
+                key={plan.id}
+                className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm shadow-black/5"
+              >
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-cyan-500 to-emerald-400" />
+                <div className="mb-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+                    {plan.id.startsWith("business") ? "Business" : "Pessoal"}
+                  </p>
+                  <h3 className="mt-3 text-2xl font-bold font-['Space_Grotesk']">{plan.label}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground min-h-10">{plan.audience}</p>
+                </div>
+
+                <div className="mb-6">
+                  <div className="text-4xl font-bold font-['Space_Grotesk']">{plan.monthlyPrice}</div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Cadastro rapido + checkout Kiwify + acesso liberado depois do pagamento.
+                  </p>
+                </div>
+
+                <div className="space-y-3 mb-8">
+                  {plan.highlights.map((highlight) => (
+                    <div key={highlight} className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+                      <span>{highlight}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <Button
+                  className="w-full"
+                  onClick={() => navigate(getPlanCheckoutIntentUrl(plan.id))}
+                >
+                  Escolher {plan.label}
+                </Button>
               </div>
             ))}
           </div>
@@ -184,11 +247,19 @@ export default function Home() {
       {/* CTA */}
       <section className="px-4 py-16 sm:px-6 sm:py-20 bg-muted/20">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-bold font-['Space_Grotesk'] mb-4">Pronto para organizar sua operação?</h2>
-          <p className="text-muted-foreground mb-8">Crie sua conta e comece a centralizar rotina, CRM e financeiro hoje.</p>
-          <Button size="lg" className="text-base px-10" onClick={() => navigate("/login")}>
+          <h2 className="text-3xl font-bold font-['Space_Grotesk'] mb-4">Pronto para contratar a Orbita?</h2>
+          <p className="text-muted-foreground mb-8">
+            Escolha um plano, crie sua conta e siga direto para o pagamento.
+          </p>
+          <Button
+            size="lg"
+            className="text-base px-10"
+            onClick={() =>
+              document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
             <Zap className="w-5 h-5 mr-2" />
-            Acessar Plataforma
+            Ver Planos Agora
           </Button>
         </div>
       </section>

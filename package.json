@@ -4,7 +4,9 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
+    "dev": "sh -c 'trap \"kill 0\" EXIT INT TERM; pnpm dev:api & pnpm dev:web'",
+    "dev:api": "DISABLE_INTERNAL_VITE=1 NODE_ENV=development PORT=3001 tsx watch server/_core/index.ts",
+    "dev:web": "VITE_DEV_BACKEND_URL=http://127.0.0.1:3001 vite --host 0.0.0.0 --port 3000",
     "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc --noEmit",

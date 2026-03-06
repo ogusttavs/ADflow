@@ -1,6 +1,6 @@
 # Deploy VPS - Operacao Oficial
 
-Atualizado em: 2026-02-25 16:13:30 -0300
+Atualizado em: 2026-03-06 07:40:00 -0300
 
 Objetivo: publicar e manter o app em VPS com PM2 + Nginx + SSL.
 
@@ -33,6 +33,13 @@ APP_BASE_URL=https://getorbita.com.br
 EMAIL_PROVIDER=resend
 EMAIL_FROM=Orbita <noreply@getorbita.com.br>
 RESEND_API_KEY=NOVA_CHAVE_RESEND
+PAYMENT_PROVIDER=kiwify
+KIWIFY_WEBHOOK_TOKEN=SEGREDO_FORTE_WEBHOOK_KIWIFY
+KIWIFY_WEBHOOK_ALLOWED_IPS=
+KIWIFY_CHECKOUT_URL_PERSONAL_STANDARD=https://pay.kiwify.com.br/SEU_LINK_1
+KIWIFY_CHECKOUT_URL_PERSONAL_PRO=https://pay.kiwify.com.br/SEU_LINK_2
+KIWIFY_CHECKOUT_URL_BUSINESS_STANDARD=https://pay.kiwify.com.br/SEU_LINK_3
+KIWIFY_CHECKOUT_URL_BUSINESS_PRO=https://pay.kiwify.com.br/SEU_LINK_4
 ```
 
 Se usar Google OAuth:
@@ -59,6 +66,18 @@ bash scripts/vps/set-resend-env.sh
 Observacao:
 - O script pede a `RESEND_API_KEY` sem eco no terminal.
 - Nao comitar `.env` com segredo real.
+
+## 2.2) Pagamentos Kiwify - operacional
+
+- Endpoint webhook do backend: `POST /api/webhooks/kiwify`
+- Header aceito para token: `x-kiwify-token` (recomendado) e variantes compativeis.
+- Seguranca minima obrigatoria:
+  - `KIWIFY_WEBHOOK_TOKEN` definido em producao;
+  - token igual no painel Kiwify;
+  - HTTPS ativo no dominio.
+- Restricao por IP e opcional:
+  - usar `KIWIFY_WEBHOOK_ALLOWED_IPS` (CSV) somente apos observar IPs reais em producao;
+  - se vazio, o webhook segue protegido por token.
 
 ## 3) Deploy recorrente (oficial)
 

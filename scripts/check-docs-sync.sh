@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-required_docs=(
-  "docs/LOG_AGENTES.md"
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+log_doc="docs/LOG_AGENTES.md"
+required_docs_non_docs=(
   "docs/CENTRO_DE_OPERACAO.md"
   "docs/TODO_LANCAMENTO.md"
 )
@@ -50,56 +53,79 @@ if [[ -z "${changed_files}" ]]; then
   exit 0
 fi
 
-needs_docs=0
+# Regra V2: toda acao registrada em log no mesmo commit/range.
+if ! grep -Fxq "$log_doc" <<< "$changed_files"; then
+  echo ""
+  echo "ERRO: toda mudanca precisa registrar acao em ${log_doc}."
+  echo "Inclua uma nova entrada de log V2 e adicione o arquivo no commit."
+  echo ""
+  echo "Sugestao:"
+  echo "  bash scripts/docs/log-action.sh --help"
+  echo "  git add ${log_doc}"
+  echo ""
+  exit 1
+fi
+
+needs_non_docs=0
 while IFS= read -r file; do
   [[ -z "$file" ]] && continue
   case "$file" in
     docs/*)
       ;;
     *)
-      needs_docs=1
+      needs_non_docs=1
       break
       ;;
   esac
 done <<< "$changed_files"
 
-if [[ "$needs_docs" -eq 0 ]]; then
-  exit 0
-fi
-
 missing_docs=()
-for doc in "${required_docs[@]}"; do
-  if ! grep -Fxq "$doc" <<< "$changed_files"; then
-    missing_docs+=("$doc")
-  fi
-done
-
-if [[ ${#missing_docs[@]} -gt 0 ]]; then
-  echo ""
-  echo "ERRO: Mudancas fora de docs detectadas sem atualizacao dos docs obrigatorios."
-  echo "Inclua no commit/branch:"
-  for doc in "${missing_docs[@]}"; do
-    echo "- ${doc}"
+if [[ "$needs_non_docs" -eq 1 ]]; then
+  for doc in "${required_docs_non_docs[@]}"; do
+    if ! grep -Fxq "$doc" <<< "$changed_files"; then
+      missing_docs+=("$doc")
+    fi
   done
-  echo ""
-  echo "Sugestao: registre o resumo final da tarefa e rode:"
-  echo "  git add docs/LOG_AGENTES.md docs/CENTRO_DE_OPERACAO.md docs/TODO_LANCAMENTO.md"
-  echo ""
-  exit 1
-fi
 
-if [[ "$mode" == "staged" ]]; then
-  unstaged_required_docs="$(git diff --name-only -- "${required_docs[@]}")"
-  if [[ -n "$unstaged_required_docs" ]]; then
+  if [[ ${#missing_docs[@]} -gt 0 ]]; then
     echo ""
-    echo "ERRO: Docs obrigatorios foram editados, mas nao estao staged."
-    echo "$unstaged_required_docs"
+    echo "ERRO: mudancas fora de docs detectadas sem atualizacao dos docs obrigatorios."
+    echo "Inclua no commit/branch:"
+    for doc in "${missing_docs[@]}"; do
+      echo "- ${doc}"
+    done
     echo ""
     echo "Rode:"
-    echo "  git add docs/LOG_AGENTES.md docs/CENTRO_DE_OPERACAO.md docs/TODO_LANCAMENTO.md"
+    echo "  git add docs/CENTRO_DE_OPERACAO.md docs/TODO_LANCAMENTO.md ${log_doc}"
     echo ""
     exit 1
   fi
+fi
+
+if [[ "$mode" == "staged" ]]; then
+  docs_to_stage=("$log_doc")
+  if [[ "$needs_non_docs" -eq 1 ]]; then
+    docs_to_stage+=("${required_docs_non_docs[@]}")
+  fi
+
+  unstaged_required_docs="$(git diff --name-only -- "${docs_to_stage[@]}")"
+  if [[ -n "$unstaged_required_docs" ]]; then
+    echo ""
+    echo "ERRO: docs obrigatorios foram editados, mas nao estao staged."
+    echo "$unstaged_required_docs"
+    echo ""
+    echo "Rode:"
+    echo "  git add ${docs_to_stage[*]}"
+    echo ""
+    exit 1
+  fi
+fi
+
+# Regra V2: valida formato minimo da nova entrada no log.
+if [[ "$mode" == "staged" ]]; then
+  "$repo_root/scripts/docs/validate-log-entry.sh" --mode staged
+else
+  "$repo_root/scripts/docs/validate-log-entry.sh" --range "$range"
 fi
 
 exit 0

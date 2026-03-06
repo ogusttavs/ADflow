@@ -12,6 +12,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { ENV } from "./env";
 import { processAsaasWebhookPayload } from "./asaasWebhook";
+import { processKiwifyWebhookPayload } from "./kiwifyWebhook";
 import * as db from "../db";
 import { serveStatic, setupVite } from "./vite";
 
@@ -41,6 +42,78 @@ function hasTrpcProcedure(req: Request, procedure: string) {
   return getTrpcProcedures(req).has(procedure);
 }
 
+function getIncomingKiwifyToken(req: Request) {
+  const headerCandidates = [
+    "x-kiwify-token",
+    "x-kiwify-webhook-token",
+    "kiwify-webhook-token",
+    "x-webhook-token",
+    "webhook-token",
+    "authorization",
+  ];
+
+  for (const headerName of headerCandidates) {
+    const headerValue = String(req.header(headerName) ?? "").trim();
+    if (!headerValue) continue;
+    if (headerName === "authorization" && headerValue.toLowerCase().startsWith("bearer ")) {
+      const bearerToken = headerValue.slice(7).trim();
+      if (bearerToken) return bearerToken;
+      continue;
+    }
+    return headerValue;
+  }
+
+  const bodyRecord =
+    req.body && typeof req.body === "object" && !Array.isArray(req.body)
+      ? (req.body as Record<string, unknown>)
+      : null;
+  if (bodyRecord) {
+    const bodyTokenCandidates = [
+      bodyRecord.token,
+      bodyRecord.webhook_token,
+      bodyRecord.webhookToken,
+      bodyRecord.x_kiwify_token,
+      bodyRecord.xKiwifyToken,
+      typeof bodyRecord.data === "object" && bodyRecord.data
+        ? (bodyRecord.data as Record<string, unknown>).token
+        : null,
+    ];
+
+    for (const value of bodyTokenCandidates) {
+      const normalized = String(value ?? "").trim();
+      if (normalized) return normalized;
+    }
+  }
+
+  return "";
+}
+
+function normalizeIp(rawValue: string) {
+  const normalized = rawValue.trim();
+  if (!normalized) return "";
+  if (normalized.startsWith("::ffff:")) return normalized.slice(7);
+  return normalized;
+}
+
+function parseAllowedIps(rawValue: string): Set<string> {
+  const allowedIps = new Set<string>();
+  for (const candidate of rawValue.split(",")) {
+    const ip = normalizeIp(candidate);
+    if (ip) allowedIps.add(ip);
+  }
+  return allowedIps;
+}
+
+function getIncomingRequestIp(req: Request) {
+  const forwardedFor = String(req.header("x-forwarded-for") ?? "").trim();
+  if (forwardedFor) {
+    const firstHop = forwardedFor.split(",")[0] ?? "";
+    const forwardedIp = normalizeIp(firstHop);
+    if (forwardedIp) return forwardedIp;
+  }
+  return normalizeIp(req.ip ?? "");
+}
+
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
     const server = net.createServer();
@@ -60,7 +133,23 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
+function shouldUseInternalVite() {
+  return process.env.NODE_ENV === "development" && process.env.DISABLE_INTERNAL_VITE !== "1";
+}
+
 async function startServer() {
+  const databaseReady = await db.isDatabaseAvailable();
+  if (!databaseReady) {
+    const message =
+      "Banco indisponível no startup. Configure DATABASE_URL e valide acesso ao MySQL.";
+
+    if (ENV.isProduction) {
+      throw new Error(message);
+    }
+
+    console.warn(`[Startup] ${message}`);
+  }
+
   const app = express();
   const server = createServer(app);
   app.set("trust proxy", 1);
@@ -171,6 +260,46 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+  app.post("/api/webhooks/kiwify", async (req, res) => {
+    const expectedToken = ENV.kiwifyWebhookToken.trim();
+    const incomingToken = getIncomingKiwifyToken(req);
+    const incomingIp = getIncomingRequestIp(req);
+    const allowedIps = parseAllowedIps(ENV.kiwifyWebhookAllowedIps);
+
+    if (!expectedToken) {
+      console.error("[Kiwify webhook] Missing KIWIFY_WEBHOOK_TOKEN configuration");
+      return res.status(503).json({ ok: false });
+    }
+
+    if (allowedIps.size === 0) {
+      console.info(
+        `[Kiwify webhook] Allowlist desativada. Origem recebida: (${incomingIp || "unknown"})`
+      );
+    }
+
+    if (allowedIps.size > 0 && (!incomingIp || !allowedIps.has(incomingIp))) {
+      console.warn(
+        `[Kiwify webhook] Blocked request from non-allowed IP (${incomingIp || "unknown"})`
+      );
+      return res.status(401).json({ ok: false });
+    }
+
+    if (!incomingToken || incomingToken !== expectedToken) {
+      console.warn(
+        `[Kiwify webhook] Invalid token from IP (${incomingIp || "unknown"})`
+      );
+      return res.status(401).json({ ok: false });
+    }
+
+    try {
+      const result = await processKiwifyWebhookPayload(req.body);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("[Kiwify webhook] Unexpected processing error", error);
+      return res.status(200).json({ ok: true });
+    }
+  });
+
   app.post("/api/webhooks/asaas", async (req, res) => {
     const expectedToken = ENV.asaasWebhookToken.trim();
     const incomingToken = String(req.header("asaas-access-token") ?? "").trim();
@@ -214,10 +343,10 @@ async function startServer() {
       createContext,
     })
   );
-  // development mode uses Vite, production mode uses static files
-  if (process.env.NODE_ENV === "development") {
+  // In local API-only mode, the frontend runs in a separate Vite process and proxies /api.
+  if (shouldUseInternalVite()) {
     await setupVite(app, server);
-  } else {
+  } else if (ENV.isProduction) {
     serveStatic(app);
   }
 
@@ -233,4 +362,7 @@ async function startServer() {
   });
 }
 
-startServer().catch(console.error);
+startServer().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

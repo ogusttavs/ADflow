@@ -1,7 +1,7 @@
 # Decisões do Produto — Orbita
 
 > Documento vivo. Atualizar sempre que uma decisão de produto for tomada ou revisada.
-> Última atualização: 2026-02-25 09:56:07 -0300
+> Última atualização: 2026-03-06 08:04:50 -0300
 > Baseado nas conversas de planejamento entre dono e Claude.
 > Status: oficializado como referência de decisão para os agentes do projeto.
 
@@ -14,7 +14,7 @@
 | **Nome** | **Orbita** |
 | **Tagline** | "Tudo na sua órbita" |
 | **Sub-brand (futuro)** | orbita.adv · orbita.gestores · orbita.clinicas · orbita.médicos |
-| **Domínio alvo** | orbita.app / getorbita.com.br / useorbita.com.br (dono decide) |
+| **Domínio oficial atual** | getorbita.com.br |
 | **Cor principal** | Azul — com MUITA personalidade, não genérico/template |
 | **Tipografia** | Inter (corpo) + Space Grotesk (títulos) — manter |
 | **Cards compartilháveis** | Sim — para Instagram e redes sociais |
@@ -122,7 +122,7 @@
 | Business Padrão | R$99 | ~R$3.50 | ~96% |
 | Business Pro | R$149 | ~R$13.00 | ~91% |
 
-*Custo variável inclui: ~3% taxa de pagamento (Asaas) + LLM para planos Pro + email transacional + storage.*
+*Custo variável inclui: taxa de pagamento (Kiwify, conforme tabela vigente) + LLM para planos Pro + email transacional + storage.*
 *Custo fixo mensal: ~R$200 (VPS + ferramentas). Sobe para ~R$400-500 a partir de ~500 assinantes.*
 
 ### 4.2 Projeção de lucro
@@ -141,12 +141,21 @@ Distribuição estimada: 50% Pessoal Padrão · 25% Pessoal Pro · 15% Business 
 
 | Item | Decisão |
 |---|---|
-| **Plataforma** | **Asaas** |
-| **Motivo** | Brasileira, focada em SaaS e recorrência, Pix + cartão + boleto nativamente, webhooks simples |
-| **Taxa** | ~2% + R$0.49 por transação |
+| **Plataforma** | **Kiwify** |
+| **Checkout no lancamento** | Hosted Kiwify |
+| **Entrada comercial oficial** | Landing page com 4 planos visiveis |
+| **Motivo** | Menor esforco de implementacao para lancar rapido (checkout pronto e operacao concentrada na plataforma) |
+| **Taxa** | Conforme tabela vigente no painel/contrato Kiwify |
+
+**Fluxo comercial oficial do lancamento:**
+1. Visitante entra na landing page.
+2. Escolhe um dos 4 planos na propria LP.
+3. Faz cadastro com o plano ja preselecionado.
+4. E redirecionado direto ao checkout Kiwify.
+5. So depois segue para acesso da plataforma.
 
 **Fluxo de validação de assinatura:**
-1. Asaas dispara webhook (pagamento aprovado / recusado / cancelado / expirado)
+1. Kiwify dispara webhook (pagamento aprovado / recusado / cancelado / estornado)
 2. Server atualiza `users.plan`, `users.planExpiry`, `users.planStatus`
 3. Middleware tRPC verifica `planStatus === 'active'` e `planExpiry > Date.now()` antes de liberar features
 4. Frontend lê `user.plan` e condiciona a renderização dos módulos por plano
@@ -273,8 +282,8 @@ Uma tela interna (não visível para usuários) para o dono acompanhar:
 | A2 | Google Cloud Console → Publicar app OAuth (sair do modo "Testing") | Alta |
 | A3 | Google Cloud Console → Revogar credenciais atuais + gerar novas | Alta |
 | A4 | Servidor (SSH) → Atualizar `.env` com novas credenciais + `CREDENTIAL_ENCRYPTION_KEY` | Alta |
-| A5 | Registrar domínio Orbita (orbita.app / getorbita.com.br / useorbita.com.br) | Média |
-| A6 | Criar conta Asaas + configurar webhook URL | Antes da Sprint 4 |
+| A5 | Domínio oficial definido: `getorbita.com.br` | Concluida |
+| A6 | Configurar Kiwify + webhook URL oficial | Antes de fechar Sprint 4 |
 
 ---
 
@@ -296,5 +305,3 @@ Cada sub-brand usa o mesmo core do Orbita com personalização de UX, copy e fea
 - Copy e estrutura da Landing Page (Sprint 9 — por último)
 - Stack exata da IA para os planos Pro (Claude API vs OpenAI — Fase B)
 - Preço final dos planos (testável após lançamento com A/B pricing)
-- Logo e identidade visual (Sprint 8)
-- Domínio final (dono decide)

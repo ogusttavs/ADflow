@@ -36,6 +36,7 @@ import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ForgotEmail from "./pages/ForgotEmail";
 import ResetPassword from "./pages/ResetPassword";
+import ThankYou from "./pages/ThankYou";
 import VerifyEmail from "./pages/VerifyEmail";
 import { FEATURE_FLAGS } from "./const";
 
@@ -76,6 +77,7 @@ function Router() {
         <Route path="/forgot-email" component={ForgotEmail} />
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/verify-email" component={VerifyEmail} />
+        <Route path="/obrigado" component={ThankYou} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/clients" component={Clients} />
         <Route path="/clients/:id" component={ClientDetail} />

@@ -1,38 +1,33 @@
 # Log Continuo de Agentes
 
-Atualizado em: 2026-02-25 19:41:11 -0300
-Atualizado em: 2026-02-25 20:05:48 -0300
-Atualizado em: 2026-02-25 20:12:42 -0300
-Atualizado em: 2026-02-25 21:40:37 -0300
-Atualizado em: 2026-02-25 23:49:54 -0300
-Atualizado em: 2026-02-25 23:56:16 -0300
-Atualizado em: 2026-02-26 00:01:57 -0300
+Atualizado em: 2026-03-05 20:49:30 -0300
 
 ## Regra
 - Este arquivo e append-only.
-- Usar timestamp real do sistema: `[AAAA-MM-DD HH:mm:ss -03]`.
+- Usar timestamp real do sistema: `[AAAA-MM-DD HH:mm:ss -0300]`.
 - Registrar execucao, decisao, validacao, commit/push e deploy.
+- Toda entrada nova deve usar o formato V2 (humano/IA + id de acao).
 
 Historico completo anterior:
 - `docs/ARQUIVO/LOG_AGENTES_ATE_2026-02-25.md`
 
-Template:
+Formato V2 obrigatorio (novas entradas):
 
 ```text
-[AAAA-MM-DD HH:mm:ss -03] [Agente]
+[AAAA-MM-DD HH:mm:ss -0300] [autor:<nome>] [perfil:humano|ia] [acao:<categoria.subcategoria>] [id:LOG-AAAAMMDD-HHMMSS-<slug>]
 Contexto:
 - ...
 
-Feito:
+Mudancas:
+- ...
+
+Arquivos afetados:
 - ...
 
 Proximo:
 - ...
 
-Bloqueios/Riscos:
-- ...
-
-Arquivos alterados:
+Evidencias:
 - ...
 ```
 
@@ -1316,3 +1311,427 @@ Arquivos alterados:
 - docs/TODO_LANCAMENTO.md
 - docs/CENTRO_DE_OPERACAO.md
 - docs/LOG_AGENTES.md
+
+[2026-03-05 20:00:43 -0300] [autor:codex] [perfil:ia] [acao:docs.governanca] [id:LOG-20260305-200043-docs-governanca]
+Contexto:
+- Dono solicitou sistema funcional de documentacao para continuidade entre humanos e IAs
+
+Mudancas:
+- Estruturado sistema V2 com padrao obrigatorio de log por acao, autor e perfil (humano/ia), com automacao em hook e CI
+
+Arquivos afetados:
+- docs/SISTEMA_DOCUMENTACAO.md
+- docs/TEMPLATE_LOG_ACAO.md
+- scripts/check-docs-sync.sh
+- scripts/docs/validate-log-entry.sh
+- scripts/docs/log-action.sh
+- AGENTS.md
+- docs/LEIA_PRIMEIRO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/TODO_LANCAMENTO.md
+
+Proximo:
+- Aplicar o formato V2 em todas as proximas entradas de log
+- Atualizar hooks locais com scripts/install-hooks.sh
+
+Evidencias:
+- Guardrail local/CI atualizado para validar presenca e formato do log
+
+[2026-03-05 20:14:54 -0300] [autor:codex] [perfil:ia] [acao:produto.pagamentos-pivot] [id:LOG-20260305-201454-produto-pagamentos-pivot]
+Contexto:
+- Dono definiu pagamento via Kiwify para acelerar o lancamento mantendo os planos atuais.
+
+Mudancas:
+- Documentacao operacional e de produto alinhada para Kiwify como plataforma oficial de pagamento no lancamento.
+
+Arquivos afetados:
+- docs/DECISOES_PRODUTO.md
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/PLANO_EXECUCAO_FASE_4.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Implementar fluxo de checkout hospedado da Kiwify no backend/frontend.
+- Configurar webhook oficial da Kiwify e validar atualizacao de planStatus/planExpiry.
+
+Evidencias:
+- Atualizacao de decisoes e backlog concluida em docs oficiais.
+- Entrada V2 adicionada neste log para handoff humano/IA.
+
+[2026-03-05 20:23:14 -0300] [autor:codex] [perfil:ia] [acao:auth.cadastro-disponibilidade-db] [id:LOG-20260305-202314-auth-cadastro-disponibilidade-db]
+Contexto:
+- Dono reportou falha ao criar novo cadastro local; reproducao confirmou erro 503 Banco de dados indisponivel no auth.register.
+
+Mudancas:
+- Corrigido ambiente local com DATABASE_URL + migracao, e aplicado hardening de startup para validar disponibilidade do banco e falhar rapido em producao.
+
+Arquivos afetados:
+- server/db.ts
+- server/_core/index.ts
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Executar deploy da alteracao no servidor de producao.
+- Validar smoke de cadastro em producao apos deploy.
+
+Evidencias:
+- curl POST /api/trpc/auth.register antes: 503 Banco de dados indisponivel.
+- curl POST /api/trpc/auth.register depois: 200 success=true.
+- pnpm check, pnpm test e pnpm build verdes.
+
+[2026-03-05 20:24:53 -0300] [autor:codex] [perfil:ia] [acao:auth.failfast-producao-db] [id:LOG-20260305-202453-auth-failfast-producao-db]
+Contexto:
+- Durante validacao do hardening, o startup em producao ainda encerrava com codigo 0 por catch global sem exit explicito.
+
+Mudancas:
+- Ajustado bootstrap para  em erro de startup e validado fail-fast com DATABASE_URL vazio (exit code 1).
+
+Arquivos afetados:
+- server/_core/index.ts
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Aplicar deploy para que a protecao de startup passe a valer na VPS.
+- Executar smoke de cadastro apos deploy.
+
+Evidencias:
+- Teste local: NODE_ENV=production com DATABASE_URL vazio retornou EXIT_CODE=1.
+- Mensagem registrada: Banco indisponivel no startup...
+
+[2026-03-05 20:25:10 -0300] [autor:codex] [perfil:ia] [acao:docs.log-correcao] [id:LOG-20260305-202510-docs-log-correcao]
+Contexto:
+- Entrada anterior de log teve truncamento textual em 'Mudancas' por escape de shell.
+
+Mudancas:
+- Registrado complemento: bootstrap de startup agora finaliza explicitamente com process exit code 1 quando ocorre erro fatal no startup.
+
+Arquivos afetados:
+- docs/LOG_AGENTES.md
+- server/_core/index.ts
+
+Proximo:
+- Manter textos de log sem caracteres que acionem substituicao de shell.
+
+Evidencias:
+- Entrada LOG-20260305-202453 mantida por append-only e complementada por esta entrada.
+
+[2026-03-05 20:26:30 -0300] [autor:codex] [perfil:ia] [acao:dados.local-limpeza-validacao] [id:LOG-20260305-202630-dados-local-limpeza-validacao]
+Contexto:
+- Foram criados 2 usuarios temporarios apenas para validar o fluxo de cadastro apos a correcao de banco.
+
+Mudancas:
+- Usuarios de validacao removidos do banco local para manter ambiente sem dados ficticios ativos.
+
+Arquivos afetados:
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Seguir validacoes futuras com limpeza imediata apos testes que gerem dados reais.
+
+Evidencias:
+- SQL executado: DELETE em auth_tokens/users para emails teste+ok1@example.com e teste+ok2@example.com.
+- Consulta final retornou users_restantes_teste=0.
+
+[2026-03-05 20:34:50 -0300] [autor:codex] [perfil:ia] [acao:auth.local-smoke-registro] [id:LOG-20260305-203450-auth-local-smoke-registro]
+Contexto:
+- Dono reportou 'Failed to fetch' ao cadastrar no localhost.
+
+Mudancas:
+- Diagnostico confirmou servidor local parado; servidor reiniciado na porta 3000 e cadastro validado com sucesso. Usuario de prova removido apos teste.
+
+Arquivos afetados:
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Manter servidor dev ativo durante testes de cadastro no browser.
+
+Evidencias:
+- lsof confirmou processo node ouvindo em :3000.
+- curl POST /api/trpc/auth.register retornou 200 success=true.
+- Limpeza de usuario de prova no MySQL retornou users_restantes_teste=0.
+
+[2026-03-05 20:49:13 -0300] [autor:codex] [perfil:ia] [acao:auth.cadastro-ux-primeiro-acesso] [id:LOG-20260305-204913-auth-cadastro-ux-primeiro-acesso]
+Contexto:
+- Dono pediu melhorias completas no cadastro e ajuste do primeiro acesso para priorizar boas-vindas em vez de resumo de ontem.
+
+Mudancas:
+- Cadastro redesenhado com pais/DDI automatico, CEP auto (Brasil), origem com opcoes, CPF/CNPJ formatado no blur e confirmacao de senha; popup diario condicionado a onboarding concluido.
+
+Arquivos afetados:
+- client/src/pages/Login.tsx
+- client/src/components/DailyBriefingPopup.tsx
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Executar validacao manual no browser do fluxo de cadastro completo com CEP e senha confirmada.
+- Na trilha de pagamentos, migrar  de Asaas para Kiwify.
+
+Evidencias:
+- pnpm check, pnpm test e pnpm build executados com sucesso apos as mudancas.
+- Onboarding continua ativo no primeiro acesso e briefing diario so abre apos concluir onboarding.
+
+[2026-03-05 20:49:30 -0300] [autor:codex] [perfil:ia] [acao:docs.log-complemento-pagamentos] [id:LOG-20260305-204930-docs-log-complemento-pagamentos]
+Contexto:
+- Entrada de log anterior teve truncamento parcial no item Proximo devido interpretacao do shell.
+
+Mudancas:
+- Complementado o proximo passo de pagamentos: migrar as rotas de assinatura do backend de Asaas para Kiwify mantendo contrato de resposta para o frontend.
+
+Arquivos afetados:
+- docs/LOG_AGENTES.md
+- server/routers.ts
+
+Proximo:
+- Definir contrato final do checkout Kiwify (url de checkout, status e expiracao).
+
+Evidencias:
+- Entrada anterior preservada por append-only e complemento registrado em nova entrada V2.
+
+[2026-03-05 21:12:32 -0300] [autor:codex] [perfil:ia] [acao:backend.feature] [id:LOG-20260305-211232-backend-feature]
+Contexto:
+- Dono autorizou seguir com a migracao de pagamentos para Kiwify e ajuste da UX de planos.
+
+Mudancas:
+- Fluxo de assinatura foi migrado para checkout Kiwify por plano via ENV; webhook /api/webhooks/kiwify com validacao de token e idempotencia entrou no backend; removido destaque de plano recomendado em Settings; suite de testes de assinatura/webhook atualizada.
+
+Arquivos afetados:
+- server/routers.ts
+- server/_core/index.ts
+- server/_core/kiwify.ts
+- server/_core/kiwifyWebhook.ts
+- client/src/pages/Settings.tsx
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/PLANO_EXECUCAO_FASE_4.md
+
+Proximo:
+- Configurar KIWIFY_WEBHOOK_TOKEN e URLs de checkout por plano no ambiente alvo.
+- Disparar evento real da Kiwify para validar mudanca de planStatus/planExpiry no usuario.
+
+Evidencias:
+- pnpm check, pnpm test (79 testes) e pnpm build executados com sucesso.
+
+[2026-03-06 07:28:17 -0300] [autor:codex] [perfil:ia] [acao:infra.config] [id:LOG-20260306-072817-infra-config]
+Contexto:
+- Dono enviou os links reais de checkout da Kiwify e o token do webhook para aplicar no ambiente local e pediu orientacao sobre IPs de origem.
+
+Mudancas:
+- Configurado ambiente local com `PAYMENT_PROVIDER=kiwify`, URLs reais dos 4 planos e token de webhook.
+- Adicionado hardening opcional por IP no endpoint `POST /api/webhooks/kiwify` via `KIWIFY_WEBHOOK_ALLOWED_IPS` (CSV), sem quebrar o fluxo por token.
+- Criado registro privado local de credenciais/operacao em `docs/CREDENCIAIS_PRIVADAS.md` (arquivo ignorado no Git) com secao dedicada para IPs observados.
+- Documentacao de deploy e operacao atualizada para refletir configuracao Kiwify e procedimento de allowlist por IP.
+
+Arquivos afetados:
+- .env
+- .env.example
+- server/_core/env.ts
+- server/_core/index.ts
+- docs/CREDENCIAIS_PRIVADAS.md
+- docs/DEPLOY_VPS.md
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+
+Proximo:
+- Configurar o webhook oficial da Kiwify apontando para `https://getorbita.com.br/api/webhooks/kiwify` com o token definido.
+- Disparar um evento real para validar atualizacao de `planStatus`/`planExpiry` e capturar IP de origem para decidir ativacao da allowlist.
+
+Evidencias:
+- Variaveis locais de Kiwify aplicadas no `.env`.
+- Endpoint de webhook agora aceita bloqueio opcional por `KIWIFY_WEBHOOK_ALLOWED_IPS`.
+
+[2026-03-06 07:54:15 -0300] [autor:codex] [perfil:ia] [acao:infra.db] [id:LOG-20260306-075415-infra-db]
+Contexto:
+- Dono pediu confirmacao manual do email no banco local porque o ambiente de desenvolvimento nao envia email real.
+
+Mudancas:
+- Conta local `gustavosilva585@gmail.com` foi marcada como confirmada diretamente na tabela `users`, com `emailVerified=1` e `emailVerifiedAt=NOW()`.
+- Documentacao operacional foi sincronizada para registrar que o QA local dessa conta nao depende mais do fluxo de email.
+
+Arquivos afetados:
+- docs/CENTRO_DE_OPERACAO.md
+- docs/TODO_LANCAMENTO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Seguir os testes locais autenticados com essa conta e manter confirmacao manual apenas em ambiente local.
+- Nao replicar essa acao em producao; la a verificacao deve continuar pelo fluxo real de email/webhook.
+
+Evidencias:
+- Consulta SQL final retornou `emailVerified=1` e `emailVerifiedAt=2026-03-06 07:54:15` para `gustavosilva585@gmail.com`.
+
+[2026-03-06 08:04:50 -0300] [autor:codex] [perfil:ia] [acao:frontend.feature] [id:LOG-20260306-080450-frontend-feature]
+Contexto:
+- Dono definiu que a landing deve mostrar os planos e levar a pessoa para cadastro + pagamento antes do acesso a plataforma.
+
+Mudancas:
+- Landing page passou a exibir os 4 planos com CTA comercial por plano.
+- Tela `Login` agora aceita funil comercial via query string, com plano preselecionado e textos/acoes adaptados para checkout.
+- Backend ganhou `auth.registerForCheckout`, que cria a conta com plano pendente e devolve o checkout Kiwify sem abrir sessao para o novo lead.
+- Fluxo para conta existente foi ajustado: ao entrar com plano selecionado, o usuario segue direto para `auth.createSubscription` e e redirecionado ao checkout.
+
+Arquivos afetados:
+- client/src/lib/planCatalog.ts
+- client/src/pages/Home.tsx
+- client/src/pages/Login.tsx
+- client/src/pages/Settings.tsx
+- server/routers.ts
+- server/auth.checkout-register.test.ts
+- docs/TODO_LANCAMENTO.md
+- docs/CENTRO_DE_OPERACAO.md
+- docs/DECISOES_PRODUTO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Validar manualmente no browser a LP escolhendo pelo menos 2 planos diferentes e confirmar o redirecionamento correto para o checkout.
+- Validar o funil de conta existente (`login -> checkout`) e o funil de novo lead (`cadastro -> checkout`) antes do deploy.
+
+Evidencias:
+- `node ./node_modules/vitest/vitest.mjs run server/auth.checkout-register.test.ts server/auth.subscription.test.ts server/auth.email-verification.test.ts` passou com 11 testes verdes.
+- `tsc --noEmit` continuou travando no ambiente local e foi interrompido; validacao completa de typescript segue pendente nesse ambiente.
+
+[2026-03-06 08:20:52 -0300] [autor:codex] [perfil:ia] [acao:infra.local-dev] [id:LOG-20260306-082052-infra-local-dev]
+Contexto:
+- Dono reportou que o app local completo nao abria em `localhost:3000` com backend e frontend integrados.
+
+Mudancas:
+- Ajustado `server/_core/vite.ts` para deixar o proprio Vite carregar `vite.config.ts`, removendo o import direto do config no runtime do backend.
+- Configurado proxy `/api` no `vite.config.ts` apontando para `http://127.0.0.1:3001`.
+- Adicionados scripts `pnpm dev:web` e `pnpm dev:api` para subir o ambiente local completo de forma estavel.
+- Ambiente local foi validado com frontend em `:3000` e backend em `:3001`, mantendo o navegador operando por `localhost:3000`.
+
+Arquivos afetados:
+- server/_core/vite.ts
+- vite.config.ts
+- package.json
+- docs/CENTRO_DE_OPERACAO.md
+- docs/TODO_LANCAMENTO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Manter QA manual no fluxo local usando `pnpm dev:web` + `pnpm dev:api`.
+- Se o modo integrado `pnpm dev` continuar necessario no futuro, tratar isso como trilha separada de estabilizacao, sem bloquear o lancamento.
+
+Evidencias:
+- `curl -I http://127.0.0.1:3000` retornou `200 OK`.
+- `curl http://127.0.0.1:3001/api/trpc/auth.me?batch=1&input=%7B%7D` retornou resposta JSON valida.
+- `curl http://127.0.0.1:3000/api/trpc/auth.me?batch=1&input=%7B%7D` passou a responder via proxy do Vite.
+
+[2026-03-06 08:32:41 -0300] [autor:codex] [perfil:ia] [acao:infra.local-runtime] [id:LOG-20260306-083241-infra-local-runtime]
+Contexto:
+- Dono reportou nova falha no ambiente local com erro do Vite/Babel e travamento ao abrir `localhost:3000`.
+
+Mudancas:
+- Backend ganhou modo explicito `DISABLE_INTERNAL_VITE=1` para subir apenas API em desenvolvimento, sem embutir o middleware do Vite no processo `tsx`.
+- `pnpm dev` foi redefinido para orquestrar `pnpm dev:api` + `pnpm dev:web`, preservando o fluxo local recomendado sem depender do Vite embutido.
+- `vite.config.ts` foi endurecido para nao carregar plugins auxiliares (`jsxLoc` e `manus runtime`) por padrao no local; agora eles sao opt-in por variavel de ambiente.
+- Dependencias locais sob `Documents/.../ADflow/node_modules` foram diagnosticadas como corrompidas/incompletas (`react`/`lucide-react` com arquivos faltando).
+- Para destravar o QA imediato, foi criado um espelho limpo em `/private/tmp/ADflow-local-run`, com `pnpm install` fresco e stack local operacional servido a partir dali.
+
+Arquivos afetados:
+- package.json
+- server/_core/index.ts
+- vite.config.ts
+- docs/CENTRO_DE_OPERACAO.md
+- docs/TODO_LANCAMENTO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Manter o QA local imediato usando o runtime limpo em `/private/tmp/ADflow-local-run` enquanto a arvore original em `Documents/.../ADflow` nao recebe reinstalacao completa e validada de dependencias.
+- Tratar como acao tecnica separar definitivamente o workspace ativo de pastas sincronizadas/File Provider para evitar nova corrupcao de `node_modules`.
+
+Evidencias:
+- `curl -I http://127.0.0.1:3000` no runtime limpo retornou `HTTP/1.1 200 OK`.
+- `curl http://127.0.0.1:3000/api/trpc/auth.me?batch=1&input=%7B%7D` no runtime limpo retornou JSON valido via proxy.
+- Vite no espelho limpo subiu sem erro de `plugin:vite:react-babel`; o diagnostico passou a mostrar arquivos faltando em `lucide-react` e `react` apenas na arvore original.
+
+[2026-03-06 08:43:10 -0300] [autor:codex] [perfil:ia] [acao:billing.kiwify-prefill] [id:LOG-20260306-084310-billing-kiwify-prefill]
+Contexto:
+- Dono reportou friccao no checkout: lead cadastrava nome, email, CPF e telefone no Orbita e precisava repetir os mesmos dados no checkout da Kiwify.
+
+Mudancas:
+- Checkout Kiwify passou a sair com prefill automatico de `name`, `email`, `phone`, `cpf` e `region=br` quando esses dados existem no Orbita.
+- Fluxo `auth.registerForCheckout` agora reutiliza os dados recem-digitados no cadastro para abrir a URL da Kiwify ja preenchida.
+- Fluxo `auth.createSubscription` agora reutiliza os dados salvos do usuario autenticado para abrir a Kiwify ja preenchida.
+- Normalizacao aplicada para Kiwify: email em lowercase, telefone sem simbolos e com remocao do prefixo `55` quando o numero salvo ja contem DDI brasileira, CPF apenas quando houver documento de 11 digitos.
+
+Arquivos afetados:
+- server/_core/kiwify.ts
+- server/routers.ts
+- server/kiwify.checkout-url.test.ts
+- server/auth.checkout-register.test.ts
+- server/auth.subscription.test.ts
+- docs/CENTRO_DE_OPERACAO.md
+- docs/TODO_LANCAMENTO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Validar manualmente no browser se a Kiwify abre com `name/email/phone/cpf` preenchidos para novo cadastro e para usuario existente.
+- Confirmar em operacao real se algum plano PJ precisa tratamento adicional de CNPJ; a documentacao oficial localizada da Kiwify publica parametro `cpf`, nao `cnpj`.
+
+Evidencias:
+- `node ./node_modules/vitest/vitest.mjs run server/kiwify.checkout-url.test.ts server/auth.checkout-register.test.ts server/auth.subscription.test.ts` passou com 11 testes verdes no espelho limpo.
+- API local em `/private/tmp/ADflow-local-run` recarregou `server/routers.ts` automaticamente apos sincronizacao do codigo novo.
+
+[2026-03-06 08:57:49 -0300] [autor:codex] [perfil:ia] [acao:checkout.funnel-rework] [id:LOG-20260306-085749-checkout-funnel-rework]
+Contexto:
+- Dono aprovou reduzir o cadastro antes do pagamento e mover os dados complementares para uma pagina de obrigado apos o checkout.
+
+Mudancas:
+- Cadastro pre-pagamento foi reduzido para os dados minimos do funil: nome, sobrenome, email, WhatsApp, CPF e senha.
+- `auth.registerForCheckout` agora devolve tambem um `checkoutCompletionToken` assinado para continuar o fluxo apos voltar da Kiwify.
+- Novo fluxo de pos-checkout implementado:
+  - `auth.getCheckoutCompletionContext`
+  - `auth.completeCheckoutProfile`
+  - `auth.activateCheckoutAccess`
+- Nova pagina publica `/obrigado` criada para coletar endereco/cidade/origem/idioma/opt-in e liberar sessao somente apos `planStatus=active|trial`.
+- Contexto local do checkout passa a ser persistido no browser (`localStorage`) para retomar o fluxo ao voltar da Kiwify no mesmo navegador.
+- Runtime local foi validado no espelho limpo com `localhost:3000`, `/obrigado`, proxy `/api`, `tsc --noEmit` verde e `vite build` verde.
+
+Arquivos afetados:
+- server/_core/checkoutCompletion.ts
+- server/routers.ts
+- client/src/pages/Login.tsx
+- client/src/pages/ThankYou.tsx
+- client/src/lib/checkoutContext.ts
+- client/src/lib/profileCompletion.ts
+- client/src/App.tsx
+- server/auth.checkout-completion.test.ts
+- server/auth.checkout-register.test.ts
+- server/auth.subscription.test.ts
+- server/kiwify.checkout-url.test.ts
+- docs/CENTRO_DE_OPERACAO.md
+- docs/TODO_LANCAMENTO.md
+- docs/LOG_AGENTES.md
+
+Proximo:
+- Configurar no painel da Kiwify a URL externa de obrigado para `https://getorbita.com.br/obrigado`.
+- Validar no browser real os cenarios:
+  - novo lead -> cadastro minimo -> checkout -> `/obrigado` -> preenchimento final -> acesso;
+  - usuario autenticado -> upgrade -> checkout -> `/obrigado` -> retorno ao app.
+- Confirmar na operacao manual os limites da Kiwify: pagina externa de obrigado para cartao aprovado e PIX aprovado; fallback para boleto/PIX gerado continua sendo login manual ou retorno posterior ao mesmo navegador.
+
+Evidencias:
+- `node ./node_modules/vitest/vitest.mjs run server/kiwify.checkout-url.test.ts server/auth.checkout-register.test.ts server/auth.subscription.test.ts server/auth.checkout-completion.test.ts server/auth.profile.test.ts` passou com 17 testes verdes no espelho limpo.
+- `pnpm exec tsc --noEmit --pretty false` passou no espelho limpo.
+- `pnpm exec vite build` concluiu com sucesso no espelho limpo; restaram apenas warnings conhecidos de bundle/chunk.
+
+[2026-03-06 09:09:12 -0300] [autor:Codex] [perfil:ia] [acao:frontend.feature] [id:LOG-20260306-090912-frontend-feature]
+Contexto:
+- Refino da pagina publica /obrigado com preview para validacao sem compra e melhoria do funil pos-Kiwify.
+
+Mudancas:
+- Reestruturada a pagina /obrigado com layout comercial, cards de status, guia de ativacao e modo /obrigado?preview=1 preservando a logica de perfil complementar e liberacao automatica.
+
+Arquivos afetados:
+- client/src/pages/ThankYou.tsx
+
+Proximo:
+- Atualizar CENTRO_DE_OPERACAO e TODO_LANCAMENTO com o novo preview e registrar validacao final antes do deploy.
+
+Evidencias:
+- pnpm test (89 testes), pnpm exec tsc --noEmit, pnpm exec vite build, curl -I http://127.0.0.1:3000/obrigado?preview=1

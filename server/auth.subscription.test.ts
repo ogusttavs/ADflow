@@ -9,11 +9,8 @@ const dbMock = vi.hoisted(() => ({
   deleteUserAndAuthTokensById: vi.fn(),
 }));
 
-const asaasMock = vi.hoisted(() => ({
-  createAsaasCustomer: vi.fn(),
-  createAsaasSubscription: vi.fn(),
-  resolveCheckoutUrlFromSubscriptionPayments: vi.fn(),
-  resolveSubscriptionCheckoutUrl: vi.fn(),
+const kiwifyMock = vi.hoisted(() => ({
+  resolveKiwifyCheckoutUrl: vi.fn(),
 }));
 
 const profileCryptoMock = vi.hoisted(() => ({
@@ -22,7 +19,7 @@ const profileCryptoMock = vi.hoisted(() => ({
 }));
 
 vi.mock("./db", () => dbMock);
-vi.mock("./_core/asaas", () => asaasMock);
+vi.mock("./_core/kiwify", () => kiwifyMock);
 vi.mock("./_core/profileCrypto", () => profileCryptoMock);
 
 function createAuthContext(): TrpcContext {
@@ -67,8 +64,8 @@ describe("auth.createSubscription", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     dbMock.getDb.mockResolvedValue({});
-    asaasMock.resolveSubscriptionCheckoutUrl.mockReturnValue("https://sandbox.asaas.com/pay/123");
-    asaasMock.resolveCheckoutUrlFromSubscriptionPayments.mockResolvedValue(null);
+    kiwifyMock.resolveKiwifyCheckoutUrl.mockReturnValue("https://pay.kiwify.com.br/checkout-123");
+    profileCryptoMock.decryptProfileSensitiveValue.mockReturnValue("39053344705");
   });
 
   it("blocks subscription activation when email is not verified", async () => {
@@ -88,7 +85,7 @@ describe("auth.createSubscription", () => {
     ).rejects.toThrow("Confirme seu email antes de ativar um plano.");
   });
 
-  it("creates customer/subscription and stores identifiers", async () => {
+  it("stores pending selection for non-active user and returns checkout URL", async () => {
     dbMock.getUserByOpenId.mockResolvedValue({
       ...createAuthContext().user,
       asaasCustomerId: null,
@@ -97,8 +94,6 @@ describe("auth.createSubscription", () => {
       planStatus: null,
       planExpiry: null,
     });
-    asaasMock.createAsaasCustomer.mockResolvedValue({ id: "cus_123" });
-    asaasMock.createAsaasSubscription.mockResolvedValue({ id: "sub_123" });
 
     const caller = appRouter.createCaller(createAuthContext());
     const result = await caller.auth.createSubscription({
@@ -107,35 +102,110 @@ describe("auth.createSubscription", () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.asaasCustomerId).toBe("cus_123");
-    expect(result.asaasSubscriptionId).toBe("sub_123");
+    expect(result.checkoutUrl).toBe("https://pay.kiwify.com.br/checkout-123");
+    expect(result.planStatus).toBe("past_due");
+    expect(kiwifyMock.resolveKiwifyCheckoutUrl).toHaveBeenCalledWith(
+      "business_standard",
+      expect.objectContaining({
+        name: "Usuário Teste",
+        email: "user@orbita.app",
+        phone: null,
+        taxId: null,
+        region: "br",
+      }),
+    );
     expect(dbMock.updateUserById).toHaveBeenCalledTimes(1);
-    expect(asaasMock.resolveCheckoutUrlFromSubscriptionPayments).not.toHaveBeenCalled();
+    expect(dbMock.updateUserById).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({
+        plan: "business_standard",
+        planStatus: "past_due",
+        planExpiry: null,
+      }),
+    );
   });
 
-  it("uses payment fallback when Asaas does not return checkout url on subscription payload", async () => {
+  it("does not downgrade active users while generating checkout", async () => {
     dbMock.getUserByOpenId.mockResolvedValue({
       ...createAuthContext().user,
-      asaasCustomerId: "cus_123",
+      asaasCustomerId: "ki_customer_1",
+      asaasSubscriptionId: "ki_subscription_1",
+      plan: "business_standard",
+      planStatus: "active",
+      planExpiry: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+    });
+
+    const caller = appRouter.createCaller(createAuthContext());
+    const result = await caller.auth.createSubscription({
+      plan: "business_pro",
+      billingType: "PIX",
+    });
+
+    expect(result.checkoutUrl).toBe("https://pay.kiwify.com.br/checkout-123");
+    expect(result.planStatus).toBe("active");
+    expect(kiwifyMock.resolveKiwifyCheckoutUrl).toHaveBeenCalledWith(
+      "business_pro",
+      expect.objectContaining({
+        name: "Usuário Teste",
+        email: "user@orbita.app",
+        phone: null,
+        taxId: null,
+        region: "br",
+      }),
+    );
+    expect(dbMock.updateUserById).not.toHaveBeenCalled();
+  });
+
+  it("prefills Kiwify checkout with stored buyer data when available", async () => {
+    dbMock.getUserByOpenId.mockResolvedValue({
+      ...createAuthContext().user,
+      asaasCustomerId: null,
       asaasSubscriptionId: null,
+      whatsapp: "+5511988887777",
+      taxIdEncrypted: "encrypted_tax_id",
+      taxIdLast4: "4705",
+      taxIdType: "cpf",
       plan: null,
       planStatus: null,
       planExpiry: null,
     });
-    asaasMock.resolveSubscriptionCheckoutUrl.mockReturnValue(null);
-    asaasMock.createAsaasSubscription.mockResolvedValue({ id: "sub_456" });
-    asaasMock.resolveCheckoutUrlFromSubscriptionPayments.mockResolvedValue(
-      "https://sandbox.asaas.com/pay/fallback",
-    );
 
     const caller = appRouter.createCaller(createAuthContext());
-    const result = await caller.auth.createSubscription({
+    await caller.auth.createSubscription({
       plan: "personal_pro",
       billingType: "PIX",
     });
 
-    expect(asaasMock.resolveCheckoutUrlFromSubscriptionPayments).toHaveBeenCalledWith("sub_456");
-    expect(result.checkoutUrl).toBe("https://sandbox.asaas.com/pay/fallback");
+    expect(profileCryptoMock.decryptProfileSensitiveValue).toHaveBeenCalledWith("encrypted_tax_id");
+    expect(kiwifyMock.resolveKiwifyCheckoutUrl).toHaveBeenCalledWith(
+      "personal_pro",
+      expect.objectContaining({
+        name: "Usuário Teste",
+        email: "user@orbita.app",
+        phone: "+5511988887777",
+        taxId: "39053344705",
+        region: "br",
+      }),
+    );
+  });
+
+  it("fails when checkout URL is not configured for selected plan", async () => {
+    dbMock.getUserByOpenId.mockResolvedValue({
+      ...createAuthContext().user,
+      plan: null,
+      planStatus: null,
+      planExpiry: null,
+    });
+    kiwifyMock.resolveKiwifyCheckoutUrl.mockReturnValue(null);
+
+    const caller = appRouter.createCaller(createAuthContext());
+
+    await expect(
+      caller.auth.createSubscription({
+        plan: "personal_standard",
+        billingType: "PIX",
+      }),
+    ).rejects.toThrow("Checkout deste plano não configurado na Kiwify.");
   });
 });
 

@@ -65,7 +65,7 @@ export type InsertAuthToken = typeof authTokens.$inferInsert;
 
 export const processedWebhookEvents = mysqlTable("processed_webhook_events", {
   id: int("id").autoincrement().primaryKey(),
-  provider: mysqlEnum("provider", ["asaas"]).notNull().default("asaas"),
+  provider: mysqlEnum("provider", ["asaas", "kiwify"]).notNull().default("asaas"),
   eventId: varchar("eventId", { length: 128 }).notNull().unique(),
   eventType: varchar("eventType", { length: 120 }).notNull(),
   processedAt: timestamp("processedAt").defaultNow().notNull(),

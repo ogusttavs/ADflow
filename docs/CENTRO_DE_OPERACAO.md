@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-02-25 21:40:37 -0300
+Atualizado em: 2026-03-06 09:09:36 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -24,27 +24,32 @@ Comandos operacionais:
 
 ## 2) Regras obrigatorias
 
+- Toda acao relevante (humano ou IA) exige nova entrada em `docs/LOG_AGENTES.md` no formato V2.
 - Toda alteracao relevante (codigo, infra, testes, deploy, commit/push) exige update de:
   - `docs/CENTRO_DE_OPERACAO.md`
   - `docs/LOG_AGENTES.md`
 - `docs/TODO_LANCAMENTO.md` e o backlog oficial: ao concluir tarefa ou criar nova tarefa, atualizar imediatamente.
-- Guardrail automatico local/CI exige os 3 arquivos (`CENTRO`, `LOG`, `TODO`) quando houver mudanca fora de `docs/`.
+- Guardrail automatico local/CI exige:
+  - `LOG` em todo commit;
+  - `CENTRO` + `TODO` quando houver mudanca fora de `docs/`;
+  - formato V2 valido nas entradas novas do log.
 - Nao manter decisoes duplicadas em arquivos diferentes com versoes conflitantes.
 - Nao registrar segredo real em `docs/`.
 
 ## 3) Fluxo oficial de execucao
 
-1. Ler `docs/TODO_LANCAMENTO.md`.
+1. Ler `docs/SISTEMA_DOCUMENTACAO.md` e `docs/TODO_LANCAMENTO.md`.
 2. Executar tarefa prioritaria.
 3. Validar (`pnpm check`, `pnpm test`, `pnpm build`) quando aplicavel.
-4. Atualizar `TODO` (status da tarefa).
-5. Registrar no `LOG_AGENTES`.
+4. Registrar no `LOG_AGENTES` (formato V2).
+5. Atualizar `TODO` (status da tarefa).
 6. Atualizar este `CENTRO` se houver mudanca de estado/processo.
 
 ## 4) Fonte de verdade por documento
 
 - `docs/TODO_LANCAMENTO.md`: o que fazer agora e o status de cada tarefa.
-- `docs/LOG_AGENTES.md`: historico cronologico de execucao.
+- `docs/LOG_AGENTES.md`: log cronologico por acao (humano e IA).
+- `docs/SISTEMA_DOCUMENTACAO.md`: padrao oficial de documentacao e formato de log.
 - `docs/DEPLOY_VPS.md`: operacao de producao/VPS.
 - `docs/DECISOES_PRODUTO.md`: decisoes de produto vigentes (priorizacao e escopo).
 - `docs/ESTRATEGIA_MERCADO_UX_SEGURANCA.md`: base de pesquisa e criterios estrategicos.
@@ -83,8 +88,9 @@ Estado atual de desenvolvimento:
 - Sidebar e Configuracoes foram alinhadas com a realidade atual do Orbita (nomenclatura e textos sem dependencias de campanhas desativadas).
 - Configuracoes agora persistem preferencias locais reais (conta, alertas, rotina, metas e pagina inicial).
 - Onboarding do dashboard foi alinhado 100% aos modulos ativos/visiveis (clientes, rotina, CRM, financeiro, configuracoes).
-- Fluxos diarios usam chave de data local (sem dependencia de `toISOString` para "hoje"), reduzindo risco de virada de dia por UTC.
+- Fluxos diarios em frontend usam chave de data local; backend ainda possui pontos com `toISOString` para tratar na trilha de hardening.
 - Landing page/login alinhados ao branding Orbita e ao escopo funcional atual para demo publica.
+- Landing page comercial atualizada para exibir os 4 planos e iniciar o funil `plano -> cadastro -> checkout` antes do acesso ao app.
 - Tema inicial do app definido como escuro por padrao para novos acessos.
 - Landing page atualizada para comunicar apenas modulos realmente ativos no produto hoje.
 
@@ -97,14 +103,40 @@ Pendencias tecnicas objetivas:
 - A9 concluido operacionalmente: `USER_PII_ENCRYPTION_KEY` dedicada configurada na VPS com tamanho valido e sem erro de runtime.
 - Sprint 3 (Auth e Email) concluida e deployada em producao (`5efe746`): itens 09, 10 e 11 ativos.
 - Sprint 4 planejada oficialmente com documento tecnico aprovado e fluxo `security-first` travado (sandbox antes de producao).
-- Sprint 4 em execucao: itens 12, 14 e 15 concluidos em codigo (Asaas/webhook/idempotencia + guards backend/frontend por plano), com pendencia de validacao manual em Asaas sandbox e aplicacao da migration no banco de producao.
-- Checkout sandbox estabilizado no local: fallback de URL de pagamento ativo quando a Asaas nao retorna `checkoutUrl` no payload inicial, com tratamento amigavel para erro de rede (`fetch failed`).
+- Sprint 4 em execucao: itens 14 e 15 concluidos em codigo; frente de pagamentos (item 12) pivotada oficialmente para Kiwify em 2026-03-05.
+- Integracao Asaas existente continua registrada como legado tecnico, mas nao e mais o caminho oficial de lancamento.
 - Upsell interno de planos publicado na tela de `Settings` (aba `Planos`) e fluxo do modal conectado para abrir diretamente essa aba (`/settings?tab=plans`).
-- Pedido de UX aprovado pelo dono para proxima iteracao: remover qualquer destaque de "plano recomendado" nos cards de planos (nenhum plano em evidência por enquanto).
-- Decisao de produto registrada: manter checkout hospedado Asaas para o lancamento; checkout visual proprio Orbita (via API Asaas) fica para pos-lancamento, apos o ultimo sprint.
+- Migracao tecnica de pagamentos iniciada em codigo (Kiwify):
+  - `auth.createSubscription` agora abre checkout hospedado Kiwify por plano via ENV;
+  - `auth.registerForCheckout` cria conta publica com plano pendente e devolve checkout para o funil da landing;
+  - novo endpoint `POST /api/webhooks/kiwify` com validacao de token;
+  - processamento de webhook com deduplicacao/idempotencia e atualizacao de `planStatus`/`planExpiry`/`plan`.
+- Checkout hospedado Kiwify agora recebe prefill automatico de comprador (`name`, `email`, `phone`, `cpf`, `region=br`) nos fluxos de novo lead e usuario autenticado, reduzindo redigitacao no pagamento.
+- Funil comercial foi repartido em 2 etapas:
+  - antes do pagamento: cadastro minimo para abrir checkout com prefill;
+  - depois do pagamento: pagina publica `/obrigado` para coletar dados complementares e liberar a sessao apenas apos confirmacao do plano.
+- Pagina publica `/obrigado` agora tambem possui modo de pre-visualizacao via `?preview=1`, permitindo revisar UI e copy sem depender de pagamento aprovado.
+- Tela `Login` agora suporta funil comercial por query string (`plan` + `checkout=1`), com cadastro sem sessao para novos leads e login com redirecionamento direto ao checkout para contas existentes.
+- Configuracao operacional local da Kiwify atualizada com links reais dos 4 planos e token webhook; controle opcional de allowlist por IP habilitado via `KIWIFY_WEBHOOK_ALLOWED_IPS`.
+- Registro privado de credenciais e checkpoint de IPs criado em `docs/CREDENCIAIS_PRIVADAS.md` (arquivo local ignorado no Git).
+- Ajuste UX da Sprint 4 aplicado: removido destaque de "plano recomendado" nos cards de planos em `Settings`.
+- Decisao de produto vigente: manter checkout hospedado Kiwify para o lancamento; checkout proprio Orbita fica para pos-lancamento (somente se necessario).
 - Refinamento de UX por plano aplicado: contas pessoais nao visualizam modulos business na sidebar/customizacao e mensagens de bloqueio nao exibem mais rotulo "Business".
 - Correcao da navegacao interna de abas em `Settings`: troca de tab funcionando com sincronizacao via query string.
-- Base local de QA com 4 usuarios ficticios (1 por plano) criada para validacao funcional de acesso por assinatura.
+- Base local de QA foi limpa em 2026-03-05; nao ha usuarios ficticios ativos no banco local/producao neste momento.
+- Cadastro local restaurado em 2026-03-05 apos ajuste de `DATABASE_URL` + `pnpm db:push`; fluxo `auth.register` validado com sucesso via API local.
+- Conta local do dono `gustavosilva585@gmail.com` foi confirmada manualmente no banco em 2026-03-06 para continuar o QA sem dependencia de envio de email no ambiente local.
+- Modo local estavel para QA completo definido em 2026-03-06: frontend Vite standalone em `localhost:3000` com proxy `/api` para backend local em `localhost:3001`; o middleware Vite integrado ao `pnpm dev` segue instavel neste ambiente.
+- Hardening adicional do runtime local aplicado em 2026-03-06: backend agora suporta modo `DISABLE_INTERNAL_VITE=1` e `pnpm dev` foi redirecionado para orquestrar `dev:api` + `dev:web`, sem usar o Vite embutido no processo `tsx`.
+- Dependencias da arvore original em `Documents/.../ADflow/node_modules` foram diagnosticadas como corrompidas/incompletas (`react`/`lucide-react` com arquivos faltando); QA imediato ficou destravado por um espelho limpo em `/private/tmp/ADflow-local-run`.
+- Hardening de disponibilidade aplicado no backend: startup agora testa conexao com banco e, em producao, encerra processo imediatamente se DB estiver indisponivel.
+- UX de cadastro reforcada no login:
+  - pais + DDI automatico para WhatsApp (usuario digita sem `+55`);
+  - CEP (Brasil) com busca automatica de endereco para completar apenas complemento;
+  - selecao guiada de origem (`Onde conheceu a Orbita?`) com opcao `Outro`;
+  - formatacao de CPF/CNPJ no blur;
+  - confirmacao obrigatoria de senha no cadastro.
+- Primeiro acesso ajustado: popup de briefing diario (resumo de ontem) nao abre enquanto onboarding nao estiver concluido.
 - Sprint 10 criado no backlog para encerramento de fase com auditoria final de seguranca, velocidade e SEO.
 - Refinamentos de seguranca/conta adicionados na Sprint 3:
   - cadastro ampliado com dados completos de perfil e consentimento;
@@ -126,15 +158,28 @@ Pendencias tecnicas objetivas:
 
 ## 7) Prioridade recomendada (curto prazo)
 
-1. A6 (Asaas + webhook) para destravar Sprint 4 de pagamentos.
-2. Ajuste rapido de UX da Sprint 4: remover destaque visual de plano recomendado.
-3. Definir estrategia de checkout (proprio vs hosted) com foco em seguranca/compliance e tempo de entrega.
-4. A1 + A2 (Google OAuth em producao), mais perto do fechamento da fase.
-5. Rotacao recorrente de segredos operacionais.
-6. Ao final das entregas funcionais, executar Sprint 10 (hardening final de seguranca + performance + SEO).
+1. A6 (Kiwify + webhook) para destravar Sprint 4 de pagamentos.
+2. Validar o fluxo fim-a-fim da Kiwify com compra real controlada e reembolsavel antes de virar a chave em producao; nao foi localizada documentacao oficial de sandbox publico para este checkout.
+3. Registrar IP real do primeiro webhook recebido e decidir ativacao do bloqueio `KIWIFY_WEBHOOK_ALLOWED_IPS`.
+4. Executar o pivot de pagamentos com foco em entrega rapida e risco operacional baixo.
+5. A1 + A2 (Google OAuth em producao), mais perto do fechamento da fase.
+6. Rotacao recorrente de segredos operacionais.
+7. Ao final das entregas funcionais, executar Sprint 10 (hardening final de seguranca + performance + SEO).
 
 ## 8) Marcos recentes
 
+- 2026-03-05: sistema de documentacao V2 oficializado com log estruturado por acao (`autor`, `perfil` humano/IA, `acao`, `id`), novo guia `docs/SISTEMA_DOCUMENTACAO.md`, template de log e guardrails automaticos reforcados em hook/CI.
+- 2026-03-05: decisao de produto revisada para pagamentos via Kiwify no lancamento (hosted checkout), substituindo o caminho oficial anterior baseado em Asaas.
+- 2026-03-05: incidente local de cadastro resolvido (`Banco de dados indisponivel`) com configuracao de `DATABASE_URL`, migracao local aplicada e hardening fail-fast para producao quando DB nao estiver acessivel no startup.
+- 2026-03-05: pacote UX de cadastro aplicado (pais/DDI, CEP auto, origem com opcoes, CPF formatado no blur, confirmacao de senha) e ajuste de primeiro acesso para priorizar onboarding antes do popup de resumo diario.
+- 2026-03-05: Sprint 4 avancou com migracao em codigo para Kiwify (checkout por plano via ENV + webhook `/api/webhooks/kiwify` com token e idempotencia) e com remocao do destaque de plano recomendado em `Settings`; validacoes `pnpm check`, `pnpm test` (79 testes) e `pnpm build` verdes.
+- 2026-03-06: links reais dos 4 planos da Kiwify e token de webhook foram aplicados no ambiente local; webhook ganhou allowlist opcional por IP (`KIWIFY_WEBHOOK_ALLOWED_IPS`) para hardening incremental apos observacao dos IPs reais.
+- 2026-03-06: landing page recebeu pricing dos 4 planos e o novo funil comercial `LP -> cadastro -> checkout Kiwify`; backend ganhou `auth.registerForCheckout` para criar conta sem liberar acesso antes do pagamento.
+- 2026-03-06: ambiente local full stack estabilizado com `pnpm dev:web` em `:3000` e `pnpm dev:api` em `:3001`, usando proxy `/api` no Vite; ajuste em `server/_core/vite.ts` removeu import direto de `vite.config.ts` no runtime do backend.
+- 2026-03-06: novo incidente local foi isolado como corrupcao/incompletude de `node_modules` na copia sob `Documents`; `package.json`, `server/_core/index.ts` e `vite.config.ts` foram ajustados para um fluxo local mais robusto, e o app ficou operacional em espelho limpo sob `/private/tmp/ADflow-local-run`.
+- 2026-03-06: checkout Kiwify passou a abrir com prefill automatico de `name/email/phone/cpf` a partir dos dados do Orbita, reduzindo digitacao duplicada no funil `cadastro/login -> pagamento`.
+- 2026-03-06: funil de checkout foi reestruturado com cadastro minimo pre-pagamento, `checkoutCompletionToken` assinado no backend e nova pagina publica `/obrigado` para completar perfil e liberar acesso so apos `planStatus=active|trial`.
+- 2026-03-06: pagina `/obrigado` foi refinada visualmente, ganhou modo `preview=1` para QA sem compra e passou por validacao completa local (`pnpm test` com 89 testes, `pnpm exec tsc --noEmit`, `pnpm exec vite build` e smoke em `localhost:3000`).
 - 2026-02-24: deploy publico concluido em `https://metrizy.com.br`.
 - 2026-02-24: guardrails de documentacao implantados (hooks + CI).
 - 2026-02-25: documentacao consolidada para modelo definitivo (Codex principal, Claude consultor, Gemini fora).

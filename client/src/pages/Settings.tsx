@@ -37,9 +37,9 @@ import {
   normalizeStartPageRoute,
   setSetting,
 } from "@/lib/user-settings";
+import { PLAN_CARDS } from "@/lib/planCatalog";
 import { getPasswordPolicyError } from "@shared/passwordPolicy";
 import { isValidTaxId } from "@shared/taxId";
-import type { OrbitaPlan } from "@shared/planAccess";
 
 const THEME_OPTIONS: Array<{
   id: Theme;
@@ -107,47 +107,6 @@ const SETTINGS_TABS = [
 ] as const;
 
 type SettingsTab = (typeof SETTINGS_TABS)[number];
-
-type PlanCard = {
-  id: OrbitaPlan;
-  label: string;
-  audience: string;
-  monthlyPrice: string;
-  highlights: string[];
-  featured?: boolean;
-};
-
-const PLAN_CARDS: PlanCard[] = [
-  {
-    id: "personal_standard",
-    label: "Pessoal Standard",
-    audience: "Profissional autônomo iniciando",
-    monthlyPrice: "R$ 29/mês",
-    highlights: ["Rotina e tarefas", "Diário e sonhos", "Painel pessoal"],
-  },
-  {
-    id: "personal_pro",
-    label: "Pessoal Pro",
-    audience: "Uso pessoal com mais recursos",
-    monthlyPrice: "R$ 49/mês",
-    highlights: ["Tudo do Standard", "Fluxos avançados", "Prioridade de suporte"],
-  },
-  {
-    id: "business_standard",
-    label: "Business Standard",
-    audience: "Operação comercial ativa",
-    monthlyPrice: "R$ 99/mês",
-    highlights: ["Clientes", "CRM", "Prospecção"],
-    featured: true,
-  },
-  {
-    id: "business_pro",
-    label: "Business Pro",
-    audience: "Equipe com demanda alta",
-    monthlyPrice: "R$ 149/mês",
-    highlights: ["Tudo do Business Standard", "Maior escala", "Prioridade máxima"],
-  },
-];
 
 function normalizeSettingsTab(value: string | null): SettingsTab {
   if (!value) return "general";
@@ -1135,12 +1094,11 @@ export default function Settings() {
                   return (
                     <Card
                       key={plan.id}
-                      className={`bg-card border-border ${plan.featured ? "ring-2 ring-primary/30" : ""}`}
+                      className="bg-card border-border"
                     >
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between gap-2">
                           <CardTitle className="text-base">{plan.label}</CardTitle>
-                          {plan.featured ? <Badge>Recomendado</Badge> : null}
                         </div>
                         <p className="text-sm text-muted-foreground">{plan.audience}</p>
                       </CardHeader>
@@ -1156,7 +1114,7 @@ export default function Settings() {
                         </div>
                         <Button
                           className="w-full"
-                          variant={plan.featured ? "default" : "outline"}
+                          variant="outline"
                           disabled={isCurrentPlan || createSubscriptionMutation.isPending}
                           onClick={() => {
                             if (isCurrentPlan) return;

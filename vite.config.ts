@@ -1,6 +1,5 @@
 import { jsxLocPlugin } from "@builder.io/vite-plugin-jsx-loc";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
@@ -151,17 +150,24 @@ function vitePluginManusDebugCollector(): Plugin {
 }
 
 const enableManusDebugCollector = process.env.ENABLE_MANUS_DEBUG_COLLECTOR === "1";
+const enableJsxLoc = process.env.ENABLE_JSX_LOC === "1";
+const enableManusRuntime = process.env.ENABLE_MANUS_RUNTIME === "1";
+const devBackendUrl =
+  (process.env.VITE_DEV_BACKEND_URL || "http://127.0.0.1:3001").trim();
 
 const plugins = [
-  react(),
   tailwindcss(),
-  jsxLocPlugin(),
-  vitePluginManusRuntime(),
+  ...(enableJsxLoc ? [jsxLocPlugin()] : []),
+  ...(enableManusRuntime ? [vitePluginManusRuntime()] : []),
   ...(enableManusDebugCollector ? [vitePluginManusDebugCollector()] : []),
 ];
 
 export default defineConfig({
   plugins,
+  esbuild: {
+    jsx: "automatic",
+    jsxImportSource: "react",
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -178,6 +184,12 @@ export default defineConfig({
   },
   server: {
     host: true,
+    proxy: {
+      "/api": {
+        target: devBackendUrl,
+        changeOrigin: false,
+      },
+    },
     allowedHosts: [
       ".manuspre.computer",
       ".manus.computer",
