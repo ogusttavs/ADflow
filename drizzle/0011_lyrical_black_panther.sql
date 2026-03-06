@@ -1,0 +1,1 @@
+ALTER TABLE `processed_webhook_events` MODIFY COLUMN `provider` enum('asaas','kiwify') NOT NULL DEFAULT 'asaas';

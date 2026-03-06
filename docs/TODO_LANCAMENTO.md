@@ -1,6 +1,6 @@
 # TODO - Lancamento Orbita (Backlog Oficial)
 
-Atualizado em: 2026-03-06 09:09:36 -0300
+Atualizado em: 2026-03-06 09:14:54 -0300
 
 Este e o backlog oficial do projeto.
 
@@ -10,7 +10,7 @@ Este e o backlog oficial do projeto.
 - Nao usar outro arquivo paralelo como backlog principal.
 
 ## Status geral
-- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida, deployada em producao no release `5efe746` e validada manualmente em fluxo real de email; pagamentos da Sprint 4 agora com foco oficial em Kiwify).
+- Fase A: em andamento (Sprints 1 e 2 concluidas em producao; Sprint 3 concluida e sucedida pelo release `5cded29` em producao com o novo funil Kiwify; pagamentos da Sprint 4 agora com foco oficial em Kiwify e validacao real de webhook).
 - Sprint final de fechamento criado no backlog: revisao completa de seguranca, performance e SEO antes do encerramento do ciclo.
 
 ---
@@ -98,12 +98,13 @@ Status atual: concluido em codigo. Popup diario foi condicionado ao onboarding c
 Status atual: concluido. Documento `docs/PLANO_EXECUCAO_FASE_4.md` criado com ordem de implementacao, hard gates de seguranca e validacao em sandbox antes de producao.
 
 - [ ] 12. Integrar Kiwify + webhooks
-Status atual: parcialmente concluido em codigo + configuracao local (2026-03-06). Links reais de checkout por plano e token de webhook foram definidos no ambiente local; backend com token + idempotencia ja ativo; fluxo publico `auth.registerForCheckout` passou a criar conta com plano pendente e devolver checkout Kiwify para a landing; checkout agora sai com prefill automatico de `name/email/phone/cpf` usando os dados ja coletados no Orbita; funil tambem ganhou `checkoutCompletionToken` + pagina publica `/obrigado` para coletar dados complementares depois do pagamento; a tela `/obrigado` agora possui preview via `/obrigado?preview=1` para QA sem compra; validacao local fechada com `pnpm test` (89 testes), `pnpm exec tsc --noEmit`, `pnpm exec vite build` e smoke HTTP em `localhost:3000`; pendente validar evento real no painel Kiwify, confirmar atualizacao de `planStatus`/`planExpiry` no ambiente externo e publicar o release em producao.
+Status atual: parcialmente concluido em codigo + producao (2026-03-06). Links reais de checkout por plano e token de webhook foram definidos no ambiente local; backend com token + idempotencia ja ativo; fluxo publico `auth.registerForCheckout` passou a criar conta com plano pendente e devolver checkout Kiwify para a landing; checkout agora sai com prefill automatico de `name/email/phone/cpf` usando os dados ja coletados no Orbita; funil tambem ganhou `checkoutCompletionToken` + pagina publica `/obrigado` para coletar dados complementares depois do pagamento; a tela `/obrigado` agora possui preview via `/obrigado?preview=1` para QA sem compra; validacao local fechada com `pnpm test` (89 testes), `pnpm exec tsc --noEmit`, `pnpm exec vite build` e smoke HTTP em `localhost:3000`; release `5cded29` ja esta em producao com PM2 online; pendente validar evento real no painel Kiwify e confirmar mudanca de status via webhook em um pagamento aprovado.
 - [x] 12c. Definir estrategia de checkout da Orbita (hosted Kiwify vs checkout proprio)
 Status atual: decisao tomada. Manter checkout hospedado da Kiwify no lancamento; checkout visual proprio fica para pos-lancamento, apenas se continuar valendo a pena.
 - [x] 13. Migration: `plan`, `planExpiry`, `planStatus` em `users`
 Status atual: concluido em codigo. Campos de plano adicionados no `drizzle/schema.ts`, migration `drizzle/0010_secret_stature.sql` gerada e `auth.me` passando `plan/planStatus/planExpiry`.
-- [ ] 13b. Aplicar migration da Sprint 4 no banco de producao (`pnpm db:push`) e validar colunas em `users`
+- [x] 13b. Aplicar migration da Sprint 4 no banco de producao (`pnpm db:push`) e validar colunas em `users`
+Status atual: concluido em 2026-03-06 no deploy do release `5cded29`. `db:push` executado na VPS e colunas `plan`, `planStatus` e `planExpiry` confirmadas em `users`.
 - [x] 14. Guards frontend por plano
 Status atual: concluido em codigo. Criados `usePlanAccess`, `PlanGate` e `UpgradePlanModal`, com bloqueio visual em rotas modulares (`Clients`, `ClientDetail`, `CRM`, `Prospecting`) e abertura de CTA de upgrade tambem em erro `UPGRADE_REQUIRED` da API.
 - [x] 14b. Upsell interno ao clicar em "Ver planos"
@@ -223,7 +224,7 @@ Status atual: concluido (confirmado pelo dono).
 - [x] A4. Configurar `CREDENTIAL_ENCRYPTION_KEY` em producao
 - [x] A5. Definir dominio final da marca Orbita
 - [ ] A6. Configurar Kiwify e webhook oficial
-Status atual: em andamento. Links dos 4 planos e token webhook ja definidos para operacao local; falta validar evento real da Kiwify no endpoint oficial de producao e fechar controle de IP observado para opcional `KIWIFY_WEBHOOK_ALLOWED_IPS`. Nao foi localizada documentacao oficial de sandbox publico para checkout, entao a validacao final deve usar compra real controlada.
+Status atual: em andamento. Links dos 4 planos e token webhook ja definidos para operacao local e release `5cded29` ja publicado em producao; falta validar evento real da Kiwify no endpoint oficial e fechar controle de IP observado para opcional `KIWIFY_WEBHOOK_ALLOWED_IPS`. Nao foi localizada documentacao oficial de sandbox publico para checkout, entao a validacao final deve usar compra real controlada.
 - [x] A7. Liberar acesso SSH de deploy (chave/usuario) para executar `quick-deploy` remoto
 - [x] A8. Configurar Resend em producao (dominio/DNS + `RESEND_API_KEY` + `EMAIL_FROM` + `EMAIL_PROVIDER=resend`)
 Status atual: concluido. ENV operacional aplicado na VPS (`APP_BASE_URL`, `EMAIL_PROVIDER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`), smoke executado e checklist manual de browser concluido (verificacao, reset, reenvio e rate limit).

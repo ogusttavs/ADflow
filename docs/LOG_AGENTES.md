@@ -1735,3 +1735,25 @@ Proximo:
 
 Evidencias:
 - pnpm test (89 testes), pnpm exec tsc --noEmit, pnpm exec vite build, curl -I http://127.0.0.1:3000/obrigado?preview=1
+
+[2026-03-06 09:14:54 -0300] [autor:Codex] [perfil:ia] [acao:infra.deploy] [id:LOG-20260306-091454-infra-deploy]
+Contexto:
+- Deploy de producao do release com funil Kiwify, pagina /obrigado e preview publico apos validacao completa local.
+
+Mudancas:
+- Release 5cded29 publicado na VPS via quick-deploy, migration aplicada em producao e PM2 reiniciado com sucesso; / e /obrigado?preview=1 respondendo 200 em getorbita.com.br.
+
+Arquivos afetados:
+- docs/CENTRO_DE_OPERACAO.md
+- docs/TODO_LANCAMENTO.md
+- docs/LOG_AGENTES.md
+- drizzle/0011_lyrical_black_panther.sql
+
+Proximo:
+- Commitar a migration gerada no deploy e atualizar o estado de producao nos docs centrais.
+
+Evidencias:
+- bash scripts/vps/quick-deploy.sh root@167.88.32.1
+- ssh root@167.88.32.1 'git rev-parse --short HEAD' => 5cded29
+- curl -I https://getorbita.com.br && curl -I https://getorbita.com.br/obrigado?preview=1 => 200 OK
+- SHOW COLUMNS FROM users => plan, planStatus, planExpiry

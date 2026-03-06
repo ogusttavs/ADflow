@@ -1,6 +1,6 @@
 # Centro de Operacao - Orbita
 
-Atualizado em: 2026-03-06 09:09:36 -0300
+Atualizado em: 2026-03-06 09:14:54 -0300
 
 Este arquivo e a fonte oficial de operacao do projeto.
 
@@ -101,7 +101,7 @@ Pendencias tecnicas objetivas:
 - Acesso SSH remoto local liberado e `quick-deploy` validado com sucesso em producao (A7 concluido).
 - Pendencias atuais do dono no backlog: A1, A2 e A6 (A3 concluido).
 - A9 concluido operacionalmente: `USER_PII_ENCRYPTION_KEY` dedicada configurada na VPS com tamanho valido e sem erro de runtime.
-- Sprint 3 (Auth e Email) concluida e deployada em producao (`5efe746`): itens 09, 10 e 11 ativos.
+- Producao atualizada em 2026-03-06 para o release `5cded29`, com funil Kiwify, pagina publica `/obrigado`, preview `?preview=1` e migracao de plano aplicada na VPS.
 - Sprint 4 planejada oficialmente com documento tecnico aprovado e fluxo `security-first` travado (sandbox antes de producao).
 - Sprint 4 em execucao: itens 14 e 15 concluidos em codigo; frente de pagamentos (item 12) pivotada oficialmente para Kiwify em 2026-03-05.
 - Integracao Asaas existente continua registrada como legado tecnico, mas nao e mais o caminho oficial de lancamento.
@@ -180,6 +180,7 @@ Pendencias tecnicas objetivas:
 - 2026-03-06: checkout Kiwify passou a abrir com prefill automatico de `name/email/phone/cpf` a partir dos dados do Orbita, reduzindo digitacao duplicada no funil `cadastro/login -> pagamento`.
 - 2026-03-06: funil de checkout foi reestruturado com cadastro minimo pre-pagamento, `checkoutCompletionToken` assinado no backend e nova pagina publica `/obrigado` para completar perfil e liberar acesso so apos `planStatus=active|trial`.
 - 2026-03-06: pagina `/obrigado` foi refinada visualmente, ganhou modo `preview=1` para QA sem compra e passou por validacao completa local (`pnpm test` com 89 testes, `pnpm exec tsc --noEmit`, `pnpm exec vite build` e smoke em `localhost:3000`).
+- 2026-03-06: deploy de producao executado com sucesso via `quick-deploy`; VPS atualizada para `5cded29`, migracao aplicada (`plan`, `planStatus`, `planExpiry` confirmados em `users`), PM2 online e `https://getorbita.com.br` + `https://getorbita.com.br/obrigado?preview=1` respondendo `200 OK`.
 - 2026-02-24: deploy publico concluido em `https://metrizy.com.br`.
 - 2026-02-24: guardrails de documentacao implantados (hooks + CI).
 - 2026-02-25: documentacao consolidada para modelo definitivo (Codex principal, Claude consultor, Gemini fora).
